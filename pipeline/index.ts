@@ -11,8 +11,9 @@ import { existsSync, readdirSync } from "fs";
 import { execSync } from "child_process";
 import { writeFile } from "fs/promises";
 import { join, basename, extname, resolve, dirname } from "path";
+import { copyFileSync } from "fs";
 import { transcribe } from "./transcribe.js";
-import { analyzeWithGemini } from "./analyze.js";
+import { analyzeWithLLM } from "./analyze.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -61,7 +62,7 @@ async function main() {
   }
 
   // Extract video name for output folder
-  const videoFileName = basename(fullInputPath);
+  let videoFileName = basename(fullInputPath);
   const videoName = basename(fullInputPath, extname(fullInputPath));
   const outputDir = join(projectRoot, "output", videoName);
 
@@ -70,8 +71,33 @@ async function main() {
   console.log(`📦 Output: ${outputDir}\n`);
 
   try {
+    // Step 0: Convert MOV to MP4 if needed (for browser compatibility)
+    let inputForTranscribe = fullInputPath;
+    const inputExt = extname(fullInputPath).toLowerCase();
+    if (inputExt === ".mov") {
+      const mp4Path = join(dirname(fullInputPath), videoName + ".mp4");
+      if (!existsSync(mp4Path)) {
+        console.log(`🎥 Converting MOV to MP4 for browser compatibility...`);
+        try {
+          execSync(
+            `ffmpeg -i "${fullInputPath}" -c:v libx264 -c:a aac -y "${mp4Path}"`,
+            { stdio: "pipe" }
+          );
+          console.log(`✅ Converted to: ${mp4Path}`);
+          inputForTranscribe = mp4Path;
+          videoFileName = basename(mp4Path);
+        } catch (err) {
+          console.warn(`⚠️  MOV conversion failed, will attempt with original file`);
+        }
+      } else {
+        console.log(`✅ Using existing MP4: ${mp4Path}`);
+        inputForTranscribe = mp4Path;
+        videoFileName = basename(mp4Path);
+      }
+    }
+
     // Step 1: Transcribe
-    const transcript = await transcribe(fullInputPath, outputDir);
+    const transcript = await transcribe(inputForTranscribe, outputDir);
 
     // Step 2: Get video duration via ffprobe
     let videoDuration: number;
@@ -89,8 +115,8 @@ async function main() {
       console.warn(`⚠️  ffprobe failed, using transcript duration: ${videoDuration.toFixed(1)}s`);
     }
 
-    // Step 3: Analyze with Gemini
-    const clipData = await analyzeWithGemini(transcript, videoFileName);
+    // Step 3: Analyze with Ollama
+    const clipData = await analyzeWithLLM(transcript, videoFileName);
     clipData.videoDuration = videoDuration;
 
     // Step 4: Write outputs

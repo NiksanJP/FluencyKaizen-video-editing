@@ -38,3 +38,8 @@ npm-debug.log*
 # Temporary files
 *.tmp
 .turbo/
+
+input/*
+
+*.mp4
+*.mov
