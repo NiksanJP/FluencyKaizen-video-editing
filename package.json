@@ -1,0 +1,15 @@
+{
+  "name": "fluencykaizen-video",
+  "version": "0.1.0",
+  "description": "Automated short-form video production for Business English learners",
+  "workspaces": ["remotion"],
+  "type": "module",
+  "scripts": {
+    "process": "bun run pipeline/index.ts",
+    "preview-all": "bun remotion/preview-all.ts"
+  },
+  "devDependencies": {
+    "@google/generative-ai": "^0.19.0",
+    "bun-types": "latest"
+  }
+}

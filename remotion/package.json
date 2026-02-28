@@ -1,0 +1,25 @@
+{
+  "name": "fluencykaizen-remotion",
+  "version": "0.1.0",
+  "description": "Remotion video rendering for FluencyKaizen",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "build": "tsc",
+    "dev": "remotion studio"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.429",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "bun-types": "latest",
+    "remotion": "^4.0.429",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

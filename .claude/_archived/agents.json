@@ -1,0 +1,283 @@
+{
+  "agents": [
+    {
+      "id": "pipeline-orchestrator",
+      "name": "Pipeline Orchestrator Agent",
+      "role": "Manages video processing pipeline",
+      "description": "Coordinates Whisper transcription, Gemini analysis, and output generation",
+      "capabilities": [
+        "Execute pipeline scripts",
+        "Manage transcription workflow",
+        "Coordinate Gemini API calls",
+        "Validate and save clip.json",
+        "Error handling and recovery"
+      ],
+      "requiredTools": [
+        "bash",
+        "typescript-compiler",
+        "gemini-api",
+        "whisper-transcriber"
+      ],
+      "commands": ["/process-video"],
+      "collaborates_with": [
+        "schema-validator",
+        "error-handler"
+      ]
+    },
+    {
+      "id": "remotion-composer",
+      "name": "Remotion Composition Agent",
+      "role": "Manages video rendering and composition",
+      "description": "Handles Remotion component rendering, Studio preview, and final MP4 generation",
+      "capabilities": [
+        "Start Remotion Studio",
+        "Render compositions to MP4",
+        "Manage component state",
+        "Handle frame calculations",
+        "Optimize rendering performance"
+      ],
+      "requiredTools": [
+        "bash",
+        "remotion-studio",
+        "ffmpeg-processor"
+      ],
+      "commands": ["/preview", "/render"],
+      "collaborates_with": [
+        "clip-editor",
+        "performance-optimizer"
+      ]
+    },
+    {
+      "id": "clip-editor",
+      "name": "Clip JSON Editor Agent",
+      "role": "Natural language editing of clip data",
+      "description": "Interprets natural language instructions and modifies clip.json safely",
+      "capabilities": [
+        "Parse clip.json",
+        "Apply semantic changes",
+        "Validate schema compliance",
+        "Suggest improvements",
+        "Handle user feedback"
+      ],
+      "requiredTools": [
+        "typescript-compiler",
+        "json-validator"
+      ],
+      "commands": ["/edit-clip"],
+      "collaborates_with": [
+        "schema-validator",
+        "remotion-composer"
+      ]
+    },
+    {
+      "id": "schema-validator",
+      "name": "Schema Validation Agent",
+      "role": "Ensures data integrity",
+      "description": "Validates ClipData schema, detects gaps, and checks compliance",
+      "capabilities": [
+        "Validate clip.json structure",
+        "Check subtitle coverage",
+        "Verify highlight words",
+        "Detect timestamp errors",
+        "Generate validation reports"
+      ],
+      "requiredTools": [
+        "typescript-compiler"
+      ],
+      "commands": ["/validate-clip"],
+      "collaborates_with": [
+        "clip-editor",
+        "error-handler"
+      ]
+    },
+    {
+      "id": "error-handler",
+      "name": "Error Handling & Recovery Agent",
+      "role": "Manages failures and provides solutions",
+      "description": "Catches errors, suggests fixes, and helps recover from failures",
+      "capabilities": [
+        "Parse error messages",
+        "Suggest remediation steps",
+        "Manage retries",
+        "Log and document issues",
+        "Provide troubleshooting guidance"
+      ],
+      "requiredTools": [
+        "bash",
+        "typescript-compiler"
+      ],
+      "commands": ["any (global)"],
+      "collaborates_with": [
+        "pipeline-orchestrator",
+        "remotion-composer",
+        "schema-validator"
+      ]
+    },
+    {
+      "id": "performance-optimizer",
+      "name": "Performance Optimization Agent",
+      "role": "Monitors and optimizes resource usage",
+      "description": "Tracks performance metrics and suggests optimizations",
+      "capabilities": [
+        "Monitor CPU/memory usage",
+        "Analyze render times",
+        "Suggest caching strategies",
+        "Recommend parameter tuning",
+        "Generate performance reports"
+      ],
+      "requiredTools": [
+        "bash"
+      ],
+      "commands": ["/test-pipeline"],
+      "collaborates_with": [
+        "remotion-composer",
+        "pipeline-orchestrator"
+      ]
+    },
+    {
+      "id": "documentation-curator",
+      "name": "Documentation & Reference Agent",
+      "role": "Maintains project documentation",
+      "description": "Updates docs, provides reference material, and maintains knowledge base",
+      "capabilities": [
+        "Update documentation files",
+        "Maintain schema reference",
+        "Create examples and guides",
+        "Track changes and updates",
+        "Generate reports"
+      ],
+      "requiredTools": [
+        "bash",
+        "typescript-compiler"
+      ],
+      "commands": ["/help", "general queries"],
+      "collaborates_with": [
+        "all agents"
+      ]
+    },
+    {
+      "id": "setup-manager",
+      "name": "Environment Setup Manager",
+      "role": "Manages project initialization and dependencies",
+      "description": "Handles environment setup, dependency installation, and health checks",
+      "capabilities": [
+        "Verify system tools",
+        "Check dependencies",
+        "Manage environment variables",
+        "Run setup scripts",
+        "Generate setup reports"
+      ],
+      "requiredTools": [
+        "bash"
+      ],
+      "commands": ["/setup-env"],
+      "collaborates_with": [
+        "error-handler",
+        "performance-optimizer"
+      ]
+    },
+    {
+      "id": "test-coordinator",
+      "name": "Test & QA Coordinator",
+      "role": "Runs tests and quality assurance",
+      "description": "Executes integration tests and validates complete workflows",
+      "capabilities": [
+        "Run unit tests",
+        "Execute integration tests",
+        "Validate end-to-end workflows",
+        "Generate test reports",
+        "Suggest optimizations"
+      ],
+      "requiredTools": [
+        "bash",
+        "typescript-compiler"
+      ],
+      "commands": ["/test-pipeline"],
+      "collaborates_with": [
+        "pipeline-orchestrator",
+        "remotion-composer",
+        "schema-validator"
+      ]
+    }
+  ],
+  "collaborationModes": {
+    "sequential": {
+      "description": "Agents work in sequence (default)",
+      "workflow": "Agent1 → Agent2 → Agent3",
+      "bestFor": ["linear pipelines", "dependent operations"]
+    },
+    "parallel": {
+      "description": "Multiple agents work simultaneously",
+      "workflow": "Agent1 ∥ Agent2 ∥ Agent3",
+      "bestFor": ["testing", "validation", "optimization"]
+    },
+    "cooperative": {
+      "description": "Agents coordinate and communicate actively",
+      "workflow": "Agent1 ↔ Agent2 ↔ Agent3",
+      "bestFor": ["complex tasks", "error recovery", "optimization"]
+    }
+  },
+  "taskRouting": {
+    "/process-video": {
+      "primary": "pipeline-orchestrator",
+      "secondary": ["schema-validator", "error-handler"],
+      "mode": "sequential"
+    },
+    "/render": {
+      "primary": "remotion-composer",
+      "secondary": ["performance-optimizer", "error-handler"],
+      "mode": "sequential"
+    },
+    "/edit-clip": {
+      "primary": "clip-editor",
+      "secondary": ["schema-validator", "error-handler"],
+      "mode": "sequential"
+    },
+    "/preview": {
+      "primary": "remotion-composer",
+      "secondary": ["error-handler"],
+      "mode": "sequential"
+    },
+    "/validate-clip": {
+      "primary": "schema-validator",
+      "secondary": ["error-handler"],
+      "mode": "sequential"
+    },
+    "/test-pipeline": {
+      "primary": "test-coordinator",
+      "secondary": ["pipeline-orchestrator", "remotion-composer", "schema-validator"],
+      "mode": "parallel"
+    },
+    "/setup-env": {
+      "primary": "setup-manager",
+      "secondary": ["error-handler"],
+      "mode": "sequential"
+    }
+  },
+  "communication": {
+    "protocol": "JSON-RPC",
+    "timeout": 300000,
+    "retries": 3,
+    "channels": [
+      "stdout",
+      "stderr",
+      "logs"
+    ]
+  },
+  "constraints": {
+    "maxParallelAgents": 4,
+    "memoryPerAgent": "512MB",
+    "timeoutPerTask": 600000,
+    "requiresApprovalFor": [
+      "destructive_operations",
+      "external_api_calls",
+      "file_deletions"
+    ]
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "agentLogs": ".claude/logs/agents/",
+    "format": "json"
+  }
+}

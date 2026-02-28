@@ -1,0 +1,161 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "enabled": true,
+      "description": "File system access for project files",
+      "capabilities": [
+        "read_files",
+        "write_files",
+        "list_directory",
+        "search_files"
+      ]
+    },
+    "bash": {
+      "enabled": true,
+      "description": "Shell command execution",
+      "capabilities": [
+        "execute_command",
+        "run_pipeline_scripts",
+        "manage_processes"
+      ],
+      "restrictions": [
+        "no_destructive_commands_without_confirmation",
+        "no_git_force_push"
+      ]
+    },
+    "typescript": {
+      "enabled": true,
+      "description": "TypeScript and code analysis",
+      "capabilities": [
+        "type_checking",
+        "compilation",
+        "diagnostics"
+      ]
+    },
+    "remotion": {
+      "enabled": true,
+      "description": "Remotion video composition framework",
+      "capabilities": [
+        "composition_preview",
+        "frame_rendering",
+        "component_templates",
+        "animation_helpers"
+      ],
+      "paths": {
+        "compositionRoot": "./remotion/src",
+        "publicFolder": "./remotion/public",
+        "outputFolder": "./output"
+      }
+    },
+    "gemini": {
+      "enabled": true,
+      "description": "Google Gemini API integration",
+      "capabilities": [
+        "content_generation",
+        "token_counting",
+        "error_handling"
+      ],
+      "config": {
+        "model": "gemini-2.0-flash",
+        "safetySettings": "strict",
+        "cacheResponses": true
+      }
+    },
+    "whisper": {
+      "enabled": true,
+      "description": "Local speech-to-text transcription",
+      "capabilities": [
+        "audio_extraction",
+        "transcription",
+        "segment_timing"
+      ],
+      "config": {
+        "model": "base",
+        "language": "en",
+        "fallbackLanguage": "ja"
+      }
+    },
+    "ffmpeg": {
+      "enabled": true,
+      "description": "Audio and video processing",
+      "capabilities": [
+        "audio_extraction",
+        "format_conversion",
+        "stream_analysis"
+      ],
+      "config": {
+        "audioFormat": "pcm_s16le",
+        "sampleRate": 16000,
+        "channels": 1
+      }
+    }
+  },
+  "contextProviders": {
+    "projectStructure": {
+      "enabled": true,
+      "includes": ["pipeline/", "remotion/src/", "docs/", ".claude/commands/"],
+      "excludes": ["node_modules/", "output/", ".git/"]
+    },
+    "activeClip": {
+      "enabled": true,
+      "description": "Load currently active clip.json into context",
+      "refreshRate": "onDemand"
+    },
+    "schemaReference": {
+      "enabled": true,
+      "description": "Keep ClipData schema available in context",
+      "file": "pipeline/types.ts"
+    },
+    "commandReference": {
+      "enabled": true,
+      "description": "All available slash commands",
+      "folder": ".claude/commands/"
+    }
+  },
+  "tools": {
+    "jsonValidation": {
+      "enabled": true,
+      "schema": "pipeline/types.ts",
+      "strict": true
+    },
+    "codeGeneration": {
+      "enabled": true,
+      "templates": {
+        "remoteComponent": "remotion/src/components/",
+        "pipelineScript": "pipeline/"
+      },
+      "typeChecking": "strict"
+    },
+    "apiSimulation": {
+      "enabled": true,
+      "mock": {
+        "gemini": "test/fixtures/gemini-response.json",
+        "whisper": "test/fixtures/whisper-output.json"
+      }
+    }
+  },
+  "caching": {
+    "enabled": true,
+    "scope": [
+      "schema_definitions",
+      "command_descriptions",
+      "project_structure"
+    ],
+    "ttl": 3600
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "channels": [
+      "console",
+      "file"
+    ],
+    "logFile": ".claude/logs/claude.log"
+  },
+  "hooks": {
+    "beforePipelineRun": "verify_env_and_input",
+    "afterClipGeneration": "validate_schema",
+    "beforeRender": "check_dependencies",
+    "onError": "suggest_fixes"
+  }
+}

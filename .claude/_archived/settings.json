@@ -1,0 +1,177 @@
+{
+  "projectName": "FluencyKaizen Video Automation",
+  "projectDescription": "Automated short-form video production pipeline for Business English learners",
+  "version": "0.1.0",
+  "author": "Content Creator",
+  "workspace": {
+    "root": "/Users/nik/Documents/fluencykaizen-video",
+    "inputDir": "./input",
+    "outputDir": "./output",
+    "pipelineDir": "./pipeline",
+    "remotionDir": "./remotion",
+    "docsDir": "./docs"
+  },
+  "tools": {
+    "bun": {
+      "enabled": true,
+      "path": "bun",
+      "version": "1.0+"
+    },
+    "ffmpeg": {
+      "enabled": true,
+      "path": "ffmpeg",
+      "version": "5.0+",
+      "required": true
+    },
+    "whisper": {
+      "enabled": true,
+      "packageName": "openai-whisper",
+      "version": "20240301+",
+      "required": true,
+      "pythonVersion": "3.8+"
+    },
+    "remotion": {
+      "enabled": true,
+      "version": "5.0+",
+      "workspace": "./remotion"
+    }
+  },
+  "apis": {
+    "gemini": {
+      "enabled": true,
+      "provider": "Google",
+      "model": "gemini-2.0-flash",
+      "keyEnvar": "GEMINI_API_KEY",
+      "rateLimit": {
+        "requestsPerMinute": 60,
+        "tokensPerMinute": 1000000
+      },
+      "fallbackBehavior": "error_with_hint"
+    }
+  },
+  "typescript": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "formatting": {
+    "prettier": {
+      "enabled": false,
+      "printWidth": 100,
+      "tabWidth": 2,
+      "trailingComma": "es5"
+    },
+    "editorConfig": {
+      "indentSize": 2,
+      "indentStyle": "space"
+    }
+  },
+  "commands": {
+    "processVideo": {
+      "script": "bun pipeline/index.ts",
+      "timeout": 600,
+      "description": "/process-video — Full pipeline execution"
+    },
+    "preview": {
+      "script": "cd remotion && bun remotion studio",
+      "timeout": 0,
+      "interactive": true,
+      "description": "/preview — Remotion studio preview"
+    },
+    "render": {
+      "script": "cd remotion && bun remotion render ClipComposition",
+      "timeout": 600,
+      "description": "/render — Render to MP4"
+    },
+    "editClip": {
+      "description": "/edit-clip — Natural language editing",
+      "requiresUserInput": true
+    },
+    "validateClip": {
+      "script": "bun pipeline/validate.ts",
+      "timeout": 10,
+      "description": "/validate-clip — Schema validation"
+    },
+    "listClips": {
+      "script": "ls -lah output/",
+      "timeout": 5,
+      "description": "/list-clips — List all clips"
+    },
+    "setupEnv": {
+      "script": "bun pipeline/setup.ts",
+      "timeout": 300,
+      "description": "/setup-env — Verify dependencies"
+    },
+    "testPipeline": {
+      "script": "bun pipeline/test.ts",
+      "timeout": 60,
+      "description": "/test-pipeline — Run tests"
+    },
+    "cleanOutput": {
+      "script": "bun pipeline/clean.ts",
+      "timeout": 30,
+      "requiresConfirmation": true,
+      "description": "/clean-output — Clean temp files"
+    }
+  },
+  "monitoring": {
+    "logLevel": "info",
+    "logDir": ".claude/logs",
+    "maxLogSize": "10MB",
+    "keepLogs": 7,
+    "trackPerformance": true
+  },
+  "validation": {
+    "schemaFile": "pipeline/types.ts",
+    "validateOnWrite": true,
+    "validateClipJson": {
+      "enabled": true,
+      "strict": true,
+      "checkCoverage": true,
+      "checkTimestamps": true
+    }
+  },
+  "hints": {
+    "showTips": true,
+    "suggestCommands": true,
+    "warnOnErrors": true,
+    "verbosity": "medium"
+  },
+  "git": {
+    "enabled": false,
+    "autoCommit": false,
+    "requiresBranchProtection": false
+  },
+  "environment": {
+    "requireDotEnv": true,
+    "envTemplate": ".env.example",
+    "checkOnStartup": true,
+    "variables": {
+      "GEMINI_API_KEY": {
+        "required": true,
+        "masked": true,
+        "description": "Google Gemini API key"
+      },
+      "WHISPER_MODEL": {
+        "required": false,
+        "default": "base",
+        "description": "Whisper model size (base, small, medium, large)"
+      }
+    }
+  },
+  "performance": {
+    "cacheFrameworks": true,
+    "parallelRenders": false,
+    "maxMemoryMB": 4096,
+    "timeoutMinutes": 10
+  },
+  "ui": {
+    "theme": "dark",
+    "fontSize": 12,
+    "lineHeight": 1.5,
+    "showLineNumbers": true
+  }
+}
