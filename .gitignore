@@ -43,3 +43,5 @@ input/*
 
 *.mp4
 *.mov
+whisper.cpp
+whisper.cpp
