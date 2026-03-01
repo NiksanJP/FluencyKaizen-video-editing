@@ -52,8 +52,8 @@ const DraggableClip = ({ clip, bounds, onSelect, onDragStart, layerZ = 0 }) => {
 
 const TransformHandle = ({ type, position, onMouseDown }) => {
   const handleStyles = {
-    scale: { width: '12px', height: '12px', background: 'white', border: '2px solid #3b82f6', borderRadius: '2px', cursor: 'nwse-resize' },
-    rotate: { width: '16px', height: '16px', background: '#10b981', borderRadius: '50%', cursor: 'grab', border: '2px solid white' },
+    scale: { width: '12px', height: '12px', background: 'white', border: '2px solid #a1a1aa', borderRadius: '2px', cursor: 'nwse-resize' },
+    rotate: { width: '16px', height: '16px', background: '#d4d4d8', borderRadius: '50%', cursor: 'grab', border: '2px solid white' },
   };
 
   const positionStyles = {
@@ -350,8 +350,8 @@ const InteractiveOverlay = ({
           height: `${selectedBounds.height}px`,
           transform: selectedBounds.transform || (selectedBounds.rotation ? `rotate(${selectedBounds.rotation}deg)` : 'none'),
           transformOrigin: 'center center',
-          border: '2px solid #3b82f6',
-          boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)',
+          border: '2px solid #a1a1aa',
+          boxShadow: '0 0 10px rgba(161, 161, 170, 0.5)',
           pointerEvents: 'none',
           zIndex: 50,
         }}>
@@ -359,7 +359,7 @@ const InteractiveOverlay = ({
             <TransformHandle key={corner} type="scale" position={corner} onMouseDown={(e) => handleTransformStart(e, 'scale', selectedBounds)} />
           ))}
           <TransformHandle type="rotate" position="top-center" onMouseDown={(e) => handleTransformStart(e, 'rotate', selectedBounds)} />
-          <div style={{ position: 'absolute', top: '-28px', left: '50%', transform: 'translateX(-50%)', width: '2px', height: '28px', background: '#10b981', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '-28px', left: '50%', transform: 'translateX(-50%)', width: '2px', height: '28px', background: '#d4d4d8', pointerEvents: 'none' }} />
         </div>
       )}
     </div>

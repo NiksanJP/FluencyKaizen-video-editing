@@ -2,7 +2,7 @@ import React from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import BaseTrackItem from './BaseTrackItem';
 
-const DEFAULT_CLIP_COLOR = 'hsl(221, 83%, 53%)';
+const DEFAULT_CLIP_COLOR = 'hsl(240, 3.7%, 15.9%)';
 
 const ImageTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
   const baseColor = clip.color || DEFAULT_CLIP_COLOR;

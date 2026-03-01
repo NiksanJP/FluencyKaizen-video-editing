@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FolderOpen, FolderPlus, Loader2, Trash2 } from 'lucide-react'
+import { projects } from '@/lib/api'
 
 const formatDate = (value) => {
   if (!value) return 'Unknown'
@@ -28,7 +29,7 @@ const formatDate = (value) => {
 
 export default function ProjectsPage() {
   const navigate = useNavigate()
-  const [projects, setProjects] = useState([])
+  const [projectList, setProjectList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
@@ -37,9 +38,8 @@ export default function ProjectsPage() {
   const loadProjects = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await fetch('/api/projects')
-      const data = await res.json()
-      setProjects(data)
+      const data = await projects.list()
+      setProjectList(data)
     } catch (err) {
       console.error('Failed to load projects:', err)
       toast.error('Failed to load projects')
@@ -58,12 +58,7 @@ export default function ProjectsPage() {
 
     try {
       setIsCreating(true)
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmedName }),
-      })
-      const project = await res.json()
+      const project = await projects.create(trimmedName)
       setNewProjectName('')
       setIsCreateDialogOpen(false)
       navigate(`/editor/${project.id}`)
@@ -79,7 +74,7 @@ export default function ProjectsPage() {
     if (!window.confirm('Are you sure you want to delete this project?')) return
 
     try {
-      await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+      await projects.delete(id)
       await loadProjects()
     } catch (err) {
       console.error('Failed to delete project:', err)
@@ -87,7 +82,7 @@ export default function ProjectsPage() {
     }
   }
 
-  const sortedProjects = [...projects].sort((a, b) => {
+  const sortedProjects = [...projectList].sort((a, b) => {
     return (b.lastModified || 0) - (a.lastModified || 0)
   })
 

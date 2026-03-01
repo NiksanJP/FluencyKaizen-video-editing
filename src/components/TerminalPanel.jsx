@@ -3,11 +3,12 @@ import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import '@xterm/xterm/css/xterm.css'
+import { pty } from '@/lib/api'
 
 export default function TerminalPanel() {
   const containerRef = useRef(null)
   const termRef = useRef(null)
-  const wsRef = useRef(null)
+  const ptyIdRef = useRef(null)
   const fitAddonRef = useRef(null)
   const [connected, setConnected] = useState(false)
 
@@ -16,7 +17,7 @@ export default function TerminalPanel() {
 
     const term = new XTerm({
       theme: {
-        background: '#0a0a0f',
+        background: '#09090b',
         foreground: '#e4e4e7',
         cursor: '#a78bfa',
         selectionBackground: '#3b3b5c',
@@ -60,55 +61,50 @@ export default function TerminalPanel() {
       try { fitAddon.fit() } catch {}
     })
 
-    // Connect WebSocket
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${protocol}//${window.location.hostname}:3001/ws`
-    const ws = new WebSocket(wsUrl)
-    wsRef.current = ws
+    // Connect via IPC
+    let removeOutputListener
+    let removeExitListener
 
-    ws.onopen = () => {
-      setConnected(true)
-      // Send initial size
-      ws.send(JSON.stringify({
-        type: 'resize',
-        cols: term.cols,
-        rows: term.rows,
-      }))
-    }
-
-    ws.onmessage = (event) => {
+    ;(async () => {
       try {
-        const msg = JSON.parse(event.data)
-        if (msg.type === 'output') {
-          term.write(msg.data)
-        } else if (msg.type === 'exit') {
-          term.writeln(`\r\n\x1b[33mProcess exited with code ${msg.exitCode}\x1b[0m`)
-          setConnected(false)
-        }
-      } catch {}
-    }
+        const id = await pty.spawn()
+        ptyIdRef.current = id
+        setConnected(true)
 
-    ws.onclose = () => {
-      setConnected(false)
-      term.writeln('\r\n\x1b[31mDisconnected from terminal\x1b[0m')
-    }
+        // Send initial size
+        pty.resize(id, term.cols, term.rows)
 
-    ws.onerror = () => {
-      setConnected(false)
-      term.writeln('\r\n\x1b[31mFailed to connect to terminal server\x1b[0m')
-    }
+        // Listen for output
+        removeOutputListener = pty.onOutput((ptyId, data) => {
+          if (ptyId === id) {
+            term.write(data)
+          }
+        })
+
+        // Listen for exit
+        removeExitListener = pty.onExit((ptyId, exitCode) => {
+          if (ptyId === id) {
+            term.writeln(`\r\n\x1b[33mProcess exited with code ${exitCode}\x1b[0m`)
+            setConnected(false)
+          }
+        })
+      } catch {
+        setConnected(false)
+        term.writeln('\r\n\x1b[31mFailed to connect to terminal\x1b[0m')
+      }
+    })()
 
     // Send input to PTY
     term.onData((data) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'input', data }))
+      if (ptyIdRef.current) {
+        pty.input(ptyIdRef.current, data)
       }
     })
 
     // Send resize events
     term.onResize(({ cols, rows }) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'resize', cols, rows }))
+      if (ptyIdRef.current) {
+        pty.resize(ptyIdRef.current, cols, rows)
       }
     })
 
@@ -122,18 +118,20 @@ export default function TerminalPanel() {
 
     return () => {
       resizeObserver.disconnect()
-      ws.close()
+      if (removeOutputListener) removeOutputListener()
+      if (removeExitListener) removeExitListener()
+      if (ptyIdRef.current) pty.kill(ptyIdRef.current)
       term.dispose()
     }
   }, [])
 
   return (
-    <div className="h-full flex flex-col bg-[#0a0a0f]">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-zinc-800 bg-zinc-900/50">
         <div
           className={`h-2 w-2 rounded-full ${
-            connected ? 'bg-green-500' : 'bg-zinc-500'
+            connected ? 'bg-foreground' : 'bg-muted-foreground'
           }`}
         />
         <span className="text-xs font-medium text-zinc-400">Claude Code</span>

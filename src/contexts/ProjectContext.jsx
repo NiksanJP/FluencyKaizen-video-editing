@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { projects, assets } from '@/lib/api'
 
 const ProjectContext = createContext(null)
 
@@ -10,15 +11,13 @@ export function useProject() {
 
 export function ProjectProvider({ projectId, children }) {
   const [project, setProject] = useState(null)
-  const [assets, setAssets] = useState([])
+  const [assetList, setAssetList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   const loadProject = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await fetch(`/api/projects/${projectId}`)
-      if (!res.ok) throw new Error('Project not found')
-      const data = await res.json()
+      const data = await projects.get(projectId)
       setProject(data)
     } catch (err) {
       console.error('Failed to load project:', err)
@@ -29,12 +28,7 @@ export function ProjectProvider({ projectId, children }) {
 
   const saveProject = useCallback(async (updates) => {
     try {
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      })
-      const data = await res.json()
+      const data = await projects.update(projectId, updates)
       setProject(data)
       return data
     } catch (err) {
@@ -45,33 +39,26 @@ export function ProjectProvider({ projectId, children }) {
 
   const refreshAssets = useCallback(async () => {
     try {
-      const res = await fetch(`/api/assets/${projectId}`)
-      const data = await res.json()
-      setAssets(data)
+      const data = await assets.list(projectId)
+      setAssetList(data)
     } catch (err) {
       console.error('Failed to load assets:', err)
     }
   }, [projectId])
 
   const uploadAsset = useCallback(async (file) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch(`/api/assets/${projectId}/upload`, {
-      method: 'POST',
-      body: formData,
-    })
-    const data = await res.json()
+    const data = await assets.upload(projectId, file)
     await refreshAssets()
     return data
   }, [projectId, refreshAssets])
 
   const deleteAsset = useCallback(async (filename) => {
-    await fetch(`/api/assets/${projectId}/${filename}`, { method: 'DELETE' })
+    await assets.delete(projectId, filename)
     await refreshAssets()
   }, [projectId, refreshAssets])
 
   const getAssetUrl = useCallback((filename) => {
-    return `/api/assets/${projectId}/${filename}`
+    return assets.getUrl(projectId, filename)
   }, [projectId])
 
   useEffect(() => {
@@ -84,7 +71,7 @@ export function ProjectProvider({ projectId, children }) {
       value={{
         project,
         projectId,
-        assets,
+        assets: assetList,
         isLoading,
         saveProject,
         refreshAssets,

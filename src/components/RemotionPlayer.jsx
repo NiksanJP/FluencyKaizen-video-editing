@@ -80,7 +80,7 @@ const getClipSource = (path) => {
   if (!path) return undefined;
   const trimmed = String(path).trim();
   if (!trimmed) return undefined;
-  if (/^(https?:|blob:|data:|\/api\/)/i.test(trimmed)) return trimmed;
+  if (/^(https?:|blob:|data:|asset:|\/api\/)/i.test(trimmed)) return trimmed;
   return trimmed;
 };
 
@@ -231,7 +231,7 @@ const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily })
         const idx = textContent.length > 0 ? Math.floor((visibleChars / textContent.length) * color.length) : 0;
         return color[Math.min(idx, color.length - 1)];
       }
-      return color || '#3b82f6';
+      return color || '#fafafa';
     };
 
     const explicitWidth = parseNumeric(textStyles.width);

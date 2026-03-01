@@ -9,13 +9,14 @@ import { MessageSquare, Plus, Trash2, Loader2, Languages } from 'lucide-react'
 import { useProject } from '@/contexts/ProjectContext'
 import { captionsToTracks } from '@/utils/captionUtils'
 import { toast } from 'sonner'
+import { captions } from '@/lib/api'
 
 const VIDEO_EXTENSIONS = /\.(mp4|mov|webm|avi|mkv)$/i
 
 export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   const { project, assets } = useProject()
   const [selectedAsset, setSelectedAsset] = useState('')
-  const [captions, setCaptions] = useState([])
+  const [captionList, setCaptionList] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState({ stage: '', percent: 0, message: '' })
   const [addMode, setAddMode] = useState('both')
@@ -32,24 +33,18 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
 
     let cancelled = false
     ;(async () => {
-      try {
-        const res = await fetch(`/api/captions/${project.id}/${selectedAsset}`)
-        if (!res.ok || cancelled) return
-        const data = await res.json()
-        if (cancelled) return
-        const captionList = (data.subtitles || []).map((sub, i) => ({
-          id: `cap-${Date.now()}-${i}`,
-          startTime: sub.startTime,
-          endTime: sub.endTime,
-          en: sub.en,
-          ja: sub.ja,
-          highlights: sub.highlights || [],
-        }))
-        setCaptions(captionList)
-        setHasCachedCaptions(true)
-      } catch {
-        // No cache available — that's fine
-      }
+      const data = await captions.get(project.id, selectedAsset)
+      if (cancelled || !data) return
+      const list = (data.subtitles || []).map((sub, i) => ({
+        id: `cap-${Date.now()}-${i}`,
+        startTime: sub.startTime,
+        endTime: sub.endTime,
+        en: sub.en,
+        ja: sub.ja,
+        highlights: sub.highlights || [],
+      }))
+      setCaptionList(list)
+      setHasCachedCaptions(true)
     })()
 
     return () => { cancelled = true }
@@ -60,68 +55,35 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
 
     setIsGenerating(true)
     setProgress({ stage: 'starting', percent: 5, message: 'Starting...' })
-    setCaptions([])
+    setCaptionList([])
 
     try {
-      const response = await fetch(`/api/captions/${project.id}/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetName: selectedAsset }),
-      })
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}))
-        throw new Error(err.error || `Server error ${response.status}`)
-      }
-
-      // Read SSE stream
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() // keep incomplete line in buffer
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          try {
-            const event = JSON.parse(line.slice(6))
-
-            if (event.type === 'progress') {
-              setProgress({
-                stage: event.stage,
-                percent: event.percent,
-                message: event.message,
-              })
-            } else if (event.type === 'complete') {
-              const data = event.data
-              const captionList = (data.subtitles || []).map((sub, i) => ({
-                id: `cap-${Date.now()}-${i}`,
-                startTime: sub.startTime,
-                endTime: sub.endTime,
-                en: sub.en,
-                ja: sub.ja,
-                highlights: sub.highlights || [],
-              }))
-              setCaptions(captionList)
-              setHasCachedCaptions(true)
-              setProgress({ stage: 'complete', percent: 100, message: 'Done!' })
-              toast.success(`Generated ${captionList.length} captions`)
-            } else if (event.type === 'error') {
-              throw new Error(event.message)
-            }
-          } catch (parseErr) {
-            if (parseErr.message && !parseErr.message.includes('JSON')) {
-              throw parseErr
-            }
-          }
+      await captions.generate(project.id, selectedAsset, (event) => {
+        if (event.type === 'progress') {
+          setProgress({
+            stage: event.stage,
+            percent: event.percent,
+            message: event.message,
+          })
+        } else if (event.type === 'complete') {
+          const data = event.data
+          const list = (data.subtitles || []).map((sub, i) => ({
+            id: `cap-${Date.now()}-${i}`,
+            startTime: sub.startTime,
+            endTime: sub.endTime,
+            en: sub.en,
+            ja: sub.ja,
+            highlights: sub.highlights || [],
+          }))
+          setCaptionList(list)
+          setHasCachedCaptions(true)
+          setProgress({ stage: 'complete', percent: 100, message: 'Done!' })
+          toast.success(`Generated ${list.length} captions`)
+        } else if (event.type === 'error') {
+          toast.error(`Caption generation failed: ${event.message}`)
+          setProgress({ stage: 'error', percent: 0, message: event.message })
         }
-      }
+      })
     } catch (error) {
       console.error('Caption generation failed:', error)
       toast.error(`Caption generation failed: ${error.message}`)
@@ -132,20 +94,20 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   }, [selectedAsset, project?.id])
 
   const updateCaption = (id, field, value) => {
-    setCaptions((prev) =>
+    setCaptionList((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
     )
   }
 
   const deleteCaption = (id) => {
-    setCaptions((prev) => prev.filter((c) => c.id !== id))
+    setCaptionList((prev) => prev.filter((c) => c.id !== id))
   }
 
   const addCaption = () => {
-    const lastEnd = captions.length > 0
-      ? captions[captions.length - 1].endTime
+    const lastEnd = captionList.length > 0
+      ? captionList[captionList.length - 1].endTime
       : 0
-    setCaptions((prev) => [
+    setCaptionList((prev) => [
       ...prev,
       {
         id: `cap-${Date.now()}`,
@@ -159,9 +121,9 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   }
 
   const addToTimeline = useCallback(() => {
-    if (captions.length === 0) return
+    if (captionList.length === 0) return
 
-    const newTracks = captionsToTracks(captions, {
+    const newTracks = captionsToTracks(captionList, {
       fps,
       sourceOffset: 0,
       timelineOffset: 0,
@@ -175,7 +137,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     const trackCount = newTracks.length
     const clipCount = newTracks.reduce((sum, t) => sum + t.clips.length, 0)
     toast.success(`Added ${trackCount} track${trackCount > 1 ? 's' : ''} with ${clipCount} caption clips`)
-  }, [captions, fps, addMode, onTracksChange])
+  }, [captionList, fps, addMode, onTracksChange])
 
   const stageLabels = {
     starting: 'Starting...',
@@ -256,25 +218,25 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
           )}
 
           {/* Cache indicator */}
-          {hasCachedCaptions && !isGenerating && captions.length > 0 && (
+          {hasCachedCaptions && !isGenerating && captionList.length > 0 && (
             <p className="text-[10px] text-muted-foreground text-center">
               Loaded from cache
             </p>
           )}
 
           {/* Caption List */}
-          {captions.length > 0 && (
+          {captionList.length > 0 && (
             <>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
-                  {captions.length} caption{captions.length !== 1 ? 's' : ''}
+                  {captionList.length} caption{captionList.length !== 1 ? 's' : ''}
                 </span>
                 <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={addCaption}>
                   <Plus className="h-2.5 w-2.5 mr-0.5" /> Add
                 </Button>
               </div>
 
-              {captions.map((caption, i) => (
+              {captionList.map((caption, i) => (
                 <Card key={caption.id}>
                   <CardHeader className="p-2.5 pb-1.5">
                     <div className="flex items-center justify-between">
@@ -365,7 +327,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
           )}
 
           {/* Empty state (no captions yet, not generating) */}
-          {captions.length === 0 && !isGenerating && (
+          {captionList.length === 0 && !isGenerating && (
             <Card>
               <CardContent className="p-6 text-center">
                 <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />

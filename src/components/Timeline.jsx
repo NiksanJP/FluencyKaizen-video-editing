@@ -57,7 +57,7 @@ const RULER_DRAG_THRESHOLD = 3;
 const ZOOM_STEP = 1.25;
 const MIN_SELECTION_DIMENSION = 4;
 const DEFAULT_VIEW_SECONDS = 60;
-const DEFAULT_CLIP_COLOR = 'hsl(221, 83%, 53%)';
+const DEFAULT_CLIP_COLOR = 'hsl(240, 3.7%, 15.9%)';
 
 const getTrackRowHeight = (track) => {
   if (track.clips.some((clip) => clip.type === 'video')) return 68;

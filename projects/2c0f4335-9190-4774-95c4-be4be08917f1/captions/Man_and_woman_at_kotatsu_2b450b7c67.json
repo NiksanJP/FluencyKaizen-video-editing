@@ -1,0 +1,74 @@
+{
+  "videoFile": "Man_and_woman_at_kotatsu_2b450b7c67.mp4",
+  "hookTitle": {
+    "ja": "リラックス英語",
+    "en": "Relax with English"
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 30
+  },
+  "subtitles": [
+    {
+      "startTime": 0,
+      "endTime": 1.04,
+      "en": "",
+      "ja": "こんにちは、まさですね",
+      "highlights": [
+        "こんにちは"
+      ]
+    },
+    {
+      "startTime": 1.1,
+      "endTime": 2.78,
+      "en": "",
+      "ja": "ジョリース リナだよー",
+      "highlights": [
+        "ジョリース",
+        "リナ"
+      ]
+    },
+    {
+      "startTime": 2.76,
+      "endTime": 4.1,
+      "en": "",
+      "ja": "リラックスしてまだみましょう",
+      "highlights": [
+        "リラックス"
+      ]
+    },
+    {
+      "startTime": 4.04,
+      "endTime": 5.88,
+      "en": "",
+      "ja": "スカイルエゴさんを教えるよ",
+      "highlights": [
+        "スカイルエゴ"
+      ]
+    },
+    {
+      "startTime": 5.8,
+      "endTime": 7.66,
+      "en": "",
+      "ja": "せれー だいびー",
+      "highlights": []
+    },
+    {
+      "startTime": 7.7,
+      "endTime": 8.28,
+      "en": "",
+      "ja": "せれー",
+      "highlights": []
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 2.76,
+      "duration": 3.5,
+      "category": "一般表現",
+      "phrase": "Relax",
+      "literal": "リラックスする",
+      "nuance": "気分を落ち着かせること。ビジネスシーンに限らず日常会話で幅広く使われます。"
+    }
+  ]
+}

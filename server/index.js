@@ -1,11 +1,15 @@
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { createServer } from 'http'
 import { WebSocketServer } from 'ws'
 import { projectsRouter } from './routes/projects.js'
 import { assetsRouter } from './routes/assets.js'
 import { captionsRouter } from './routes/captions.js'
 import { createPtyManager } from './pty.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const app = express()
 const server = createServer(app)
@@ -61,6 +65,25 @@ wss.on('connection', (ws) => {
   })
 })
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
+// Serve built frontend in production
+const distPath = path.join(__dirname, '..', 'dist')
+app.use(express.static(distPath))
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/ws')) return next()
+  res.sendFile(path.join(distPath, 'index.html'))
 })
+
+export function startServer() {
+  return new Promise((resolve) => {
+    server.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`)
+      resolve(server)
+    })
+  })
+}
+
+// Run standalone when executed directly (not imported by Electron)
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+if (isMain) {
+  startServer()
+}
