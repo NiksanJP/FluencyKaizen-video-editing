@@ -1,7 +1,7 @@
 {
   "hookTitle": {
     "maxCount": 10,
-    "fontFamily": "sans-serif",
+    "fontFamily": "Inter",
     "fontSize": 86,
     "fontWeight": "bold",
     "color": "#ffffff",
@@ -13,14 +13,14 @@
   "caption": {
     "maxCount": 30,
     "en": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 52,
       "fontWeight": "600",
       "color": "#ffffff",
       "textShadow": "3px 3px 6px rgba(0,0,0,0.9)"
     },
     "ja": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 48,
       "fontWeight": "600",
       "color": "#ffffff",
@@ -45,26 +45,26 @@
     "padding": 32,
     "shadow": "0 8px 24px rgba(0,0,0,0.6)",
     "category": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 23,
       "fontWeight": "bold",
       "backgroundColor": "#FFD700",
       "color": "#000000"
     },
     "phrase": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 49,
       "fontWeight": "bold",
       "color": "#ffffff"
     },
     "literal": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 29,
       "color": "#BBBBBB",
       "fontStyle": "italic"
     },
     "nuance": {
-      "fontFamily": "sans-serif",
+      "fontFamily": "Inter",
       "fontSize": 31,
       "color": "#FFD700",
       "fontStyle": "italic"

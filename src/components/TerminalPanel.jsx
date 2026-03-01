@@ -5,7 +5,7 @@ import { WebLinksAddon } from '@xterm/addon-web-links'
 import '@xterm/xterm/css/xterm.css'
 import { pty } from '@/lib/api'
 
-export default function TerminalPanel() {
+export default function TerminalPanel({ collapsed = false, onToggleCollapse, projectId }) {
   const containerRef = useRef(null)
   const termRef = useRef(null)
   const ptyIdRef = useRef(null)
@@ -67,7 +67,7 @@ export default function TerminalPanel() {
 
     ;(async () => {
       try {
-        const id = await pty.spawn()
+        const id = await pty.spawn({ projectId })
         ptyIdRef.current = id
         setConnected(true)
 
@@ -135,10 +135,25 @@ export default function TerminalPanel() {
           }`}
         />
         <span className="text-xs font-medium text-zinc-400">Claude Code</span>
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            className="ml-auto p-0.5 rounded hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200 transition-colors"
+            title={collapsed ? 'Expand terminal' : 'Collapse terminal'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {collapsed ? (
+                <polyline points="15 18 9 12 15 6" />
+              ) : (
+                <polyline points="9 18 15 12 9 6" />
+              )}
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Terminal */}
-      <div ref={containerRef} className="flex-1 min-h-0 p-1" />
+      {!collapsed && <div ref={containerRef} className="flex-1 min-h-0 p-1" />}
     </div>
   )
 }

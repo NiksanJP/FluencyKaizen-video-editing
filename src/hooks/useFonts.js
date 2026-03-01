@@ -24,7 +24,15 @@ const FONT_LOADERS = {
   'Playfair Display': () => loadPlayfairDisplay('normal', { weights: ['400', '700'], subsets: ['latin'] }),
   'Roboto Mono': () => loadRobotoMono('normal', { weights: ['400', '500', '700'], subsets: ['latin'] }),
   'Source Code Pro': () => loadSourceCodePro('normal', { weights: ['400', '500', '600', '700'], subsets: ['latin'] }),
-  'Noto Sans JP': () => loadNotoSansJP('normal', { weights: ['400', '500', '700'] }),
+  'Noto Sans JP': () => {
+    const origWarn = console.warn;
+    console.warn = (...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('over 20 `FontFace`')) return;
+      origWarn.apply(console, args);
+    };
+    try { return loadNotoSansJP('normal', { weights: ['400', '500', '700'] }); }
+    finally { console.warn = origWarn; }
+  },
 };
 
 const getUniqueFontFamilies = () => {

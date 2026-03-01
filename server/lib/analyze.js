@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai'
 import { LIMITS } from './config.js'
+import { backfillEnglishFromWhisper } from './whisper-backfill.js'
 
 /**
  * Send transcript to Gemini for analysis.
@@ -9,7 +10,7 @@ import { LIMITS } from './config.js'
  * @param {string} videoFileName - Source video filename
  * @returns {Promise<object>} ClipData
  */
-export async function analyzeWithGemini(transcript, videoFileName) {
+export async function analyzeWithGemini(transcript, videoFileName, { backfillTranscript = null } = {}) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY not set in environment')
 
@@ -228,8 +229,9 @@ Now analyze and output the JSON:`
       }
 
       validateClipData(clipData)
-      enforceCharacterLimits(clipData)
       normalizeTimestamps(clipData)
+      backfillEnglishFromWhisper(clipData, backfillTranscript)
+      enforceCharacterLimits(clipData)
 
       console.log(
         `Gemini analysis complete: ${clipData.clip.endTime - clipData.clip.startTime}s clip selected`

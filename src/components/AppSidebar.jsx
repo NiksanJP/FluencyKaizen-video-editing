@@ -3,6 +3,7 @@ import {
   Upload,
   Film,
   Edit,
+  Type,
   MessageSquare,
   Settings,
   Download,
@@ -32,6 +33,7 @@ const menuGroups = [
     items: [
       { title: "Uploads", icon: Upload, tab: "uploads" },
       { title: "Videos", icon: Film, tab: "videos" },
+      { title: "Text", icon: Type, tab: "text-templates" },
     ],
   },
   {

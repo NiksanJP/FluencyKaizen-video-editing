@@ -1,13 +1,14 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
 import { MessageSquare, Plus, Trash2, Loader2, Languages } from 'lucide-react'
 import { useProject } from '@/contexts/ProjectContext'
-import { captionsToTracks } from '@/utils/captionUtils'
+import { captionsToTracks, splitCaptions } from '@/utils/captionUtils'
 import { toast } from 'sonner'
 import { captions } from '@/lib/api'
 
@@ -21,6 +22,12 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   const [progress, setProgress] = useState({ stage: '', percent: 0, message: '' })
   const [addMode, setAddMode] = useState('both')
   const [hasCachedCaptions, setHasCachedCaptions] = useState(false)
+  const [enMaxChars, setEnMaxChars] = useState(40)
+
+  const splitCaptionList = useMemo(
+    () => splitCaptions(captionList, enMaxChars, 9999),
+    [captionList, enMaxChars]
+  )
 
   const videoAssets = (assets || []).filter((a) => VIDEO_EXTENSIONS.test(a.name))
 
@@ -121,9 +128,9 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   }
 
   const addToTimeline = useCallback(() => {
-    if (captionList.length === 0) return
+    if (splitCaptionList.length === 0) return
 
-    const newTracks = captionsToTracks(captionList, {
+    const newTracks = captionsToTracks(splitCaptionList, {
       fps,
       sourceOffset: 0,
       timelineOffset: 0,
@@ -137,7 +144,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     const trackCount = newTracks.length
     const clipCount = newTracks.reduce((sum, t) => sum + t.clips.length, 0)
     toast.success(`Added ${trackCount} track${trackCount > 1 ? 's' : ''} with ${clipCount} caption clips`)
-  }, [captionList, fps, addMode, onTracksChange])
+  }, [splitCaptionList, fps, addMode, onTracksChange])
 
   const stageLabels = {
     starting: 'Starting...',
@@ -224,6 +231,33 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
             </p>
           )}
 
+          {/* Character Limit Sliders */}
+          {captionList.length > 0 && (
+            <div className="space-y-2 p-2.5 rounded-md border bg-muted/30">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                English Character Limit
+              </span>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[10px]">English</Label>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{enMaxChars} chars</span>
+                </div>
+                <Slider
+                  value={[enMaxChars]}
+                  onValueChange={([v]) => setEnMaxChars(v)}
+                  min={10}
+                  max={100}
+                  step={5}
+                />
+              </div>
+              {splitCaptionList.length > captionList.length && (
+                <p className="text-[10px] text-primary">
+                  {captionList.length} captions split into {splitCaptionList.length} segments
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Caption List */}
           {captionList.length > 0 && (
             <>
@@ -301,6 +335,37 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Split Preview */}
+              {splitCaptionList.length > captionList.length && (
+                <div className="space-y-1.5">
+                  <span className="text-xs text-muted-foreground">
+                    Split Preview ({splitCaptionList.length} segments)
+                  </span>
+                  {splitCaptionList.map((seg) => {
+                    const isSplit = seg._splitTotal > 1
+                    return (
+                      <div
+                        key={seg.id}
+                        className={`rounded border p-2 text-[10px] space-y-0.5 ${
+                          isSplit ? 'border-l-2 border-l-primary bg-muted/40' : 'bg-muted/20'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-muted-foreground">
+                          <span>{seg.startTime.toFixed(1)}s - {seg.endTime.toFixed(1)}s</span>
+                          {isSplit && (
+                            <span className="px-1 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-medium">
+                              {seg._splitIndex + 1}/{seg._splitTotal}
+                            </span>
+                          )}
+                        </div>
+                        {seg.en && <p className="text-foreground">{seg.en}</p>}
+                        {seg.ja && <p className="text-foreground/80">{seg.ja}</p>}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Timeline Actions */}
               <div className="space-y-1.5 pt-1 border-t">

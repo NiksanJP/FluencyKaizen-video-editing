@@ -2,10 +2,12 @@ import { ipcMain, app } from 'electron'
 import fs from 'fs/promises'
 import fsSync from 'fs'
 import path from 'path'
+import chokidar from 'chokidar'
 import { randomUUID } from 'crypto'
 import { execSync, spawn } from 'child_process'
 import pty from 'node-pty'
 import os from 'os'
+import { registerExportHandlers } from './export-handler.js'
 
 const PROJECTS_DIR = path.resolve(app.getAppPath(), 'projects')
 
@@ -274,7 +276,7 @@ function registerCaptionHandlers() {
 
       // Dynamic import to keep analyze.js as-is
       const { analyzeWithGemini } = await import('../server/lib/analyze.js')
-      const clipData = await analyzeWithGemini(transcript, assetName)
+      const clipData = await analyzeWithGemini(transcript, assetName, { backfillTranscript: transcript })
 
       if (aborted) return { error: 'Aborted' }
 
@@ -315,12 +317,12 @@ function registerCaptionHandlers() {
 function registerPtyHandlers() {
   const ptyProcesses = new Map()
 
-  ipcMain.handle('pty:spawn', (event) => {
+  ipcMain.handle('pty:spawn', (event, options = {}) => {
     const id = randomUUID()
     const shell = os.platform() === 'win32' ? 'powershell.exe' : process.env.SHELL || '/bin/zsh'
     const cwd = app.isPackaged ? app.getPath('home') : path.resolve(app.getAppPath())
 
-    const ptyProcess = pty.spawn('claude', [], {
+    const ptyProcess = pty.spawn('claude', ['--dangerously-skip-permissions'], {
       name: 'xterm-256color',
       cols: 120,
       rows: 30,
@@ -329,6 +331,8 @@ function registerPtyHandlers() {
         ...process.env,
         TERM: 'xterm-256color',
         COLORTERM: 'truecolor',
+        FLUENCYKAIZEN_PROJECT_ID: options.projectId || '',
+        FLUENCYKAIZEN_PROJECTS_DIR: PROJECTS_DIR,
       },
     })
 
@@ -370,6 +374,60 @@ function registerPtyHandlers() {
   })
 }
 
+// ── File Watcher ─────────────────────────────────────────────────────────────
+
+function registerFileWatcherHandlers() {
+  const watchers = new Map()
+
+  ipcMain.handle('watch:project', (event, projectId) => {
+    // Clean up any existing watcher for this project
+    const existing = watchers.get(projectId)
+    if (existing) {
+      existing.close()
+      watchers.delete(projectId)
+    }
+
+    const filePath = path.join(PROJECTS_DIR, projectId, 'project.json')
+    const sender = event.sender
+
+    let debounceTimer = null
+    try {
+      const watcher = chokidar.watch(filePath, {
+        ignoreInitial: true,
+        awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 50 },
+      })
+
+      watcher.on('change', () => {
+        clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => {
+          if (!sender.isDestroyed()) {
+            sender.send('project:external-change', projectId)
+          }
+        }, 300)
+      })
+
+      watcher.on('error', () => {
+        watcher.close()
+        watchers.delete(projectId)
+      })
+
+      watchers.set(projectId, watcher)
+      return { ok: true }
+    } catch (err) {
+      console.warn('Failed to watch project file:', err.message)
+      return { ok: false, error: err.message }
+    }
+  })
+
+  ipcMain.on('watch:stop', (_e, projectId) => {
+    const watcher = watchers.get(projectId)
+    if (watcher) {
+      watcher.close()
+      watchers.delete(projectId)
+    }
+  })
+}
+
 // ── Register all ────────────────────────────────────────────────────────────
 
 export function registerAllHandlers() {
@@ -377,6 +435,8 @@ export function registerAllHandlers() {
   registerAssetHandlers()
   registerCaptionHandlers()
   registerPtyHandlers()
+  registerFileWatcherHandlers()
+  registerExportHandlers()
 }
 
 export { PROJECTS_DIR }

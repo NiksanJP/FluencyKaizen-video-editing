@@ -153,7 +153,7 @@ router.post('/:projectId/generate', async (req, res) => {
     // Stage 3: Analyze with Gemini
     sendEvent({ type: 'progress', stage: 'analyzing', percent: 60, message: 'Analyzing with Gemini...' })
 
-    const clipData = await analyzeWithGemini(transcript, assetName)
+    const clipData = await analyzeWithGemini(transcript, assetName, { backfillTranscript: transcript })
 
     if (aborted) return
 

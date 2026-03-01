@@ -1,0 +1,113 @@
+{
+  "videoFile": "Man_and_woman_at_kotatsu_0e0194644e.mp4",
+  "hookTitle": {
+    "ja": "挨拶英語",
+    "en": "Learn Basic Greetings"
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 30
+  },
+  "subtitles": [
+    {
+      "startTime": 0,
+      "endTime": 0.3,
+      "en": "Hello.",
+      "ja": "こんにちは",
+      "highlights": [
+        "こんにちは"
+      ]
+    },
+    {
+      "startTime": 0.66,
+      "endTime": 1.08,
+      "en": "It's Masa, right?",
+      "ja": "まさですね",
+      "highlights": [
+        "まさ"
+      ]
+    },
+    {
+      "startTime": 1.2,
+      "endTime": 2.14,
+      "en": "It's Chorizo.",
+      "ja": "チョリーズです",
+      "highlights": [
+        "チョリーズ"
+      ]
+    },
+    {
+      "startTime": 2.22,
+      "endTime": 3,
+      "en": "It's Rina, isn't it?",
+      "ja": "リナだよね",
+      "highlights": [
+        "リナ"
+      ]
+    },
+    {
+      "startTime": 2.86,
+      "endTime": 4.26,
+      "en": "Relax, see you again.",
+      "ja": "リラックスしてまたみましょう",
+      "highlights": [
+        "リラックス",
+        "またみましょう"
+      ]
+    },
+    {
+      "startTime": 4.26,
+      "endTime": 5.98,
+      "en": "Skyllego-san teaches,",
+      "ja": "スカイルエゴさん教えるよね",
+      "highlights": [
+        "スカイルエゴ",
+        "教える"
+      ]
+    },
+    {
+      "startTime": 5.96,
+      "endTime": 6.72,
+      "en": "It's Cere.",
+      "ja": "セレです",
+      "highlights": [
+        "セレ"
+      ]
+    },
+    {
+      "startTime": 6.8,
+      "endTime": 7.66,
+      "en": "Bye-bye!",
+      "ja": "バイビー",
+      "highlights": [
+        "バイビー"
+      ]
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 0,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "Good to see you",
+      "literal": "お会いできて嬉しいです",
+      "nuance": "対面での再会や初対面時に使う丁寧な挨拶。ビジネスシーンでも頻繁に使われる。"
+    },
+    {
+      "triggerTime": 2.86,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "Keep in touch",
+      "literal": "連絡を取り合いましょう",
+      "nuance": "今後も関係を継続したい意向を示すフレーズ。会議の後やプロジェクト終了時に使える。"
+    },
+    {
+      "triggerTime": 6.8,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "Have a good one",
+      "literal": "良い一日を",
+      "nuance": "「Have a good day/weekend/meeting」などの総称で、様々な別れの挨拶に使えるカジュアルだがビジネスでもOKな表現。"
+    }
+  ]
+}

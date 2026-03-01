@@ -83,6 +83,13 @@ export default function UploadsPanel({ onAddToTimeline }) {
                     alt={asset.name}
                     className="w-full h-full object-cover"
                   />
+                ) : /\.(mp4|mov|webm|avi)$/i.test(asset.name) ? (
+                  <video
+                    src={getAssetUrl(asset.name)}
+                    preload="metadata"
+                    muted
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
                 ) : (
                   (() => { const TypeIcon = getTypeIcon(asset.name); return <TypeIcon className="w-6 h-6 text-muted-foreground" /> })()
                 )}

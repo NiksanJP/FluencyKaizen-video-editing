@@ -623,6 +623,7 @@ const RemotionPlayer = React.forwardRef(({
             spaceKeyToPlayOrPause={false}
             moveWhileDragging={false}
             autoPlay={true}
+            acknowledgeRemotionLicense
             onPlay={() => onPlaybackStateChange?.(true)}
             onPause={() => onPlaybackStateChange?.(false)}
             onError={(error) => console.warn('[RemotionPlayer] Player error:', error)}

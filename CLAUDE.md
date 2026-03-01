@@ -324,3 +324,85 @@ tail -f .claude/logs/agents/pipeline-orchestrator.log
 ---
 
 *This project uses multi-agent orchestration to handle complex video production workflows. Agents automatically coordinate, validate, optimize, and recover from errors to provide a seamless user experience.*
+
+---
+
+## Editor Project Context (for Claude Code Terminal)
+
+When Claude Code runs inside the editor's terminal panel, it receives environment variables:
+
+- `FLUENCYKAIZEN_PROJECT_ID` — UUID of the currently open project
+- `FLUENCYKAIZEN_PROJECTS_DIR` — Absolute path to the `projects/` directory
+
+The project file lives at: `$FLUENCYKAIZEN_PROJECTS_DIR/$FLUENCYKAIZEN_PROJECT_ID/project.json`
+
+The editor watches this file. If you edit it, the editor reloads automatically — no page refresh needed.
+
+### project.json Schema
+
+```json
+{
+  "id": "uuid-string",
+  "name": "Project Name",
+  "createdAt": 1709300000000,
+  "lastModified": 1709300000000,
+  "composition": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 900
+  },
+  "tracks": [
+    {
+      "id": "track-1709300000000",
+      "type": "video | audio | image",
+      "name": "Video 1",
+      "clips": [
+        {
+          "id": "clip-1709300000000",
+          "type": "video | audio | image",
+          "name": "filename.mp4",
+          "src": "asset://project-uuid/filename.mp4",
+          "path": "asset://project-uuid/filename.mp4",
+          "mimeType": "video/mp4",
+          "start": 0,
+          "duration": 10.5,
+          "startFrame": 0,
+          "durationFrames": 315,
+          "sourceStart": 0,
+          "originalDuration": 120.0,
+          "x": 0,
+          "y": 0,
+          "scale": 100,
+          "rotation": 0,
+          "opacity": 100
+        }
+      ],
+      "visible": true
+    }
+  ]
+}
+```
+
+### Editing Rules
+
+1. **Always update `lastModified`** to `Date.now()` (ms since epoch) so the editor detects the change.
+2. **Keep seconds and frames in sync**: `startFrame = Math.round(start * fps)`, `durationFrames = Math.round(duration * fps)`. The `fps` is in `composition.fps` (usually 30).
+3. **Asset URLs** use the format `asset://PROJECT_ID/filename.ext`.
+4. **Clip IDs** must be unique strings (convention: `clip-TIMESTAMP`).
+5. **Track IDs** must be unique strings (convention: `track-TIMESTAMP`).
+6. **Track types**: `"video"`, `"audio"`, or `"image"`.
+7. **Transform fields** (`x`, `y`, `scale`, `rotation`, `opacity`) are relative to the canvas center. `scale` and `opacity` are percentages (100 = normal).
+
+### Example: Move a clip 2 seconds later
+
+```bash
+# Read, modify, write back
+PROJECT_FILE="$FLUENCYKAIZEN_PROJECTS_DIR/$FLUENCYKAIZEN_PROJECT_ID/project.json"
+# Use jq or node to update .tracks[0].clips[0].start += 2,
+# recalculate .startFrame, and set .lastModified = Date.now()
+```
+
+### Example: Add a text overlay (as an image clip)
+
+Add a new track of type `"image"` with a clip pointing to an uploaded image asset.

@@ -14,6 +14,7 @@ import UploadsPanel from '@/components/panels/UploadsPanel'
 import VideosPanel from '@/components/panels/VideosPanel'
 import EditPanel from '@/components/panels/EditPanel'
 import CaptionsPanel from '@/components/panels/CaptionsPanel'
+import TextTemplatesPanel from '@/components/panels/TextTemplatesPanel'
 import ExportsPanel from '@/components/panels/ExportsPanel'
 import SettingsPanel from '@/components/panels/SettingsPanel'
 import { useProject } from '@/contexts/ProjectContext'
@@ -23,6 +24,8 @@ const DEFAULT_TIMELINE_DURATION = 30 // seconds
 export default function VideoEditor({ onBack }) {
   const { project, saveProject } = useProject()
   const playerRef = useRef(null)
+  const terminalPanelRef = useRef(null)
+  const [terminalCollapsed, setTerminalCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState('uploads')
   const [tracks, setTracks] = useState([])
   const [selectedClipIds, setSelectedClipIds] = useState([])
@@ -41,12 +44,19 @@ export default function VideoEditor({ onBack }) {
     duration: clip.duration ?? (clip.durationFrames || 0) / clipFps,
   }), [])
 
-  // Initialize tracks from project
+  // Track the lastModified value we last saved, so we can ignore our own save echoes
+  const lastSavedModified = useRef(null)
+
+  // Initialize tracks from project (also reacts to external reloads via lastModified)
   useEffect(() => {
     if (project?.tracks) {
+      // Skip if this reload is just the echo of our own save
+      if (project.lastModified && project.lastModified === lastSavedModified.current) {
+        return
+      }
       setTracks(project.tracks)
     }
-  }, [project?.id])
+  }, [project?.id, project?.lastModified])
 
   const fps = project?.composition?.fps || 30
   const width = project?.composition?.width || 1080
@@ -109,12 +119,17 @@ export default function VideoEditor({ onBack }) {
   useEffect(() => {
     if (!project) return
     clearTimeout(autoSaveTimeout.current)
-    autoSaveTimeout.current = setTimeout(() => {
+    autoSaveTimeout.current = setTimeout(async () => {
       const syncedTracks = tracks.map((track) => ({
         ...track,
         clips: (track.clips || []).map((clip) => syncClipFields(clip, fps)),
       }))
-      saveProject({ tracks: syncedTracks }).catch(() => {})
+      try {
+        const saved = await saveProject({ tracks: syncedTracks })
+        if (saved?.lastModified) {
+          lastSavedModified.current = saved.lastModified
+        }
+      } catch {}
     }, 2000)
     return () => clearTimeout(autoSaveTimeout.current)
   }, [tracks, fps, syncClipFields])
@@ -214,13 +229,39 @@ export default function VideoEditor({ onBack }) {
     })
   }, [])
 
-  const handleAddClipToTimeline = useCallback((asset) => {
+  const probeMediaDimensions = useCallback((src, type) => {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(null), 5000)
+      if (type === 'image') {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => { clearTimeout(timeout); resolve({ width: img.naturalWidth, height: img.naturalHeight }) }
+        img.onerror = () => { clearTimeout(timeout); resolve(null) }
+        img.src = src
+      } else {
+        const video = document.createElement('video')
+        video.preload = 'metadata'
+        video.crossOrigin = 'anonymous'
+        video.onloadedmetadata = () => { clearTimeout(timeout); resolve({ width: video.videoWidth, height: video.videoHeight }) }
+        video.onerror = () => { clearTimeout(timeout); resolve(null) }
+        video.src = src
+      }
+    })
+  }, [])
+
+  const handleAddClipToTimeline = useCallback(async (asset) => {
     const isAudio = asset.name.match(/\.(mp3|wav|ogg|aac|m4a|flac)$/i)
     const isVideo = asset.name.match(/\.(mp4|mov|webm|avi|mkv)$/i)
     const isImage = asset.name.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i)
     let trackType = 'video'
     if (isAudio) trackType = 'audio'
     else if (isImage) trackType = 'image'
+
+    // Pre-probe dimensions for visual clips
+    let intrinsicDims = null
+    if ((isVideo || isImage) && asset.path) {
+      intrinsicDims = await probeMediaDimensions(asset.path, isImage ? 'image' : 'video')
+    }
 
     let targetTrack = tracks.find((t) => t.type === trackType)
     if (!targetTrack) {
@@ -254,6 +295,7 @@ export default function VideoEditor({ onBack }) {
       durationFrames: Math.round(durationSeconds * fps),
       sourceStart: 0,
       ...(asset.duration && (isVideo || isAudio) ? { originalDuration: asset.duration } : {}),
+      ...(intrinsicDims ? { intrinsicWidth: intrinsicDims.width, intrinsicHeight: intrinsicDims.height } : {}),
       // Transform defaults
       x: 0,
       y: 0,
@@ -270,7 +312,7 @@ export default function VideoEditor({ onBack }) {
       )
     )
     toast.success(`Added ${asset.name} to timeline`)
-  }, [tracks, fps])
+  }, [tracks, fps, probeMediaDimensions])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -337,6 +379,16 @@ export default function VideoEditor({ onBack }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handlePlayPause, handleSkip, selectedClipIds, selectedClipId, selectedClip, handleClipUpdate, handleClipDelete])
 
+  const handleToggleTerminal = useCallback(() => {
+    const panel = terminalPanelRef.current
+    if (!panel) return
+    if (terminalCollapsed) {
+      panel.expand()
+    } else {
+      panel.collapse()
+    }
+  }, [terminalCollapsed])
+
   const renderPanel = () => {
     switch (activeTab) {
       case 'uploads':
@@ -350,10 +402,12 @@ export default function VideoEditor({ onBack }) {
             onClipUpdate={handleClipUpdate}
           />
         )
+      case 'text-templates':
+        return <TextTemplatesPanel onTracksChange={handleTracksChange} fps={fps} />
       case 'captions':
         return <CaptionsPanel tracks={tracks} onTracksChange={handleTracksChange} fps={fps} />
       case 'exports':
-        return <ExportsPanel />
+        return <ExportsPanel tracks={tracks} totalFrames={totalFrames} />
       case 'settings':
         return <SettingsPanel />
       default:
@@ -443,8 +497,21 @@ export default function VideoEditor({ onBack }) {
             <ResizableHandle withHandle />
 
             {/* Right panel - terminal */}
-            <ResizablePanel defaultSize={30} minSize={15} maxSize={50}>
-              <TerminalPanel />
+            <ResizablePanel
+              ref={terminalPanelRef}
+              defaultSize={30}
+              minSize={15}
+              maxSize={50}
+              collapsible
+              collapsedSize={3}
+              onCollapse={() => setTerminalCollapsed(true)}
+              onExpand={() => setTerminalCollapsed(false)}
+            >
+              <TerminalPanel
+                collapsed={terminalCollapsed}
+                onToggleCollapse={handleToggleTerminal}
+                projectId={project.id}
+              />
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>

@@ -1,11 +1,24 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { projects, assets } from '@/lib/api'
+import { projects, assets, watch } from '@/lib/api'
 
 const ProjectContext = createContext(null)
 
 export function useProject() {
   const ctx = useContext(ProjectContext)
-  if (!ctx) throw new Error('useProject must be used within ProjectProvider')
+  if (!ctx) {
+    return {
+      project: null,
+      projectId: null,
+      assets: [],
+      isLoading: true,
+      saveProject: async () => {},
+      refreshAssets: async () => {},
+      uploadAsset: async () => {},
+      deleteAsset: async () => {},
+      getAssetUrl: () => '',
+      setProject: () => {},
+    }
+  }
   return ctx
 }
 
@@ -14,15 +27,15 @@ export function ProjectProvider({ projectId, children }) {
   const [assetList, setAssetList] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadProject = useCallback(async () => {
+  const loadProject = useCallback(async (isReload = false) => {
     try {
-      setIsLoading(true)
+      if (!isReload) setIsLoading(true)
       const data = await projects.get(projectId)
       setProject(data)
     } catch (err) {
       console.error('Failed to load project:', err)
     } finally {
-      setIsLoading(false)
+      if (!isReload) setIsLoading(false)
     }
   }, [projectId])
 
@@ -65,6 +78,22 @@ export function ProjectProvider({ projectId, children }) {
     loadProject()
     refreshAssets()
   }, [loadProject, refreshAssets])
+
+  // Watch for external changes to project.json (e.g. from Claude Code terminal)
+  useEffect(() => {
+    watch.project(projectId).catch(() => {})
+
+    const removeListener = watch.onExternalChange((changedId) => {
+      if (changedId === projectId) {
+        loadProject(true)
+      }
+    })
+
+    return () => {
+      removeListener()
+      watch.stop(projectId)
+    }
+  }, [projectId, loadProject])
 
   return (
     <ProjectContext.Provider

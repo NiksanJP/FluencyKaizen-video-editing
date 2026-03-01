@@ -108,7 +108,7 @@ const InteractiveOverlay = ({
 
     const sourceUrl = clip.src || clip.path;
     if (!sourceUrl) { delete mediaLoadersRef.current[clip.id]; return; }
-    const isLoadable = /^(https?:|blob:|data:|\/api\/)/i.test(sourceUrl);
+    const isLoadable = /^(https?:|blob:|data:|asset:|\/api\/)/i.test(sourceUrl);
     if (!isLoadable) { delete mediaLoadersRef.current[clip.id]; return; }
 
     const type = (clip.mimeType || clip.type || '').toLowerCase();
@@ -171,8 +171,8 @@ const InteractiveOverlay = ({
     const containerWidth = width;
 
     const intrinsic = mediaDimensions[clip.id];
-    const sourceWidth = Number(intrinsic?.width) > 0 ? intrinsic.width : clip.width && !textClip ? clip.width : containerWidth;
-    const sourceHeight = Number(intrinsic?.height) > 0 ? intrinsic.height : clip.height && !textClip ? clip.height : containerHeight;
+    const sourceWidth = Number(intrinsic?.width) > 0 ? intrinsic.width : Number(clip.intrinsicWidth) > 0 ? clip.intrinsicWidth : clip.width && !textClip ? clip.width : containerWidth;
+    const sourceHeight = Number(intrinsic?.height) > 0 ? intrinsic.height : Number(clip.intrinsicHeight) > 0 ? clip.intrinsicHeight : clip.height && !textClip ? clip.height : containerHeight;
 
     const blurObjectFit = clip.blurStyles?.objectFit;
     const blurWidth = parseDimensionToPixels(clip.blurStyles?.width, containerWidth);

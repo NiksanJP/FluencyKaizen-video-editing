@@ -35,9 +35,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
   },
 
+  // Export
+  export: {
+    render: (options) => ipcRenderer.invoke('export:render', options),
+    onProgress: (callback) => {
+      const handler = (_event, data) => callback(data)
+      ipcRenderer.on('export:progress', handler)
+      return () => ipcRenderer.removeListener('export:progress', handler)
+    },
+  },
+
+  // File Watcher
+  watch: {
+    project: (projectId) => ipcRenderer.invoke('watch:project', projectId),
+    stop: (projectId) => ipcRenderer.send('watch:stop', projectId),
+    onExternalChange: (callback) => {
+      const handler = (_event, projectId) => callback(projectId)
+      ipcRenderer.on('project:external-change', handler)
+      return () => ipcRenderer.removeListener('project:external-change', handler)
+    },
+  },
+
   // PTY (Terminal)
   pty: {
-    spawn: () => ipcRenderer.invoke('pty:spawn'),
+    spawn: (options) => ipcRenderer.invoke('pty:spawn', options),
     input: (id, data) => ipcRenderer.send('pty:input', id, data),
     resize: (id, cols, rows) => ipcRenderer.send('pty:resize', id, cols, rows),
     kill: (id) => ipcRenderer.send('pty:kill', id),

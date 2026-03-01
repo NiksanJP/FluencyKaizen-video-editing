@@ -1,4 +1,129 @@
 /**
+ * Split English text at word boundaries to fit within a character limit.
+ * @param {string} text
+ * @param {number} maxChars
+ * @returns {string[]}
+ */
+export function splitEnglishText(text, maxChars) {
+  if (!text || text.length <= maxChars) return [text || '']
+  const words = text.split(' ')
+  const segments = []
+  let current = ''
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word
+    if (candidate.length > maxChars && current) {
+      segments.push(current)
+      current = word
+    } else {
+      current = candidate
+    }
+  }
+  if (current) segments.push(current)
+  return segments.length > 0 ? segments : [text]
+}
+
+/**
+ * Split Japanese text by character count, preferring natural break points.
+ * Looks back up to 5 chars for punctuation (、。！？) to break at.
+ * @param {string} text
+ * @param {number} maxChars
+ * @returns {string[]}
+ */
+export function splitJapaneseText(text, maxChars) {
+  if (!text || text.length <= maxChars) return [text || '']
+  const breakChars = new Set(['、', '。', '！', '？'])
+  const segments = []
+  let start = 0
+  while (start < text.length) {
+    if (start + maxChars >= text.length) {
+      segments.push(text.slice(start))
+      break
+    }
+    let end = start + maxChars
+    // Look back up to 5 chars for a natural break
+    let breakAt = -1
+    for (let i = end; i >= Math.max(start + 1, end - 5); i--) {
+      if (breakChars.has(text[i - 1])) {
+        breakAt = i
+        break
+      }
+    }
+    if (breakAt > start) {
+      segments.push(text.slice(start, breakAt))
+      start = breakAt
+    } else {
+      segments.push(text.slice(start, end))
+      start = end
+    }
+  }
+  return segments.length > 0 ? segments : [text]
+}
+
+/**
+ * Split a list of captions according to EN/JA character limits.
+ * Time is distributed proportionally by character weight.
+ * Highlights are distributed to whichever JA segment contains each word.
+ *
+ * @param {Array} captionList - Array of caption objects
+ * @param {number} enMaxChars - Max characters per English segment
+ * @param {number} jaMaxChars - Max characters per Japanese segment
+ * @returns {Array} New caption array with split segments
+ */
+export function splitCaptions(captionList, enMaxChars, jaMaxChars) {
+  const result = []
+  for (const caption of captionList) {
+    const enSegments = splitEnglishText(caption.en, enMaxChars)
+    const jaSegments = splitJapaneseText(caption.ja, jaMaxChars)
+    const segCount = Math.max(enSegments.length, jaSegments.length)
+
+    if (segCount <= 1) {
+      result.push(caption)
+      continue
+    }
+
+    // Build paired segments with character weights
+    const pairs = []
+    for (let i = 0; i < segCount; i++) {
+      const en = enSegments[i] || ''
+      const ja = jaSegments[i] || ''
+      pairs.push({ en, ja, weight: Math.max(1, en.length + ja.length) })
+    }
+
+    const totalWeight = pairs.reduce((sum, p) => sum + p.weight, 0)
+    const totalDuration = caption.endTime - caption.startTime
+    let currentStart = caption.startTime
+
+    for (let i = 0; i < pairs.length; i++) {
+      const duration = Math.max(0.1, (pairs[i].weight / totalWeight) * totalDuration)
+      const endTime = i === pairs.length - 1
+        ? caption.endTime
+        : Math.round((currentStart + duration) * 1000) / 1000
+
+      // Distribute highlights to JA segments that contain them
+      const segHighlights = (caption.highlights || []).filter(
+        (h) => pairs[i].ja.includes(h)
+      )
+
+      result.push({
+        ...caption,
+        id: `${caption.id}-split-${i}`,
+        startTime: Math.round(currentStart * 1000) / 1000,
+        endTime,
+        en: pairs[i].en,
+        ja: pairs[i].ja,
+        highlights: segHighlights,
+        _sourceId: caption.id,
+        _splitIndex: i,
+        _splitTotal: pairs.length,
+      })
+
+      currentStart = endTime
+    }
+  }
+  return result
+}
+
+/**
  * Default text styles for bilingual captions on a 1080x1920 canvas.
  */
 export const CAPTION_STYLES = {
