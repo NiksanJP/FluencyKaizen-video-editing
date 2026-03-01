@@ -47,3 +47,5 @@ input/*
 whisper.cpp
 whisper.cpp
 whisper.cpp
+
+projects/*

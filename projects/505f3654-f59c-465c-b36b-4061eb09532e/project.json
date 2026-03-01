@@ -2,7 +2,7 @@
   "id": "505f3654-f59c-465c-b36b-4061eb09532e",
   "name": "Test3",
   "createdAt": 1772355087361,
-  "lastModified": 1772359775033,
+  "lastModified": 1772363883264,
   "composition": {
     "width": 1080,
     "height": 1920,
@@ -11,92 +11,12 @@
   },
   "tracks": [
     {
-      "id": "track-text-1772359652443",
-      "type": "text",
-      "name": "Subtitle",
-      "clips": [
-        {
-          "id": "text-1772359652443",
-          "type": "text",
-          "name": "Subtitle",
-          "textContent": "Subtitle text here",
-          "start": 0.0003090370866853931,
-          "duration": 5,
-          "startFrame": 0,
-          "durationFrames": 150,
-          "sourceStart": 0,
-          "x": -56.66880172170838,
-          "y": -691.5263226159766,
-          "scale": 100,
-          "rotation": 0,
-          "opacity": 100,
-          "textStyles": {
-            "fontFamily": "Inter",
-            "fontWeight": "400",
-            "fontSize": 36,
-            "color": "#ffffff",
-            "backgroundColor": "rgba(0,0,0,0.6)",
-            "textAlign": "center",
-            "width": 960,
-            "paddingX": 16,
-            "paddingY": 8
-          },
-          "width": 960,
-          "height": 51.6,
-          "absoluteX": 3.331198278291623,
-          "absoluteY": 1136.8736773840235
-        }
-      ],
-      "visible": true
-    },
-    {
-      "id": "track-text-1772359666293",
-      "type": "text",
-      "name": "Callout Box",
-      "clips": [
-        {
-          "id": "text-1772359666293",
-          "type": "text",
-          "name": "Callo",
-          "textContent": "Callo",
-          "start": 0,
-          "duration": 5,
-          "startFrame": 0,
-          "durationFrames": 150,
-          "sourceStart": 0,
-          "x": 7.083600215213547,
-          "y": -1073.8073758088458,
-          "scale": 100,
-          "rotation": 0,
-          "opacity": 100,
-          "textStyles": {
-            "fontFamily": "Inter",
-            "fontWeight": "700",
-            "fontSize": 48,
-            "color": "#1a1a1a",
-            "backgroundColor": "#f5c542",
-            "textAlign": "center",
-            "width": 700,
-            "paddingX": 24,
-            "paddingY": 16,
-            "borderRadius": 16
-          },
-          "width": 700,
-          "height": 64.80000000000001,
-          "absoluteX": 197.08360021521355,
-          "absoluteY": 741.3926241911543,
-          "text": "Callo"
-        }
-      ],
-      "visible": true
-    },
-    {
-      "id": "track-1772359772478",
+      "id": "track-1772362013230",
       "type": "video",
       "name": "Video 1",
       "clips": [
         {
-          "id": "clip-1772359772479",
+          "id": "clip-1772362013230",
           "type": "video",
           "name": "Man_and_woman_at_kotatsu_0e0194644e.mp4",
           "src": "asset://505f3654-f59c-465c-b36b-4061eb09532e/Man_and_woman_at_kotatsu_0e0194644e.mp4",
@@ -110,8 +30,8 @@
           "originalDuration": 8,
           "intrinsicWidth": 1280,
           "intrinsicHeight": 720,
-          "x": 0,
-          "y": 0,
+          "x": -35.24160467218244,
+          "y": -3.203754399687128,
           "scale": 100,
           "rotation": 0,
           "opacity": 100

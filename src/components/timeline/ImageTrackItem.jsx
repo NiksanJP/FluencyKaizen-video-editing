@@ -4,7 +4,7 @@ import BaseTrackItem from './BaseTrackItem';
 
 const DEFAULT_CLIP_COLOR = 'hsl(240, 3.7%, 15.9%)';
 
-const ImageTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
+const ImageTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
   const baseColor = clip.color || DEFAULT_CLIP_COLOR;
 
   return (
@@ -28,6 +28,6 @@ const ImageTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) 
       </div>
     </BaseTrackItem>
   );
-};
+});
 
 export default ImageTrackItem;

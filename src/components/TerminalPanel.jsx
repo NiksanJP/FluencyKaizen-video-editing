@@ -129,16 +129,10 @@ export default function TerminalPanel({ collapsed = false, onToggleCollapse, pro
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-zinc-800 bg-zinc-900/50">
-        <div
-          className={`h-2 w-2 rounded-full ${
-            connected ? 'bg-foreground' : 'bg-muted-foreground'
-          }`}
-        />
-        <span className="text-xs font-medium text-zinc-400">Claude Code</span>
         {onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
-            className="ml-auto p-0.5 rounded hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="p-0.5 rounded hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200 transition-colors"
             title={collapsed ? 'Expand terminal' : 'Collapse terminal'}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -150,6 +144,12 @@ export default function TerminalPanel({ collapsed = false, onToggleCollapse, pro
             </svg>
           </button>
         )}
+        <div
+          className={`h-2 w-2 rounded-full ${
+            connected ? 'bg-foreground' : 'bg-muted-foreground'
+          }`}
+        />
+        <span className="text-xs font-medium text-zinc-400">Claude Code</span>
       </div>
 
       {/* Terminal */}

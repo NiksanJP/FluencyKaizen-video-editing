@@ -40,13 +40,18 @@ const VideoThumbnails = ({ videoSrc, duration, sourceStart = 0, clipId }) => {
   const thumbnailCacheRef = useRef(new Map());
 
   useEffect(() => {
+    let timerId;
     const updateWidth = () => {
-      if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth || containerRef.current.clientWidth);
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth || containerRef.current.clientWidth);
+      }, 150);
     };
-    updateWidth();
+    // Initial measurement (no debounce)
+    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth || containerRef.current.clientWidth);
     const resizeObserver = new ResizeObserver(updateWidth);
     if (containerRef.current) resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    return () => { clearTimeout(timerId); resizeObserver.disconnect(); };
   }, []);
 
   useEffect(() => {

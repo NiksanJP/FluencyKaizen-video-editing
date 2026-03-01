@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { calculateTextClipBounds } from '@/components/RemotionPlayer';
 
 const parseDimensionToPixels = (value, reference) => {
   if (value === undefined || value === null) return undefined;
@@ -202,7 +203,8 @@ const InteractiveOverlay = ({
   const [transformMode, setTransformMode] = useState(null);
   const [transformStart, setTransformStart] = useState({ x: 0, y: 0 });
   const [initialTransform, setInitialTransform] = useState({});
-  const [mediaDimensions, setMediaDimensions] = useState({});
+  const mediaDimensionsRef = useRef({});
+  const [mediaDimensionsVersion, setMediaDimensionsVersion] = useState(0);
   const mediaLoadersRef = useRef({});
 
   // Inline editing state
@@ -217,14 +219,14 @@ const InteractiveOverlay = ({
   }, []);
 
   const loadMediaDimensions = useCallback((clip) => {
-    if (!clip || mediaDimensions[clip.id]) return;
+    if (!clip || mediaDimensionsRef.current[clip.id]) return;
     if (!isVisualClip(clip)) return;
     if (mediaLoadersRef.current[clip.id]) return;
     mediaLoadersRef.current[clip.id] = true;
 
     const sourceUrl = clip.src || clip.path;
     if (!sourceUrl) { delete mediaLoadersRef.current[clip.id]; return; }
-    const isLoadable = /^(https?:|blob:|data:|asset:|\/api\/)/i.test(sourceUrl);
+    const isLoadable = /^(blob:|data:|asset:|\/api\/|\/project-assets\/)/i.test(sourceUrl);
     if (!isLoadable) { delete mediaLoadersRef.current[clip.id]; return; }
 
     const type = (clip.mimeType || clip.type || '').toLowerCase();
@@ -232,7 +234,8 @@ const InteractiveOverlay = ({
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
-        setMediaDimensions((prev) => ({ ...prev, [clip.id]: { width: img.naturalWidth || width, height: img.naturalHeight || height } }));
+        mediaDimensionsRef.current[clip.id] = { width: img.naturalWidth || width, height: img.naturalHeight || height };
+        setMediaDimensionsVersion((v) => v + 1);
         delete mediaLoadersRef.current[clip.id];
       };
       img.onerror = () => { delete mediaLoadersRef.current[clip.id]; };
@@ -242,13 +245,14 @@ const InteractiveOverlay = ({
       videoEl.preload = 'metadata';
       videoEl.crossOrigin = 'anonymous';
       videoEl.onloadedmetadata = () => {
-        setMediaDimensions((prev) => ({ ...prev, [clip.id]: { width: videoEl.videoWidth || width, height: videoEl.videoHeight || height } }));
+        mediaDimensionsRef.current[clip.id] = { width: videoEl.videoWidth || width, height: videoEl.videoHeight || height };
+        setMediaDimensionsVersion((v) => v + 1);
         delete mediaLoadersRef.current[clip.id];
       };
       videoEl.onerror = () => { delete mediaLoadersRef.current[clip.id]; };
       videoEl.src = sourceUrl;
     }
-  }, [isVisualClip, mediaDimensions, width, height]);
+  }, [isVisualClip, width, height]);
 
   useEffect(() => {
     const clipsToCheck = new Map();
@@ -267,14 +271,11 @@ const InteractiveOverlay = ({
     const textClipFlag = clip.type === 'text' || clip.type === 'animated-text' || clip.mimeType === 'text/plain' || (typeof clip.type === 'string' && clip.type.startsWith('text/'));
 
     if (textClipFlag) {
-      const compositionWidth = clip.width || width;
-      const compositionHeight = clip.height || height;
-      const clipX = clip.absoluteX ?? clip.x ?? 0;
-      const clipY = clip.absoluteY ?? clip.y ?? 0;
-      const left = clipX * scaleX;
-      const top = clipY * scaleY;
-      const widthPx = compositionWidth * scaleX;
-      const heightPx = compositionHeight * scaleY;
+      const bounds = calculateTextClipBounds(clip, width, height);
+      const left = bounds.absoluteX * scaleX;
+      const top = bounds.absoluteY * scaleY;
+      const widthPx = bounds.width * scaleX;
+      const heightPx = bounds.height * scaleY;
       const transforms = [];
       if (clipScale !== 1) transforms.push(`scale(${clipScale})`);
       if (clipRotation !== 0) transforms.push(`rotate(${clipRotation}deg)`);
@@ -286,7 +287,7 @@ const InteractiveOverlay = ({
     const containerTopOffset = clip.half === 'bottom' ? height / 2 : 0;
     const containerWidth = width;
 
-    const intrinsic = mediaDimensions[clip.id];
+    const intrinsic = mediaDimensionsRef.current[clip.id];
     const sourceWidth = Number(intrinsic?.width) > 0 ? intrinsic.width : Number(clip.intrinsicWidth) > 0 ? clip.intrinsicWidth : clip.width && !textClipFlag ? clip.width : containerWidth;
     const sourceHeight = Number(intrinsic?.height) > 0 ? intrinsic.height : Number(clip.intrinsicHeight) > 0 ? clip.intrinsicHeight : clip.height && !textClipFlag ? clip.height : containerHeight;
 
@@ -336,7 +337,7 @@ const InteractiveOverlay = ({
     if (clipScale !== 1) transforms.push(`scale(${clipScale})`);
     if (clipRotation !== 0) transforms.push(`rotate(${clipRotation}deg)`);
     return { left, top, width: widthPx, height: heightPx, rotation: clipRotation, transform: transforms.length > 0 ? transforms.join(' ') : undefined, centerX: left + widthPx / 2, centerY: top + heightPx / 2, isTextClip: false };
-  }, [width, height, scaleX, scaleY, mediaDimensions]);
+  }, [width, height, scaleX, scaleY, mediaDimensionsVersion]);
 
   const visibleClipBounds = useMemo(() => {
     return visibleClips

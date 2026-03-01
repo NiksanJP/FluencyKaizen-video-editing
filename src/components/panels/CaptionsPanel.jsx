@@ -6,13 +6,30 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { MessageSquare, Plus, Trash2, Loader2, Languages } from 'lucide-react'
+import { Mic, Loader2, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { useProject } from '@/contexts/ProjectContext'
 import { captionsToTracks, splitCaptions } from '@/utils/captionUtils'
 import { toast } from 'sonner'
 import { captions } from '@/lib/api'
+import { TEMPLATES } from '@/data/textTemplates'
+import { FONTS } from '@/data/fonts'
 
 const VIDEO_EXTENSIONS = /\.(mp4|mov|webm|avi|mkv)$/i
+
+const FONT_FAMILIES = [...new Set(FONTS.map((f) => f.family))]
+
+const POSITION_PRESETS = {
+  top: 200,
+  middle: 860,
+  bottom: 1480,
+}
+
+const WEIGHT_OPTIONS = [
+  { value: 400, label: 'Regular' },
+  { value: 500, label: 'Medium' },
+  { value: 600, label: 'SemiBold' },
+  { value: 700, label: 'Bold' },
+]
 
 export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   const { project, assets } = useProject()
@@ -20,16 +37,102 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   const [captionList, setCaptionList] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState({ stage: '', percent: 0, message: '' })
-  const [addMode, setAddMode] = useState('both')
   const [hasCachedCaptions, setHasCachedCaptions] = useState(false)
-  const [enMaxChars, setEnMaxChars] = useState(40)
+  const [maxChars, setMaxChars] = useState(40)
+
+  // Style controls
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [positionPreset, setPositionPreset] = useState('bottom')
+  const [customY, setCustomY] = useState(1480)
+  const [fontFamily, setFontFamily] = useState('Inter')
+  const [fontSize, setFontSize] = useState(42)
+  const [fontWeight, setFontWeight] = useState(700)
+  const [textAlign, setTextAlign] = useState('center')
+  const [textColor, setTextColor] = useState('#FFFFFF')
+  const [bgColor, setBgColor] = useState('rgba(0,0,0,0.6)')
+  const [strokeWidth, setStrokeWidth] = useState(0)
+  const [strokeColor, setStrokeColor] = useState('#000000')
+
+  // Decorative properties from template (not individually editable)
+  const [templateDecorative, setTemplateDecorative] = useState({})
 
   const splitCaptionList = useMemo(
-    () => splitCaptions(captionList, enMaxChars, 9999),
-    [captionList, enMaxChars]
+    () => splitCaptions(captionList, maxChars),
+    [captionList, maxChars]
   )
 
   const videoAssets = (assets || []).filter((a) => VIDEO_EXTENSIONS.test(a.name))
+
+  // Compute final style from individual controls + template decorative props
+  const captionStyle = useMemo(() => {
+    const y = positionPreset === 'custom' ? customY : POSITION_PRESETS[positionPreset]
+
+    const sharedDecorative = {}
+    if (templateDecorative.shadowColor) sharedDecorative.shadowColor = templateDecorative.shadowColor
+    if (templateDecorative.shadowBlur) sharedDecorative.shadowBlur = templateDecorative.shadowBlur
+    if (templateDecorative.shadowOffsetX !== undefined) sharedDecorative.shadowOffsetX = templateDecorative.shadowOffsetX
+    if (templateDecorative.shadowOffsetY !== undefined) sharedDecorative.shadowOffsetY = templateDecorative.shadowOffsetY
+    if (templateDecorative.borderRadius) sharedDecorative.borderRadius = templateDecorative.borderRadius
+    if (templateDecorative.letterSpacing) sharedDecorative.letterSpacing = templateDecorative.letterSpacing
+    if (templateDecorative.backgroundPadding) sharedDecorative.backgroundPadding = templateDecorative.backgroundPadding
+
+    return {
+      fontFamily,
+      fontWeight,
+      fontSize,
+      color: textColor,
+      backgroundColor: bgColor,
+      textAlign,
+      x: 0,
+      y,
+      width: 1080,
+      paddingX: 40,
+      paddingY: 10,
+      ...(strokeWidth > 0 ? { strokeWidth, strokeColor } : {}),
+      ...sharedDecorative,
+    }
+  }, [
+    positionPreset, customY,
+    fontFamily, fontSize, fontWeight,
+    textAlign, textColor, bgColor,
+    strokeWidth, strokeColor, templateDecorative,
+  ])
+
+  const applyTemplate = useCallback((template) => {
+    if (!template) {
+      setSelectedTemplate(null)
+      setTemplateDecorative({})
+      return
+    }
+
+    setSelectedTemplate(template.id)
+    const ts = template.textStyles
+
+    setFontFamily(ts.fontFamily)
+    setFontSize(ts.fontSize)
+    setFontWeight(parseInt(ts.fontWeight) || 700)
+
+    if (ts.color) setTextColor(ts.color)
+    if (ts.backgroundColor) setBgColor(ts.backgroundColor)
+    if (ts.textAlign) setTextAlign(ts.textAlign)
+    if (ts.strokeWidth) {
+      setStrokeWidth(ts.strokeWidth)
+      if (ts.strokeColor) setStrokeColor(ts.strokeColor)
+    } else {
+      setStrokeWidth(0)
+    }
+
+    // Collect decorative properties
+    const deco = {}
+    if (ts.shadowColor) deco.shadowColor = ts.shadowColor
+    if (ts.shadowBlur) deco.shadowBlur = ts.shadowBlur
+    if (ts.shadowOffsetX !== undefined) deco.shadowOffsetX = ts.shadowOffsetX
+    if (ts.shadowOffsetY !== undefined) deco.shadowOffsetY = ts.shadowOffsetY
+    if (ts.borderRadius) deco.borderRadius = ts.borderRadius
+    if (ts.letterSpacing) deco.letterSpacing = ts.letterSpacing
+    if (ts.paddingX) deco.backgroundPadding = ts.paddingX
+    setTemplateDecorative(deco)
+  }, [])
 
   // Load cached captions when asset selection changes
   useEffect(() => {
@@ -42,13 +145,15 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     ;(async () => {
       const data = await captions.get(project.id, selectedAsset)
       if (cancelled || !data) return
-      const list = (data.subtitles || []).map((sub, i) => ({
+
+      // Only use Whisper segments — ignore legacy subtitles format
+      const rawList = data.segments || []
+      const list = rawList.map((seg, i) => ({
         id: `cap-${Date.now()}-${i}`,
-        startTime: sub.startTime,
-        endTime: sub.endTime,
-        en: sub.en,
-        ja: sub.ja,
-        highlights: sub.highlights || [],
+        startTime: seg.startTime ?? seg.start ?? 0,
+        endTime: seg.endTime ?? seg.end ?? 0,
+        text: seg.text ?? '',
+        words: seg.words || [],
       }))
       setCaptionList(list)
       setHasCachedCaptions(true)
@@ -67,20 +172,26 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     try {
       await captions.generate(project.id, selectedAsset, (event) => {
         if (event.type === 'progress') {
+          // Captions use Whisper only — never show Gemini-related messages
+          const rawMessage = event.message || ''
+          const message = rawMessage.toLowerCase().includes('gemini')
+            ? 'Transcribing with Whisper...'
+            : rawMessage
           setProgress({
             stage: event.stage,
             percent: event.percent,
-            message: event.message,
+            message,
           })
         } else if (event.type === 'complete') {
           const data = event.data
-          const list = (data.subtitles || []).map((sub, i) => ({
+          // Only use Whisper segments — ignore legacy subtitles format
+          const rawList = data.segments || []
+          const list = rawList.map((seg, i) => ({
             id: `cap-${Date.now()}-${i}`,
-            startTime: sub.startTime,
-            endTime: sub.endTime,
-            en: sub.en,
-            ja: sub.ja,
-            highlights: sub.highlights || [],
+            startTime: seg.startTime ?? seg.start ?? 0,
+            endTime: seg.endTime ?? seg.end ?? 0,
+            text: seg.text ?? '',
+            words: seg.words || [],
           }))
           setCaptionList(list)
           setHasCachedCaptions(true)
@@ -100,33 +211,6 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     }
   }, [selectedAsset, project?.id])
 
-  const updateCaption = (id, field, value) => {
-    setCaptionList((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
-    )
-  }
-
-  const deleteCaption = (id) => {
-    setCaptionList((prev) => prev.filter((c) => c.id !== id))
-  }
-
-  const addCaption = () => {
-    const lastEnd = captionList.length > 0
-      ? captionList[captionList.length - 1].endTime
-      : 0
-    setCaptionList((prev) => [
-      ...prev,
-      {
-        id: `cap-${Date.now()}`,
-        startTime: lastEnd,
-        endTime: lastEnd + 3,
-        en: '',
-        ja: '',
-        highlights: [],
-      },
-    ])
-  }
-
   const addToTimeline = useCallback(() => {
     if (splitCaptionList.length === 0) return
 
@@ -134,42 +218,40 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
       fps,
       sourceOffset: 0,
       timelineOffset: 0,
-      mode: addMode,
+      style: captionStyle,
     })
 
     if (onTracksChange) {
       onTracksChange((prev) => [...prev, ...newTracks])
     }
 
-    const trackCount = newTracks.length
     const clipCount = newTracks.reduce((sum, t) => sum + t.clips.length, 0)
-    toast.success(`Added ${trackCount} track${trackCount > 1 ? 's' : ''} with ${clipCount} caption clips`)
-  }, [splitCaptionList, fps, addMode, onTracksChange])
+    toast.success(`Added 1 track with ${clipCount} caption clips`)
+  }, [splitCaptionList, fps, captionStyle, onTracksChange])
 
   const stageLabels = {
     starting: 'Starting...',
     extracting: 'Extracting audio',
     transcribing: 'Transcribing',
-    analyzing: 'Analyzing with AI',
     complete: 'Complete',
     error: 'Error',
   }
 
   return (
-    <div className="h-full">
-      <ScrollArea className="h-full">
-        <div className="p-3 space-y-3">
-          {/* Header */}
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">Captions</span>
-          </div>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b">
+        <Mic className="h-4 w-4 text-muted-foreground" />
+        <span className="font-medium text-sm">Captions</span>
+      </div>
 
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-3">
           {/* Video Selection */}
           <div className="space-y-1.5">
             <Label className="text-xs">Source Video</Label>
             <Select value={selectedAsset} onValueChange={setSelectedAsset}>
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs min-w-0 w-full">
                 <SelectValue placeholder="Select a video..." />
               </SelectTrigger>
               <SelectContent>
@@ -203,7 +285,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
               </>
             ) : (
               <>
-                <Languages className="h-3 w-3 mr-1.5" />
+                <Mic className="h-3 w-3 mr-1.5" />
                 {hasCachedCaptions ? 'Regenerate Captions' : 'Generate Captions'}
               </>
             )}
@@ -231,20 +313,17 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
             </p>
           )}
 
-          {/* Character Limit Sliders */}
+          {/* Max character per caption shown */}
           {captionList.length > 0 && (
-            <div className="space-y-2 p-2.5 rounded-md border bg-muted/30">
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                English Character Limit
-              </span>
+            <div className="space-y-2 p-2.5 rounded-md border bg-muted/30 min-w-0">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px]">English</Label>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">{enMaxChars} chars</span>
+                  <Label className="text-[10px]">Max character per caption shown</Label>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{maxChars} chars</span>
                 </div>
                 <Slider
-                  value={[enMaxChars]}
-                  onValueChange={([v]) => setEnMaxChars(v)}
+                  value={[maxChars]}
+                  onValueChange={([v]) => setMaxChars(v)}
                   min={10}
                   max={100}
                   step={5}
@@ -261,84 +340,41 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
           {/* Caption List */}
           {captionList.length > 0 && (
             <>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs text-muted-foreground truncate min-w-0">
                   {captionList.length} caption{captionList.length !== 1 ? 's' : ''}
                 </span>
-                <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={addCaption}>
-                  <Plus className="h-2.5 w-2.5 mr-0.5" /> Add
-                </Button>
               </div>
 
               {captionList.map((caption, i) => (
-                <Card key={caption.id}>
-                  <CardHeader className="p-2.5 pb-1.5">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-[10px] text-muted-foreground">
-                        #{i + 1}
-                      </CardTitle>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => deleteCaption(caption.id)}
-                      >
-                        <Trash2 className="h-2.5 w-2.5 text-destructive" />
-                      </Button>
-                    </div>
+                <Card key={caption.id} className="min-w-0 overflow-hidden">
+                  <CardHeader className="p-2.5 pb-1.5 min-w-0">
+                    <CardTitle className="text-[10px] text-muted-foreground">
+                      #{i + 1} · {caption.startTime.toFixed(1)}s – {caption.endTime.toFixed(1)}s
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-2.5 pt-0 space-y-1.5">
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <div className="space-y-0.5">
-                        <Label className="text-[10px]">Start (s)</Label>
-                        <Input
-                          type="number"
-                          value={caption.startTime}
-                          onChange={(e) =>
-                            updateCaption(caption.id, 'startTime', parseFloat(e.target.value) || 0)
-                          }
-                          className="h-6 text-xs"
-                          step="0.1"
-                        />
+                  <CardContent className="p-2.5 pt-0 space-y-1.5 min-w-0">
+                    <p className="text-xs text-foreground break-words min-w-0">{caption.text}</p>
+                    {caption.words && caption.words.length > 0 && (
+                      <div className="flex flex-wrap gap-0.5 min-w-0 overflow-hidden">
+                        {caption.words.map((w, wi) => (
+                          <span
+                            key={wi}
+                            className="inline-block px-1 py-0.5 rounded bg-primary/10 text-[9px] text-primary"
+                            title={`${w.start?.toFixed(2)}s - ${w.end?.toFixed(2)}s`}
+                          >
+                            {w.word}
+                          </span>
+                        ))}
                       </div>
-                      <div className="space-y-0.5">
-                        <Label className="text-[10px]">End (s)</Label>
-                        <Input
-                          type="number"
-                          value={caption.endTime}
-                          onChange={(e) =>
-                            updateCaption(caption.id, 'endTime', parseFloat(e.target.value) || 0)
-                          }
-                          className="h-6 text-xs"
-                          step="0.1"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <Label className="text-[10px]">English</Label>
-                      <Input
-                        value={caption.en}
-                        onChange={(e) => updateCaption(caption.id, 'en', e.target.value)}
-                        className="h-6 text-xs"
-                        placeholder="English text..."
-                      />
-                    </div>
-                    <div className="space-y-0.5">
-                      <Label className="text-[10px]">Japanese</Label>
-                      <Input
-                        value={caption.ja}
-                        onChange={(e) => updateCaption(caption.id, 'ja', e.target.value)}
-                        className="h-6 text-xs"
-                        placeholder="Japanese text..."
-                      />
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
 
               {/* Split Preview */}
               {splitCaptionList.length > captionList.length && (
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <span className="text-xs text-muted-foreground">
                     Split Preview ({splitCaptionList.length} segments)
                   </span>
@@ -347,20 +383,19 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
                     return (
                       <div
                         key={seg.id}
-                        className={`rounded border p-2 text-[10px] space-y-0.5 ${
+                        className={`rounded border p-2 text-[10px] space-y-0.5 min-w-0 overflow-hidden ${
                           isSplit ? 'border-l-2 border-l-primary bg-muted/40' : 'bg-muted/20'
                         }`}
                       >
-                        <div className="flex items-center justify-between text-muted-foreground">
-                          <span>{seg.startTime.toFixed(1)}s - {seg.endTime.toFixed(1)}s</span>
+                        <div className="flex items-center justify-between text-muted-foreground gap-2 min-w-0">
+                          <span className="truncate">{seg.startTime.toFixed(1)}s - {seg.endTime.toFixed(1)}s</span>
                           {isSplit && (
-                            <span className="px-1 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-medium">
+                            <span className="shrink-0 px-1 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-medium">
                               {seg._splitIndex + 1}/{seg._splitTotal}
                             </span>
                           )}
                         </div>
-                        {seg.en && <p className="text-foreground">{seg.en}</p>}
-                        {seg.ja && <p className="text-foreground/80">{seg.ja}</p>}
+                        {seg.text && <p className="text-foreground break-words min-w-0">{seg.text}</p>}
                       </div>
                     )
                   })}
@@ -368,18 +403,219 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
               )}
 
               {/* Timeline Actions */}
-              <div className="space-y-1.5 pt-1 border-t">
-                <Label className="text-xs">Add to Timeline</Label>
-                <Select value={addMode} onValueChange={setAddMode}>
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="both">Both EN + JA</SelectItem>
-                    <SelectItem value="en">English Only</SelectItem>
-                    <SelectItem value="ja">Japanese Only</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3 pt-2 border-t min-w-0">
+                <Label className="text-xs font-semibold">Add to Timeline</Label>
+
+                {/* Text Effect Template */}
+                <div className="space-y-1.5 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Text Effect
+                  </span>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 min-w-0">
+                    <button
+                      className={`shrink-0 flex flex-col items-center rounded border px-2 py-1.5 text-[9px] cursor-pointer transition-colors ${
+                        selectedTemplate === null
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => applyTemplate(null)}
+                    >
+                      <span className="h-6 flex items-center text-[10px] text-foreground">Aa</span>
+                      <span className="text-muted-foreground">Default</span>
+                    </button>
+                    {TEMPLATES.map((tmpl) => (
+                      <button
+                        key={tmpl.id}
+                        className={`shrink-0 flex flex-col items-center rounded border px-2 py-1.5 text-[9px] cursor-pointer transition-colors ${
+                          selectedTemplate === tmpl.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => applyTemplate(tmpl)}
+                        title={tmpl.name}
+                      >
+                        <span
+                          className="h-6 flex items-center truncate max-w-[50px]"
+                          style={{
+                            fontFamily: tmpl.textStyles.fontFamily,
+                            fontWeight: tmpl.textStyles.fontWeight,
+                            fontSize: `${Math.min(tmpl.textStyles.fontSize * 0.15, 11)}px`,
+                            color: tmpl.textStyles.color,
+                            WebkitTextStroke: tmpl.textStyles.strokeWidth
+                              ? `${Math.max(1, tmpl.textStyles.strokeWidth * 0.2)}px ${tmpl.textStyles.strokeColor || '#000'}`
+                              : undefined,
+                          }}
+                        >
+                          {tmpl.previewText.slice(0, 4)}
+                        </span>
+                        <span className="text-muted-foreground truncate max-w-[50px]">{tmpl.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Position */}
+                <div className="space-y-2 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Position
+                  </span>
+
+                  <div className="flex gap-1 min-w-0 flex-wrap">
+                    {['top', 'middle', 'bottom', 'custom'].map((preset) => (
+                      <Button
+                        key={preset}
+                        size="sm"
+                        variant={positionPreset === preset ? 'default' : 'outline'}
+                        className="h-6 text-[10px] min-w-0 flex-1 basis-0 capitalize"
+                        onClick={() => setPositionPreset(preset)}
+                      >
+                        {preset}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {positionPreset === 'custom' && (
+                    <div className="flex items-center gap-2">
+                      <Label className="text-[10px] shrink-0">Custom Y:</Label>
+                      <Input
+                        type="number"
+                        value={customY}
+                        onChange={(e) => setCustomY(parseInt(e.target.value) || 0)}
+                        className="h-6 text-xs w-20"
+                        min={0}
+                        max={1920}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Font */}
+                <div className="space-y-1.5 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Font
+                  </span>
+                  <div className="space-y-1 min-w-0">
+                    <Select value={fontFamily} onValueChange={setFontFamily}>
+                      <SelectTrigger className="h-7 text-xs min-w-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FONT_FAMILIES.map((family) => (
+                          <SelectItem key={family} value={family}>
+                            <span style={{ fontFamily: family }}>{family}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="grid grid-cols-2 gap-1.5 min-w-0">
+                      <div className="space-y-0.5 min-w-0">
+                        <Label className="text-[10px]">Size</Label>
+                        <Input
+                          type="number"
+                          value={fontSize}
+                          onChange={(e) => setFontSize(parseInt(e.target.value) || 12)}
+                          className="h-6 text-xs min-w-0"
+                          min={8}
+                          max={200}
+                        />
+                      </div>
+                      <div className="space-y-0.5 min-w-0">
+                        <Label className="text-[10px]">Weight</Label>
+                        <Select value={String(fontWeight)} onValueChange={(v) => setFontWeight(parseInt(v))}>
+                          <SelectTrigger className="h-6 text-[10px] min-w-0">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {WEIGHT_OPTIONS.map((w) => (
+                              <SelectItem key={w.value} value={String(w.value)}>{w.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Alignment */}
+                <div className="space-y-1.5 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Alignment
+                  </span>
+                  <div className="flex gap-1 min-w-0">
+                    {[
+                      { value: 'left', icon: AlignLeft },
+                      { value: 'center', icon: AlignCenter },
+                      { value: 'right', icon: AlignRight },
+                    ].map(({ value, icon: Icon }) => (
+                      <Button
+                        key={value}
+                        size="sm"
+                        variant={textAlign === value ? 'default' : 'outline'}
+                        className="h-7 flex-1"
+                        onClick={() => setTextAlign(value)}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Colors & Effects */}
+                <div className="space-y-2 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Colors & Effects
+                  </span>
+
+                  <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1.5 items-center min-w-0">
+                    <Label className="text-[10px]">Color</Label>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <input
+                        type="color"
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="w-6 h-6 rounded border border-border cursor-pointer bg-transparent shrink-0"
+                      />
+                      <Input
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="h-6 text-[10px] font-mono min-w-0 flex-1"
+                      />
+                    </div>
+
+                    <Label className="text-[10px]">BG</Label>
+                    <Input
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="h-6 text-[10px] font-mono min-w-0"
+                      placeholder="rgba(0,0,0,0.6)"
+                    />
+                  </div>
+
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center justify-between min-w-0">
+                      <Label className="text-[10px]">Stroke</Label>
+                      <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">{strokeWidth} px</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Slider
+                        value={[strokeWidth]}
+                        onValueChange={([v]) => setStrokeWidth(v)}
+                        min={0}
+                        max={10}
+                        step={1}
+                        className="flex-1"
+                      />
+                      <input
+                        type="color"
+                        value={strokeColor}
+                        onChange={(e) => setStrokeColor(e.target.value)}
+                        className="w-6 h-6 rounded border border-border cursor-pointer bg-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add Button */}
                 <Button
                   size="sm"
                   className="w-full h-8 text-xs"
@@ -395,10 +631,10 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
           {captionList.length === 0 && !isGenerating && (
             <Card>
               <CardContent className="p-6 text-center">
-                <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <Mic className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-medium">No captions</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Select a video and generate bilingual captions
+                  Select a video and generate captions
                 </p>
               </CardContent>
             </Card>

@@ -96,7 +96,7 @@ const getClipSource = (path) => {
   const trimmed = String(path).trim();
   if (!trimmed) return undefined;
   if (trimmed.startsWith('asset://')) return resolveAssetUrl(trimmed);
-  if (/^(https?:|blob:|data:|\/api\/|\/project-assets\/)/i.test(trimmed)) return trimmed;
+  if (/^(blob:|data:|\/api\/|\/project-assets\/)/i.test(trimmed)) return trimmed;
   return trimmed;
 };
 
@@ -112,7 +112,7 @@ const hexToNormalizedRgb = (input) => {
   return [r / 255, g / 255, b / 255].map((v) => Math.min(Math.max(Number.isFinite(v) ? v : 0, 0), 1));
 };
 
-const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily }) => {
+const ActiveClipMedia = memo(({ clip, width, height, getFontFamily }) => {
   const { fps: compositionFps } = useVideoConfig();
   const frame = useCurrentFrame();
   const [imageIntrinsicSize, setImageIntrinsicSize] = useState(() => deriveClipIntrinsicSize(clip));
@@ -264,11 +264,6 @@ const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily })
     if (centerText) { textLeft = (baseLeft ?? width / 2) + dragOffsetX; textTop = (baseTop ?? height / 2) + dragOffsetY; }
     else { textLeft = clamp((baseLeft ?? (width - measuredWidth) / 2) + dragOffsetX, 0, Math.max(width - measuredWidth, 0)); textTop = clamp((baseTop ?? height - measuredHeight - 40) + dragOffsetY, 0, Math.max(height - measuredHeight, 0)); }
 
-    clip.width = measuredWidth;
-    clip.height = measuredHeight;
-    clip.absoluteX = centerText ? textLeft - measuredWidth / 2 : textLeft;
-    clip.absoluteY = centerText ? textTop - measuredHeight / 2 : textTop;
-
     const clipScale = parseNumeric(clip.scale);
     const clipRotation = parseNumeric(clip.rotation);
     const transforms = [];
@@ -307,9 +302,6 @@ const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily })
     let positioningWidth = parsedWidth && parsedWidth > 0 ? parsedWidth : Math.max(Math.min(textValue.length * fontSize * 0.6, width * 0.8), 200);
     let positioningHeight = parsedHeight && parsedHeight > 0 ? parsedHeight : fontSize * lineHeightVal + padding * 2;
 
-    clip.width = positioningWidth;
-    clip.height = positioningHeight;
-
     const parsedLeft = parseNumeric(styles.left);
     const parsedTop = parseNumeric(styles.top);
     const centerText = styles.centerText === true;
@@ -326,9 +318,6 @@ const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily })
       textTop = clamp((parsedTop ?? height - positioningHeight - 40) + dragOffsetY, 0, Math.max(height - positioningHeight, 0));
       transformStyle = 'none';
     }
-
-    if (centerText) { clip.absoluteX = textLeft - positioningWidth / 2; clip.absoluteY = textTop - positioningHeight / 2; }
-    else { clip.absoluteX = textLeft; clip.absoluteY = textTop; }
 
     return (
       <div style={{ position: 'absolute', left: textLeft, top: textTop, transform: transformStyle, width: parsedWidth && parsedWidth > 0 ? `${parsedWidth}px` : 'auto', minWidth: parsedWidth && parsedWidth > 0 ? `${parsedWidth}px` : 'max-content', height: parsedHeight && parsedHeight > 0 ? `${parsedHeight}px` : 'auto', display: 'flex', alignItems: 'center', justifyContent: textAlign === 'left' ? 'flex-start' : textAlign === 'right' ? 'flex-end' : 'center', padding: `${padding}px`, backgroundColor: styles.backgroundColor || 'transparent', borderRadius: `${borderRadius}px`, border: borderWidth ? `${borderWidth}px solid ${styles.borderColor || '#000'}` : 'none', opacity, boxShadow: shadowX || shadowY ? `${shadowX}px ${shadowY}px ${shadowBlur}px ${styles.shadowColor || '#000'}` : 'none', zIndex: 30, pointerEvents: 'none', whiteSpace: 'nowrap', overflow: 'visible' }}>
@@ -431,7 +420,34 @@ const ActiveClipMedia = memo(({ clip, width, height, isPlaying, getFontFamily })
   return <div style={containerStyle}>{styledVideoElement}</div>;
 });
 
-const calculateTextClipBounds = (clip, width, height) => {
+export const calculateTextClipBounds = (clip, width, height) => {
+  if (clip.type === 'animated-text') {
+    const textStyles = clip.textStyles || {};
+    const fontSize = parseNumeric(textStyles.fontSize) ?? 48;
+    const lineHeight = parseNumeric(textStyles.lineHeight) || 1.1;
+    const letterSpacing = parseNumeric(textStyles.letterSpacing) ?? 0;
+    const padding = parseNumeric(textStyles.backgroundPadding) ?? 0;
+    const centerText = textStyles.centerText === true;
+    const textContent = (clip.textContent || clip.name || 'Animated Text').toString();
+    const maxWidth = parseNumeric(textStyles.maxWidth);
+
+    const explicitWidth = parseNumeric(textStyles.width);
+    const explicitHeight = parseNumeric(textStyles.height);
+    const dragOffsetX = parseNumeric(clip.x) ?? 0;
+    const dragOffsetY = parseNumeric(clip.y) ?? 0;
+    const baseLeft = parseNumeric(textStyles.left);
+    const baseTop = parseNumeric(textStyles.top);
+
+    let measuredWidth = explicitWidth && explicitWidth > 0 ? explicitWidth : maxWidth && maxWidth > 0 ? maxWidth : Math.max(textContent.length * fontSize * 0.6 + Math.max(textContent.length - 1, 0) * letterSpacing + padding * 2, fontSize);
+    let measuredHeight = explicitHeight && explicitHeight > 0 ? explicitHeight : maxWidth && maxWidth > 0 ? fontSize * lineHeight * Math.max(1, Math.ceil(textContent.length / Math.floor(maxWidth / (fontSize * 0.6)))) + padding * 2 : fontSize * lineHeight + padding * 2;
+
+    let textLeft, textTop;
+    if (centerText) { textLeft = (baseLeft ?? width / 2) + dragOffsetX; textTop = (baseTop ?? height / 2) + dragOffsetY; }
+    else { textLeft = clamp((baseLeft ?? (width - measuredWidth) / 2) + dragOffsetX, 0, Math.max(width - measuredWidth, 0)); textTop = clamp((baseTop ?? height - measuredHeight - 40) + dragOffsetY, 0, Math.max(height - measuredHeight, 0)); }
+
+    return { width: measuredWidth, height: measuredHeight, absoluteX: centerText ? textLeft - measuredWidth / 2 : textLeft, absoluteY: centerText ? textTop - measuredHeight / 2 : textTop };
+  }
+
   const styles = clip.textStyles || {};
   const textValue = (clip.textContent || clip.name || 'Text').toString().replace(/\s+/g, ' ').trim();
   const parsedWidth = parseNumeric(styles.width);
@@ -456,7 +472,7 @@ const calculateTextClipBounds = (clip, width, height) => {
   return { width: positioningWidth, height: positioningHeight, absoluteX: centerText ? textLeft - positioningWidth / 2 : textLeft, absoluteY: centerText ? textTop - positioningHeight / 2 : textTop };
 };
 
-export const TimelineComposition = ({ tracks = [], fallbackTitle, playerTotalFrames, isPlaying }) => {
+export const TimelineComposition = ({ tracks = [], fallbackTitle, playerTotalFrames }) => {
   const frame = useCurrentFrame();
   const { width: compWidth, height: compHeight, fps: compFps } = useVideoConfig();
   const { getFontFamily, isLoading } = useFonts();
@@ -477,13 +493,13 @@ export const TimelineComposition = ({ tracks = [], fallbackTitle, playerTotalFra
         return (
           <Sequence key={`track-${trackIndex}-clip-${clipIndex}-${clip.id}`} layout="none" from={from} durationInFrames={durationInFrames}>
             <AbsoluteFill style={{ zIndex: layerZ }}>
-              <ActiveClipMedia clip={clip} width={compWidth} height={compHeight} isPlaying={isPlaying} getFontFamily={getFontFamily} />
+              <ActiveClipMedia clip={clip} width={compWidth} height={compHeight} getFontFamily={getFontFamily} />
             </AbsoluteFill>
           </Sequence>
         );
       }).filter(Boolean);
     });
-  }, [tracks, compFps, compWidth, compHeight, getFontFamily, isPlaying]);
+  }, [tracks, compFps, compWidth, compHeight, getFontFamily]);
 
   if (isLoading) {
     return <div style={{ flex: 1, textAlign: 'center', fontSize: 24, color: 'white', backgroundColor: '#000', width: compWidth, height: compHeight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><h1>Loading fonts...</h1></div>;
@@ -603,10 +619,10 @@ const RemotionPlayer = React.forwardRef(({
     for (const track of tracks) {
       const clip = (track.clips || []).find((c) => c.id === selectedClipId);
       if (clip) {
-        const isTextClip = clip.type === 'text' || clip.mimeType === 'text/plain' || (typeof clip.type === 'string' && clip.type.startsWith('text/'));
-        if (isTextClip && (!clip.width || !clip.height || clip.absoluteX === undefined)) {
+        const isText = clip.type === 'text' || clip.type === 'animated-text' || clip.mimeType === 'text/plain' || (typeof clip.type === 'string' && clip.type.startsWith('text/'));
+        if (isText) {
           const bounds = calculateTextClipBounds(clip, width, height);
-          clip.width = bounds.width; clip.height = bounds.height; clip.absoluteX = bounds.absoluteX; clip.absoluteY = bounds.absoluteY;
+          return { ...clip, ...bounds };
         }
         return clip;
       }
@@ -630,7 +646,7 @@ const RemotionPlayer = React.forwardRef(({
             fps={playerFps}
             compositionWidth={stableDimensions.width}
             compositionHeight={stableDimensions.height}
-            inputProps={{ tracks, fallbackTitle: project?.name || 'Untitled Project', playerTotalFrames, isPlaying }}
+            inputProps={{ tracks, fallbackTitle: project?.name || 'Untitled Project', playerTotalFrames }}
             style={{ width: '100%', height: '100%' }}
             controls={false}
             loop={false}

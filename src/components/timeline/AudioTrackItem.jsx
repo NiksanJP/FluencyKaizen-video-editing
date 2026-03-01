@@ -4,7 +4,7 @@ import BaseTrackItem from './BaseTrackItem';
 
 const DEFAULT_CLIP_COLOR = 'hsl(240, 3.7%, 15.9%)';
 
-const AudioTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
+const AudioTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
   const baseColor = clip.color || DEFAULT_CLIP_COLOR;
 
   return (
@@ -28,6 +28,6 @@ const AudioTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) 
       </div>
     </BaseTrackItem>
   );
-};
+});
 
 export default AudioTrackItem;

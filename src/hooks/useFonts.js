@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { FONTS, DEFAULT_FONT } from '@/data/fonts';
 
 import { loadFont as loadInter } from '@remotion/google-fonts/Inter';
@@ -66,24 +66,22 @@ export const useFonts = () => {
   const [loadedFonts, setLoadedFonts] = useState(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const loadingRef = useRef(new Set());
 
+  // Only load Inter on startup; other fonts loaded on demand
   useEffect(() => {
     try {
       setIsLoading(true);
-      const uniqueFamilies = getUniqueFontFamilies();
       const fontMap = new Map();
-
-      uniqueFamilies.forEach((family) => {
+      const interLoader = FONT_LOADERS['Inter'];
+      if (interLoader) {
         try {
-          const loader = FONT_LOADERS[family];
-          if (!loader) return;
-          const { fontFamily } = loader();
-          fontMap.set(family, { fontFamily });
+          const { fontFamily } = interLoader();
+          fontMap.set('Inter', { fontFamily });
         } catch (fontError) {
-          console.error(`Failed to load font ${family}:`, fontError);
+          console.error('Failed to load font Inter:', fontError);
         }
-      });
-
+      }
       setLoadedFonts(fontMap);
       setError(null);
     } catch (err) {
@@ -94,20 +92,38 @@ export const useFonts = () => {
     }
   }, []);
 
-  const getFontFamily = (familyName) => {
+  const getFontFamily = useCallback((familyName) => {
     const fontData = loadedFonts.get(familyName);
-    return fontData?.fontFamily || familyName || DEFAULT_FONT.family;
-  };
+    if (fontData) return fontData.fontFamily;
 
-  const getAvailableFonts = () => {
+    // Trigger lazy load if not yet loaded and a loader exists
+    const loader = FONT_LOADERS[familyName];
+    if (loader && !loadingRef.current.has(familyName)) {
+      loadingRef.current.add(familyName);
+      try {
+        const { fontFamily } = loader();
+        setLoadedFonts((prev) => {
+          const next = new Map(prev);
+          next.set(familyName, { fontFamily });
+          return next;
+        });
+      } catch (fontError) {
+        console.error(`Failed to load font ${familyName}:`, fontError);
+      }
+    }
+
+    return familyName || DEFAULT_FONT.family;
+  }, [loadedFonts]);
+
+  const getAvailableFonts = useCallback(() => {
     return FONTS.map(font => ({
       ...font,
       fontFamily: getFontFamily(font.family),
       isLoaded: loadedFonts.has(font.family),
     }));
-  };
+  }, [getFontFamily, loadedFonts]);
 
-  const getFontWeights = (familyName) => {
+  const getFontWeights = useCallback((familyName) => {
     return FONTS
       .filter(font => font.family === familyName)
       .map(font => ({
@@ -116,7 +132,7 @@ export const useFonts = () => {
         fullName: font.fullName,
         postScriptName: font.postScriptName,
       }));
-  };
+  }, []);
 
   return {
     loadedFonts,

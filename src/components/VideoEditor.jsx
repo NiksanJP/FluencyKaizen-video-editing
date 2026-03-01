@@ -108,8 +108,11 @@ export default function VideoEditor({ onBack }) {
   )
 
   // All timeline clips flattened
-  const timelineClips = tracks.flatMap((track) =>
-    (track.clips || []).map((clip) => ({ ...clip, trackId: track.id }))
+  const timelineClips = useMemo(() =>
+    tracks.flatMap((track) =>
+      (track.clips || []).map((clip) => ({ ...clip, trackId: track.id }))
+    ),
+    [tracks]
   )
 
   const selectedClip = timelineClips.find((c) => c.id === selectedClipId) || null
@@ -142,21 +145,36 @@ export default function VideoEditor({ onBack }) {
   }, [])
 
   const handlePlayPause = useCallback(() => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pause()
-      } else {
-        playerRef.current.play()
+    setIsPlaying((prev) => {
+      if (playerRef.current) {
+        if (prev) {
+          playerRef.current.pause()
+        } else {
+          playerRef.current.play()
+        }
       }
-    }
-    setIsPlaying((prev) => !prev)
-  }, [isPlaying])
+      return !prev
+    })
+  }, [])
+
+  // Refs for keyboard handler stabilization
+  const currentFrameRef = useRef(currentFrame)
+  useEffect(() => { currentFrameRef.current = currentFrame }, [currentFrame])
+
+  const selectedClipIdsRef = useRef(selectedClipIds)
+  useEffect(() => { selectedClipIdsRef.current = selectedClipIds }, [selectedClipIds])
+
+  const selectedClipRef = useRef(selectedClip)
+  useEffect(() => { selectedClipRef.current = selectedClip }, [selectedClip])
+
+  const selectedClipIdRef = useRef(selectedClipId)
+  useEffect(() => { selectedClipIdRef.current = selectedClipId }, [selectedClipId])
 
   // Skip forward/backward by N seconds
   const handleSkip = useCallback((seconds) => {
-    const newFrame = Math.max(0, Math.min(currentFrame + Math.round(seconds * fps), totalFrames - 1))
+    const newFrame = Math.max(0, Math.min(currentFrameRef.current + Math.round(seconds * fps), totalFrames - 1))
     handleSeek(newFrame)
-  }, [currentFrame, fps, totalFrames, handleSeek])
+  }, [fps, totalFrames, handleSeek])
 
   const handleAddTrack = useCallback((type = 'video') => {
     const newTrack = {
@@ -314,11 +332,15 @@ export default function VideoEditor({ onBack }) {
     toast.success(`Added ${asset.name} to timeline`)
   }, [tracks, fps, probeMediaDimensions])
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts — uses refs so handler is registered once
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't intercept if user is typing in an input
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
+
+      const clipIds = selectedClipIdsRef.current
+      const clipId = selectedClipIdRef.current
+      const clip = selectedClipRef.current
 
       switch (e.key) {
         case ' ':
@@ -327,9 +349,9 @@ export default function VideoEditor({ onBack }) {
           break
         case 'Delete':
         case 'Backspace':
-          if (selectedClipIds.length > 0) {
+          if (clipIds.length > 0) {
             e.preventDefault()
-            selectedClipIds.forEach((id) => handleClipDelete(id))
+            clipIds.forEach((id) => handleClipDelete(id))
           }
           break
         case 'Escape':
@@ -337,10 +359,9 @@ export default function VideoEditor({ onBack }) {
           break
         case 'ArrowLeft':
           e.preventDefault()
-          if (selectedClipId) {
-            // Nudge selected clip left
-            handleClipUpdate(selectedClipId, {
-              x: (selectedClip?.x || 0) - (e.shiftKey ? 10 : 1),
+          if (clipId) {
+            handleClipUpdate(clipId, {
+              x: (clip?.x || 0) - (e.shiftKey ? 10 : 1),
             })
           } else {
             handleSkip(e.shiftKey ? -5 : -1)
@@ -348,9 +369,9 @@ export default function VideoEditor({ onBack }) {
           break
         case 'ArrowRight':
           e.preventDefault()
-          if (selectedClipId) {
-            handleClipUpdate(selectedClipId, {
-              x: (selectedClip?.x || 0) + (e.shiftKey ? 10 : 1),
+          if (clipId) {
+            handleClipUpdate(clipId, {
+              x: (clip?.x || 0) + (e.shiftKey ? 10 : 1),
             })
           } else {
             handleSkip(e.shiftKey ? 5 : 1)
@@ -358,17 +379,17 @@ export default function VideoEditor({ onBack }) {
           break
         case 'ArrowUp':
           e.preventDefault()
-          if (selectedClipId) {
-            handleClipUpdate(selectedClipId, {
-              y: (selectedClip?.y || 0) - (e.shiftKey ? 10 : 1),
+          if (clipId) {
+            handleClipUpdate(clipId, {
+              y: (clip?.y || 0) - (e.shiftKey ? 10 : 1),
             })
           }
           break
         case 'ArrowDown':
           e.preventDefault()
-          if (selectedClipId) {
-            handleClipUpdate(selectedClipId, {
-              y: (selectedClip?.y || 0) + (e.shiftKey ? 10 : 1),
+          if (clipId) {
+            handleClipUpdate(clipId, {
+              y: (clip?.y || 0) + (e.shiftKey ? 10 : 1),
             })
           }
           break
@@ -377,7 +398,7 @@ export default function VideoEditor({ onBack }) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handlePlayPause, handleSkip, selectedClipIds, selectedClipId, selectedClip, handleClipUpdate, handleClipDelete])
+  }, [handlePlayPause, handleSkip, handleClipUpdate, handleClipDelete])
 
   const handleToggleTerminal = useCallback(() => {
     const panel = terminalPanelRef.current
@@ -436,7 +457,7 @@ export default function VideoEditor({ onBack }) {
           <ResizablePanelGroup direction="horizontal" className="flex-1">
             {/* Left panel - sidebar content */}
             <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
-              <div className="h-full overflow-y-auto border-r">
+              <div className="h-full border-r min-w-0 flex flex-col">
                 {renderPanel()}
               </div>
             </ResizablePanel>

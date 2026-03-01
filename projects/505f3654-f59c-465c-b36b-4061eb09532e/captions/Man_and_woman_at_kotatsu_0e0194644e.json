@@ -1,113 +1,244 @@
 {
   "videoFile": "Man_and_woman_at_kotatsu_0e0194644e.mp4",
-  "hookTitle": {
-    "ja": "挨拶英語",
-    "en": "Learn Basic Greetings"
-  },
-  "clip": {
-    "startTime": 0,
-    "endTime": 30
-  },
-  "subtitles": [
+  "segments": [
     {
+      "text": "こんにちは、まさですね",
       "startTime": 0,
-      "endTime": 0.3,
-      "en": "Hello.",
-      "ja": "こんにちは",
-      "highlights": [
-        "こんにちは"
+      "endTime": 1.2,
+      "words": [
+        {
+          "word": "こんにちは、",
+          "start": 0,
+          "end": 0.42
+        },
+        {
+          "word": "ま",
+          "start": 0.66,
+          "end": 0.7
+        },
+        {
+          "word": "さ",
+          "start": 0.7,
+          "end": 0.78
+        },
+        {
+          "word": "ですね",
+          "start": 0.78,
+          "end": 1.2
+        }
       ]
     },
     {
-      "startTime": 0.66,
-      "endTime": 1.08,
-      "en": "It's Masa, right?",
-      "ja": "まさですね",
-      "highlights": [
-        "まさ"
-      ]
-    },
-    {
+      "text": "チョリーズです",
       "startTime": 1.2,
-      "endTime": 2.14,
-      "en": "It's Chorizo.",
-      "ja": "チョリーズです",
-      "highlights": [
-        "チョリーズ"
+      "endTime": 2.22,
+      "words": [
+        {
+          "word": "チ",
+          "start": 1.2,
+          "end": 1.6
+        },
+        {
+          "word": "ョ",
+          "start": 1.6,
+          "end": 1.62
+        },
+        {
+          "word": "リ",
+          "start": 1.62,
+          "end": 1.7
+        },
+        {
+          "word": "ー",
+          "start": 1.7,
+          "end": 1.78
+        },
+        {
+          "word": "ズ",
+          "start": 1.78,
+          "end": 1.84
+        },
+        {
+          "word": "です",
+          "start": 1.84,
+          "end": 2.22
+        }
       ]
     },
     {
+      "text": "リナだよね",
       "startTime": 2.22,
-      "endTime": 3,
-      "en": "It's Rina, isn't it?",
-      "ja": "リナだよね",
-      "highlights": [
-        "リナ"
+      "endTime": 2.86,
+      "words": [
+        {
+          "word": "リ",
+          "start": 2.22,
+          "end": 2.46
+        },
+        {
+          "word": "ナ",
+          "start": 2.46,
+          "end": 2.58
+        },
+        {
+          "word": "だ",
+          "start": 2.58,
+          "end": 2.7
+        },
+        {
+          "word": "よね",
+          "start": 2.7,
+          "end": 2.86
+        }
       ]
     },
     {
+      "text": "リラックスしてまたみましょう",
       "startTime": 2.86,
       "endTime": 4.26,
-      "en": "Relax, see you again.",
-      "ja": "リラックスしてまたみましょう",
-      "highlights": [
-        "リラックス",
-        "またみましょう"
+      "words": [
+        {
+          "word": "リ",
+          "start": 2.86,
+          "end": 3.16
+        },
+        {
+          "word": "ラ",
+          "start": 3.16,
+          "end": 3.28
+        },
+        {
+          "word": "ック",
+          "start": 3.28,
+          "end": 3.4
+        },
+        {
+          "word": "ス",
+          "start": 3.4,
+          "end": 3.52
+        },
+        {
+          "word": "して",
+          "start": 3.52,
+          "end": 3.66
+        },
+        {
+          "word": "また",
+          "start": 3.66,
+          "end": 3.86
+        },
+        {
+          "word": "み",
+          "start": 3.86,
+          "end": 3.96
+        },
+        {
+          "word": "ましょう",
+          "start": 3.96,
+          "end": 4.26
+        }
       ]
     },
     {
+      "text": "スカイルエゴさん教えるよね",
       "startTime": 4.26,
-      "endTime": 5.98,
-      "en": "Skyllego-san teaches,",
-      "ja": "スカイルエゴさん教えるよね",
-      "highlights": [
-        "スカイルエゴ",
-        "教える"
+      "endTime": 5.96,
+      "words": [
+        {
+          "word": "ス",
+          "start": 4.26,
+          "end": 4.56
+        },
+        {
+          "word": "カ",
+          "start": 4.56,
+          "end": 4.66
+        },
+        {
+          "word": "イ",
+          "start": 4.66,
+          "end": 4.74
+        },
+        {
+          "word": "ル",
+          "start": 4.74,
+          "end": 4.82
+        },
+        {
+          "word": "エ",
+          "start": 4.82,
+          "end": 4.96
+        },
+        {
+          "word": "ゴ",
+          "start": 4.96,
+          "end": 5.02
+        },
+        {
+          "word": "さん",
+          "start": 5.02,
+          "end": 5.2
+        },
+        {
+          "word": "教",
+          "start": 5.2,
+          "end": 5.46
+        },
+        {
+          "word": "える",
+          "start": 5.46,
+          "end": 5.68
+        },
+        {
+          "word": "よね",
+          "start": 5.68,
+          "end": 5.96
+        }
       ]
     },
     {
+      "text": "セレです",
       "startTime": 5.96,
-      "endTime": 6.72,
-      "en": "It's Cere.",
-      "ja": "セレです",
-      "highlights": [
-        "セレ"
+      "endTime": 6.8,
+      "words": [
+        {
+          "word": "セ",
+          "start": 5.96,
+          "end": 6.36
+        },
+        {
+          "word": "レ",
+          "start": 6.36,
+          "end": 6.42
+        },
+        {
+          "word": "です",
+          "start": 6.42,
+          "end": 6.8
+        }
       ]
     },
     {
+      "text": "バイビー",
       "startTime": 6.8,
-      "endTime": 7.66,
-      "en": "Bye-bye!",
-      "ja": "バイビー",
-      "highlights": [
-        "バイビー"
+      "endTime": 7.74,
+      "words": [
+        {
+          "word": "バイ",
+          "start": 6.8,
+          "end": 7.18
+        },
+        {
+          "word": "ビ",
+          "start": 7.18,
+          "end": 7.36
+        },
+        {
+          "word": "ー",
+          "start": 7.36,
+          "end": 7.74
+        }
       ]
-    }
-  ],
-  "vocabCards": [
-    {
-      "triggerTime": 0,
-      "duration": 3.5,
-      "category": "ビジネス英語",
-      "phrase": "Good to see you",
-      "literal": "お会いできて嬉しいです",
-      "nuance": "対面での再会や初対面時に使う丁寧な挨拶。ビジネスシーンでも頻繁に使われる。"
-    },
-    {
-      "triggerTime": 2.86,
-      "duration": 3.5,
-      "category": "ビジネス英語",
-      "phrase": "Keep in touch",
-      "literal": "連絡を取り合いましょう",
-      "nuance": "今後も関係を継続したい意向を示すフレーズ。会議の後やプロジェクト終了時に使える。"
-    },
-    {
-      "triggerTime": 6.8,
-      "duration": 3.5,
-      "category": "ビジネス英語",
-      "phrase": "Have a good one",
-      "literal": "良い一日を",
-      "nuance": "「Have a good day/weekend/meeting」などの総称で、様々な別れの挨拶に使えるカジュアルだがビジネスでもOKな表現。"
     }
   ]
 }

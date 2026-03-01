@@ -49,9 +49,16 @@ export default function UploadsPanel({ onAddToTimeline }) {
     return assets.filter((a) => a.name.toLowerCase().includes(q))
   }, [assets, searchQuery])
 
-  const videos = filteredAssets.filter((a) => /\.(mp4|mov|webm|avi)$/i.test(a.name))
-  const images = filteredAssets.filter((a) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(a.name))
-  const audios = filteredAssets.filter((a) => /\.(mp3|wav|ogg|m4a|aac)$/i.test(a.name))
+  const { videos, images, audios } = useMemo(() => {
+    const v = [], i = [], a = []
+    for (const asset of filteredAssets) {
+      const name = asset.name
+      if (/\.(mp4|mov|webm|avi)$/i.test(name)) v.push(asset)
+      else if (/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name)) i.push(asset)
+      else if (/\.(mp3|wav|ogg|m4a|aac)$/i.test(name)) a.push(asset)
+    }
+    return { videos: v, images: i, audios: a }
+  }, [filteredAssets])
 
   const getTypeIcon = (name) => {
     if (/\.(mp4|mov|webm|avi)$/i.test(name)) return Video

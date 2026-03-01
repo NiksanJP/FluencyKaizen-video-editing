@@ -3,7 +3,7 @@ import { useItem } from 'dnd-timeline';
 import { cn } from '@/lib/utils';
 import { MIN_CLIP_DURATION } from '@/utils/timelineUtils';
 
-const BaseTrackItem = ({
+const BaseTrackItem = React.memo(({
   clip,
   trackId,
   onSelect,
@@ -74,6 +74,6 @@ const BaseTrackItem = ({
       </div>
     </div>
   );
-};
+});
 
 export default BaseTrackItem;

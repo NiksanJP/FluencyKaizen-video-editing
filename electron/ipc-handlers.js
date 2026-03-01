@@ -223,10 +223,10 @@ function registerCaptionHandlers() {
 
       if (aborted) return { error: 'Aborted' }
 
-      sendProgress({ type: 'progress', stage: 'extracting', percent: 25, message: 'Audio extracted' })
+      sendProgress({ type: 'progress', stage: 'extracting', percent: 30, message: 'Audio extracted' })
 
       // Stage 2: Transcribe with Whisper
-      sendProgress({ type: 'progress', stage: 'transcribing', percent: 30, message: 'Transcribing with Whisper...' })
+      sendProgress({ type: 'progress', stage: 'transcribing', percent: 35, message: 'Transcribing with Whisper...' })
 
       await new Promise((resolve, reject) => {
         const proc = spawn('python3', [
@@ -242,7 +242,7 @@ function registerCaptionHandlers() {
         proc.stderr.on('data', (chunk) => {
           stderr += chunk.toString()
           if (stderr.includes('%|')) {
-            sendProgress({ type: 'progress', stage: 'transcribing', percent: 40, message: 'Whisper processing...' })
+            sendProgress({ type: 'progress', stage: 'transcribing', percent: 55, message: 'Whisper processing...' })
           }
         })
         proc.on('close', (code) => {
@@ -255,7 +255,7 @@ function registerCaptionHandlers() {
 
       if (aborted) return { error: 'Aborted' }
 
-      sendProgress({ type: 'progress', stage: 'transcribing', percent: 55, message: 'Transcription complete' })
+      sendProgress({ type: 'progress', stage: 'transcribing', percent: 80, message: 'Transcription complete' })
 
       // Read Whisper output
       let transcript
@@ -271,28 +271,38 @@ function registerCaptionHandlers() {
         }
       }
 
-      // Stage 3: Analyze with Gemini
-      sendProgress({ type: 'progress', stage: 'analyzing', percent: 60, message: 'Analyzing with Gemini...' })
-
-      // Dynamic import to keep analyze.js as-is
-      const { analyzeWithGemini } = await import('../server/lib/analyze.js')
-      const clipData = await analyzeWithGemini(transcript, assetName, { backfillTranscript: transcript })
-
       if (aborted) return { error: 'Aborted' }
 
-      sendProgress({ type: 'progress', stage: 'analyzing', percent: 90, message: 'Analysis complete' })
+      // Transform Whisper output to caption data with word-level timestamps
+      const segments = (transcript.segments || []).map((seg) => ({
+        text: (seg.text || '').trim(),
+        startTime: seg.start,
+        endTime: seg.end,
+        words: (seg.words || []).map((w) => ({
+          word: (w.word || w.text || '').trim(),
+          start: w.start,
+          end: w.end,
+        })),
+      }))
+
+      const captionData = {
+        videoFile: assetName,
+        segments,
+      }
+
+      sendProgress({ type: 'progress', stage: 'transcribing', percent: 90, message: 'Saving captions...' })
 
       // Cache
       try {
         const cachePath = captionCachePath(projectDir, assetName)
         await fs.mkdir(path.dirname(cachePath), { recursive: true })
-        await fs.writeFile(cachePath, JSON.stringify(clipData, null, 2))
+        await fs.writeFile(cachePath, JSON.stringify(captionData, null, 2))
       } catch (cacheErr) {
         console.warn('Failed to cache captions:', cacheErr.message)
       }
 
-      sendProgress({ type: 'complete', data: clipData })
-      return clipData
+      sendProgress({ type: 'complete', data: captionData })
+      return captionData
     } catch (error) {
       if (!aborted) {
         console.error('Caption generation error:', error)

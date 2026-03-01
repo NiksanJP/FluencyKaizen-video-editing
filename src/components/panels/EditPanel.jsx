@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,6 +21,14 @@ import {
 
 export default function EditPanel({ selectedClip, onClipUpdate }) {
   const [aspectLocked, setAspectLocked] = useState(true)
+  const sliderTimerRef = useRef(null)
+  const debouncedUpdate = useCallback((updates) => {
+    if (!selectedClip) return
+    clearTimeout(sliderTimerRef.current)
+    sliderTimerRef.current = setTimeout(() => {
+      onClipUpdate(selectedClip.id, updates)
+    }, 50)
+  }, [onClipUpdate, selectedClip?.id])
 
   if (!selectedClip) {
     return (
@@ -121,7 +129,7 @@ export default function EditPanel({ selectedClip, onClipUpdate }) {
             </div>
             <Slider
               value={[selectedClip.rotation || 0]}
-              onValueChange={([v]) => update({ rotation: v })}
+              onValueChange={([v]) => debouncedUpdate({ rotation: v })}
               min={0}
               max={360}
               step={1}
@@ -136,7 +144,7 @@ export default function EditPanel({ selectedClip, onClipUpdate }) {
             </div>
             <Slider
               value={[selectedClip.opacity ?? 100]}
-              onValueChange={([v]) => update({ opacity: v })}
+              onValueChange={([v]) => debouncedUpdate({ opacity: v })}
               min={0}
               max={100}
               step={1}
@@ -152,7 +160,7 @@ export default function EditPanel({ selectedClip, onClipUpdate }) {
               </div>
               <Slider
                 value={[selectedClip.playbackRate || 1]}
-                onValueChange={([v]) => update({ playbackRate: v })}
+                onValueChange={([v]) => debouncedUpdate({ playbackRate: v })}
                 min={0.25}
                 max={4}
                 step={0.25}
@@ -169,7 +177,7 @@ export default function EditPanel({ selectedClip, onClipUpdate }) {
               </div>
               <Slider
                 value={[(selectedClip.volume ?? 1) * 100]}
-                onValueChange={([v]) => update({ volume: v / 100 })}
+                onValueChange={([v]) => debouncedUpdate({ volume: v / 100 })}
                 min={0}
                 max={100}
                 step={1}

@@ -11,6 +11,10 @@ const rootDir = path.join(__dirname, '..')
 // Load .env from project root
 dotenv.config({ path: path.join(rootDir, '.env') })
 
+// Suppress harmless Chromium warnings
+app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
+
 let mainWindow
 
 // Register custom protocol for serving asset files directly from disk
@@ -37,11 +41,11 @@ function createWindow() {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval' asset: blob: data: http://localhost:* https://fonts.googleapis.com https://fonts.gstatic.com; " +
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval' asset: blob: data: http://localhost:*; " +
           "media-src 'self' asset: blob: data: http://localhost:*; " +
-          "img-src 'self' asset: blob: data: http://localhost:* https:; " +
-          "font-src 'self' data: https://fonts.gstatic.com; " +
-          "connect-src 'self' ws://localhost:* http://localhost:* https:;"
+          "img-src 'self' asset: blob: data: http://localhost:*; " +
+          "font-src 'self' data:; " +
+          "connect-src 'self' ws://localhost:* http://localhost:*;"
         ],
       },
     })

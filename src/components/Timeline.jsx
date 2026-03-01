@@ -79,7 +79,7 @@ const getTrackItemComponent = (clipType) => {
   }
 };
 
-const SortableTrackItem = ({ track, onDelete, onVisibilityChange, onTrackSelect }) => {
+const SortableTrackItem = React.memo(({ track, onDelete, onVisibilityChange, onTrackSelect }) => {
   const {
     attributes,
     listeners,
@@ -111,7 +111,7 @@ const SortableTrackItem = ({ track, onDelete, onVisibilityChange, onTrackSelect 
       />
     </div>
   );
-};
+});
 
 const TimelineRows = ({
   tracks,

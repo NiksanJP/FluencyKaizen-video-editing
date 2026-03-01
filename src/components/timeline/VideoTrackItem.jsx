@@ -3,7 +3,7 @@ import BaseTrackItem from './BaseTrackItem';
 import VideoThumbnails from './VideoThumbnails';
 import { MIN_CLIP_DURATION } from '@/utils/timelineUtils';
 
-const VideoTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
+const VideoTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
   const clipDuration = Math.max(clip.duration || 0, MIN_CLIP_DURATION);
 
   return (
@@ -27,6 +27,6 @@ const VideoTrackItem = ({ clip, trackId, onSelect, onDoubleClick, isSelected }) 
       </>
     </BaseTrackItem>
   );
-};
+});
 
 export default VideoTrackItem;
