@@ -79,7 +79,7 @@ const getTrackItemComponent = (clipType) => {
   }
 };
 
-const SortableTrackItem = React.memo(({ track, onDelete, onVisibilityChange, onTrackSelect }) => {
+const SortableTrackItem = React.memo(({ track, trackNumber, onDelete, onVisibilityChange, onTrackSelect }) => {
   const {
     attributes,
     listeners,
@@ -103,6 +103,7 @@ const SortableTrackItem = React.memo(({ track, onDelete, onVisibilityChange, onT
     >
       <TrackItem
         track={track}
+        trackNumber={trackNumber}
         onDelete={onDelete}
         isDragging={isDragging}
         onVisibilityChange={onVisibilityChange}
@@ -554,13 +555,14 @@ const TimelineRows = ({
                 strategy={verticalListSortingStrategy}
               >
                 <div className="flex flex-col">
-                  {tracks.map((track) => (
+                  {tracks.map((track, index) => (
                     <div
                       key={track.id}
                       style={{ height: `${getTrackRowHeight(track)}px` }}
                     >
                       <SortableTrackItem
                         track={track}
+                        trackNumber={index + 1}
                         onDelete={onDeleteTrack}
                         onVisibilityChange={onVisibilityChange}
                         onTrackSelect={onTrackSelect}
@@ -695,7 +697,7 @@ export default function Timeline({
     (clipIds) => {
       const normalized = Array.isArray(clipIds) ? clipIds.filter(Boolean) : [];
       if (onSelectedClipChange) {
-        onSelectedClipChange(normalized.length ? normalized[normalized.length - 1] : null);
+        onSelectedClipChange(normalized.length ? normalized : null);
         return;
       }
       setInternalSelectedClipIds(normalized);
@@ -927,8 +929,8 @@ export default function Timeline({
       setActiveSelectedClipIds([]);
       return;
     }
-    setActiveSelectedClipId(track.clips[0].id);
-  }, [tracks, setActiveSelectedClipId, setActiveSelectedClipIds]);
+    setActiveSelectedClipIds(track.clips.map((c) => c.id));
+  }, [tracks, setActiveSelectedClipIds]);
 
   const handleDeleteTrack = useCallback((trackId) => {
     if (!onTracksChange) return;

@@ -76,11 +76,11 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
       color: textColor,
       backgroundColor: bgColor,
       textAlign,
-      x: 0,
+      x: 540,
       y,
-      width: 1080,
-      paddingX: 40,
-      paddingY: 10,
+      centerText: true,
+      backgroundPadding: 16,
+      borderRadius: 8,
       ...(strokeWidth > 0 ? { strokeWidth, strokeColor } : {}),
       ...sharedDecorative,
     }
@@ -225,7 +225,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     }
 
     const clipCount = newTracks.reduce((sum, t) => sum + t.clips.length, 0)
-    toast.success(`Added 1 track with ${clipCount} caption clips`)
+    toast.success(`Added ${newTracks.length} track${newTracks.length !== 1 ? 's' : ''} with ${clipCount} caption clips`)
   }, [splitCaptionList, fps, captionStyle, onTracksChange])
 
   const stageLabels = {
@@ -324,7 +324,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
                   value={[maxChars]}
                   onValueChange={([v]) => setMaxChars(v)}
                   min={10}
-                  max={100}
+                  max={50}
                   step={5}
                 />
               </div>
@@ -392,18 +392,35 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
                         )}
                       </div>
                       {isDerivedSegment ? (
-                        <p
-                          className="w-full text-xs text-foreground border border-border/50 rounded px-1.5 py-1 bg-muted/30 break-words"
-                        >
-                          {caption.text}
-                        </p>
+                        <>
+                          <p
+                            className="w-full text-xs text-foreground border border-border/50 rounded px-1.5 py-1 bg-muted/30 break-words"
+                          >
+                            {caption.text}
+                          </p>
+                          {caption.enText && (
+                            <p className="w-full text-[11px] text-muted-foreground border border-border/50 rounded px-1.5 py-1 bg-muted/30 break-words italic">
+                              {caption.enText}
+                            </p>
+                          )}
+                        </>
                       ) : (
-                        <textarea
-                          value={caption.text}
-                          onChange={(e) => updateCaption(sourceCaptionId, 'text', e.target.value)}
-                          className="w-full text-xs text-foreground bg-transparent border border-border rounded px-1.5 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-ring min-w-0"
-                          rows={Math.max(1, Math.ceil(caption.text.length / 50))}
-                        />
+                        <>
+                          <textarea
+                            value={caption.text}
+                            onChange={(e) => updateCaption(sourceCaptionId, 'text', e.target.value)}
+                            className="w-full text-xs text-foreground bg-transparent border border-border rounded px-1.5 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-ring min-w-0"
+                            rows={Math.max(1, Math.ceil(caption.text.length / 50))}
+                            placeholder="Japanese"
+                          />
+                          <textarea
+                            value={caption.enText || ''}
+                            onChange={(e) => updateCaption(sourceCaptionId, 'enText', e.target.value)}
+                            className="w-full text-[11px] text-muted-foreground bg-transparent border border-border/50 rounded px-1.5 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-ring min-w-0 italic"
+                            rows={1}
+                            placeholder="English translation"
+                          />
+                        </>
                       )}
                     </div>
                   </div>

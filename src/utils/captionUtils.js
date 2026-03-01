@@ -99,6 +99,7 @@ export function splitCaptions(captionList, maxChars) {
         startTime: Math.round(currentStart * 1000) / 1000,
         endTime,
         text: segText,
+        enText: caption.enText || '',
         words: segWords,
         _sourceId: caption.id,
         _splitIndex: i,
@@ -163,11 +164,11 @@ export const CAPTION_STYLE = {
   color: '#FFFFFF',
   backgroundColor: 'rgba(0, 0, 0, 0.6)',
   textAlign: 'center',
-  x: 0,
+  x: 540,
   y: 1480,
-  width: 1080,
-  paddingX: 40,
-  paddingY: 10,
+  backgroundPadding: 16,
+  borderRadius: 8,
+  centerText: true,
 }
 
 /**
@@ -187,45 +188,45 @@ export function captionsToTracks(captions, options = {}) {
     sourceOffset = 0,
     timelineOffset = 0,
     style = {},
+    enStyle = {},
   } = options
 
   const finalStyle = { ...CAPTION_STYLE, ...style }
   const timestamp = Date.now()
 
+  const buildTextStyleObj = (styleObj, yOverride) => {
+    const obj = {
+      fontFamily: styleObj.fontFamily,
+      fontWeight: styleObj.fontWeight,
+      fontSize: styleObj.fontSize,
+      color: styleObj.color,
+      backgroundColor: styleObj.backgroundColor,
+      textAlign: styleObj.textAlign,
+    }
+
+    if (styleObj.centerText) obj.centerText = true
+    if (styleObj.backgroundPadding) obj.backgroundPadding = styleObj.backgroundPadding
+    if (styleObj.strokeWidth) obj.strokeWidth = styleObj.strokeWidth
+    if (styleObj.strokeColor && styleObj.strokeWidth) obj.strokeColor = styleObj.strokeColor
+    if (styleObj.shadowColor) obj.shadowColor = styleObj.shadowColor
+    if (styleObj.shadowBlur) obj.shadowBlur = styleObj.shadowBlur
+    if (styleObj.shadowOffsetX !== undefined) obj.shadowOffsetX = styleObj.shadowOffsetX
+    if (styleObj.shadowOffsetY !== undefined) obj.shadowOffsetY = styleObj.shadowOffsetY
+    if (styleObj.borderRadius) obj.borderRadius = styleObj.borderRadius
+    if (styleObj.borderWidth) obj.borderWidth = styleObj.borderWidth
+    if (styleObj.borderColor && styleObj.borderWidth) obj.borderColor = styleObj.borderColor
+    if (styleObj.letterSpacing) obj.letterSpacing = styleObj.letterSpacing
+    if (styleObj.lineHeight) obj.lineHeight = styleObj.lineHeight
+
+    obj.top = yOverride !== undefined ? yOverride : styleObj.y
+    obj.left = styleObj.x
+
+    return obj
+  }
+
   const clips = captions.map((caption, i) => {
     const start = (caption.startTime - sourceOffset) + timelineOffset
     const duration = caption.endTime - caption.startTime
-
-    const textStyleObj = {
-      fontFamily: finalStyle.fontFamily,
-      fontWeight: finalStyle.fontWeight,
-      fontSize: finalStyle.fontSize,
-      color: finalStyle.color,
-      backgroundColor: finalStyle.backgroundColor,
-      textAlign: finalStyle.textAlign,
-      width: finalStyle.width,
-      paddingX: finalStyle.paddingX,
-      paddingY: finalStyle.paddingY,
-    }
-
-    // Pass through optional renderer properties when present
-    if (finalStyle.strokeWidth) textStyleObj.strokeWidth = finalStyle.strokeWidth
-    if (finalStyle.strokeColor && finalStyle.strokeWidth) textStyleObj.strokeColor = finalStyle.strokeColor
-    if (finalStyle.shadowColor) textStyleObj.shadowColor = finalStyle.shadowColor
-    if (finalStyle.shadowBlur) textStyleObj.shadowBlur = finalStyle.shadowBlur
-    if (finalStyle.shadowOffsetX !== undefined) textStyleObj.shadowOffsetX = finalStyle.shadowOffsetX
-    if (finalStyle.shadowOffsetY !== undefined) textStyleObj.shadowOffsetY = finalStyle.shadowOffsetY
-    if (finalStyle.borderRadius) textStyleObj.borderRadius = finalStyle.borderRadius
-    if (finalStyle.borderWidth) textStyleObj.borderWidth = finalStyle.borderWidth
-    if (finalStyle.borderColor && finalStyle.borderWidth) textStyleObj.borderColor = finalStyle.borderColor
-    if (finalStyle.letterSpacing) textStyleObj.letterSpacing = finalStyle.letterSpacing
-    if (finalStyle.lineHeight) textStyleObj.lineHeight = finalStyle.lineHeight
-    if (finalStyle.backgroundPadding) textStyleObj.backgroundPadding = finalStyle.backgroundPadding
-
-    // Position is stored in textStyles.top/left (absolute canvas coords),
-    // NOT in clip.x/y which are drag offsets added on top.
-    textStyleObj.top = finalStyle.y
-    textStyleObj.left = finalStyle.x
 
     return {
       id: `caption-${timestamp}-${i}`,
@@ -242,16 +243,67 @@ export function captionsToTracks(captions, options = {}) {
       scale: 100,
       rotation: 0,
       opacity: 100,
-      textStyles: textStyleObj,
+      textStyles: buildTextStyleObj(finalStyle, finalStyle.y),
       words: caption.words || [],
     }
   })
 
-  return [{
+  const tracks = [{
     id: `track-captions-${timestamp}`,
     type: 'text',
-    name: 'Captions',
+    name: 'Captions (JP)',
     clips,
     visible: true,
   }]
+
+  // Build English caption track if any caption has enText
+  const hasEnglish = captions.some((c) => c.enText && c.enText.trim())
+  if (hasEnglish) {
+    const enFinalStyle = {
+      ...finalStyle,
+      fontSize: Math.round(finalStyle.fontSize * 0.8),
+      color: '#e2e8f0',
+      backgroundColor: 'transparent',
+      ...enStyle,
+    }
+    const enY = (finalStyle.y || 0) + (finalStyle.fontSize || 42) + 20
+
+    const enClips = captions
+      .filter((caption) => caption.enText && caption.enText.trim())
+      .map((caption, i) => {
+        const start = (caption.startTime - sourceOffset) + timelineOffset
+        const duration = caption.endTime - caption.startTime
+
+        return {
+          id: `caption-en-${timestamp}-${i}`,
+          type: 'text',
+          name: caption.enText,
+          textContent: caption.enText,
+          start: Math.max(0, start),
+          duration: Math.max(0.1, duration),
+          startFrame: Math.round(Math.max(0, start) * fps),
+          durationFrames: Math.round(Math.max(0.1, duration) * fps),
+          sourceStart: 0,
+          x: 0,
+          y: 0,
+          scale: 100,
+          rotation: 0,
+          opacity: 100,
+          textStyles: buildTextStyleObj(enFinalStyle, enY),
+          words: [],
+        }
+      })
+
+    if (enClips.length > 0) {
+      tracks.push({
+        id: `track-captions-en-${timestamp}`,
+        type: 'text',
+        name: 'Captions (EN)',
+        clips: enClips,
+        visible: true,
+      })
+    }
+  }
+
+  return tracks
 }

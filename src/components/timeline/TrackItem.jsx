@@ -3,7 +3,7 @@ import { GripVertical, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-const TrackItem = ({ track, onDelete, isDragging, onVisibilityChange, onTrackSelect, dragHandleProps = {} }) => {
+const TrackItem = ({ track, trackNumber, onDelete, isDragging, onVisibilityChange, onTrackSelect, dragHandleProps = {} }) => {
   const { className: dragHandleClassName, ...dragHandleRest } = dragHandleProps;
   const isVisible = track.visible !== false;
 
@@ -50,7 +50,7 @@ const TrackItem = ({ track, onDelete, isDragging, onVisibilityChange, onTrackSel
         )}
         title="Click to select all clips in track"
       >
-        <span className="truncate">{track.name}</span>
+        <span className="truncate">{trackNumber}</span>
       </div>
     </div>
   );
