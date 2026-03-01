@@ -1,0 +1,70 @@
+{
+  "videoFile": "Man_and_woman_at_kotatsu_0e0194644e.mp4",
+  "hookTitle": {
+    "ja": "ご挨拶",
+    "en": "Quick Greetings"
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 30
+  },
+  "subtitles": [
+    {
+      "startTime": 0,
+      "endTime": 0.66,
+      "en": "",
+      "ja": "こんにちは",
+      "highlights": [
+        "こんにちは"
+      ]
+    },
+    {
+      "startTime": 0.66,
+      "endTime": 1.2,
+      "en": "",
+      "ja": "まさですね",
+      "highlights": [
+        "まさ"
+      ]
+    },
+    {
+      "startTime": 1.2,
+      "endTime": 2.22,
+      "en": "",
+      "ja": "チョリーズです",
+      "highlights": [
+        "チョリーズ"
+      ]
+    },
+    {
+      "startTime": 2.22,
+      "endTime": 5.96,
+      "en": "",
+      "ja": "リナだよねリラックスしてまたみましょうスカイルエゴさん教えるよね",
+      "highlights": [
+        "リナ",
+        "リラックス",
+        "スカイルエゴ"
+      ]
+    },
+    {
+      "startTime": 5.96,
+      "endTime": 6.8,
+      "en": "",
+      "ja": "セレです",
+      "highlights": [
+        "セレ"
+      ]
+    },
+    {
+      "startTime": 6.8,
+      "endTime": 7.66,
+      "en": "",
+      "ja": "バイビー",
+      "highlights": [
+        "バイビー"
+      ]
+    }
+  ],
+  "vocabCards": []
+}
