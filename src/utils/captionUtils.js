@@ -5,13 +5,38 @@
  * @returns {string[]}
  */
 export function splitText(text, maxChars) {
-  if (!text || text.length <= maxChars) return [text || '']
-  const words = text.split(' ')
+  const normalizedText = (text || '').trim()
+  const normalizedMaxChars = Math.max(1, Math.floor(Number(maxChars) || 1))
+
+  if (!normalizedText) return ['']
+  if (normalizedText.length <= normalizedMaxChars) return [normalizedText]
+
+  // Languages/scripts without spaces (or long unbroken tokens) need char-based chunking.
+  if (!/\s/.test(normalizedText)) {
+    const chunks = []
+    for (let i = 0; i < normalizedText.length; i += normalizedMaxChars) {
+      chunks.push(normalizedText.slice(i, i + normalizedMaxChars))
+    }
+    return chunks
+  }
+
+  const words = normalizedText.trim().split(/\s+/)
   const segments = []
   let current = ''
   for (const word of words) {
+    if (word.length > normalizedMaxChars) {
+      if (current) {
+        segments.push(current)
+        current = ''
+      }
+      for (let i = 0; i < word.length; i += normalizedMaxChars) {
+        segments.push(word.slice(i, i + normalizedMaxChars))
+      }
+      continue
+    }
+
     const candidate = current ? `${current} ${word}` : word
-    if (candidate.length > maxChars && current) {
+    if (candidate.length > normalizedMaxChars && current) {
       segments.push(current)
       current = word
     } else {
@@ -32,12 +57,22 @@ export function splitText(text, maxChars) {
  * @returns {Array} New caption array with split segments
  */
 export function splitCaptions(captionList, maxChars) {
-  const result = []
+  const normalizedMaxChars = Math.max(1, Math.floor(Number(maxChars) || 1))
+  const splitSegments = []
+
   for (const caption of captionList) {
-    const textSegments = splitText(caption.text, maxChars)
+    const sourceText = (caption.text || '').trim()
+    const textSegments = splitText(sourceText, normalizedMaxChars).filter(Boolean)
+
+    if (textSegments.length === 0) {
+      continue
+    }
 
     if (textSegments.length <= 1) {
-      result.push(caption)
+      splitSegments.push({
+        ...caption,
+        text: sourceText,
+      })
       continue
     }
 
@@ -58,7 +93,7 @@ export function splitCaptions(captionList, maxChars) {
         (w) => w.start >= currentStart && w.start < endTime
       )
 
-      result.push({
+      splitSegments.push({
         ...caption,
         id: `${caption.id}-split-${i}`,
         startTime: Math.round(currentStart * 1000) / 1000,
@@ -68,12 +103,54 @@ export function splitCaptions(captionList, maxChars) {
         _sourceId: caption.id,
         _splitIndex: i,
         _splitTotal: textSegments.length,
+        _isDerived: true,
       })
 
       currentStart = endTime
     }
   }
-  return result
+
+  // Merge adjacent split segments when their combined text still fits maxChars.
+  // This lets the slider both increase and decrease caption count.
+  const merged = []
+  let current = null
+
+  for (const seg of splitSegments) {
+    if (!current) {
+      current = { ...seg }
+      continue
+    }
+
+    const mergedText = [current.text, seg.text].filter(Boolean).join(' ').trim()
+    if (mergedText.length <= normalizedMaxChars) {
+      const currentSourceIds = current._sourceIds || [current._sourceId || current.id]
+      const nextSourceIds = seg._sourceIds || [seg._sourceId || seg.id]
+      current = {
+        ...current,
+        endTime: seg.endTime,
+        text: mergedText,
+        words: [...(current.words || []), ...(seg.words || [])],
+        _sourceIds: [...new Set([...currentSourceIds, ...nextSourceIds])],
+        _isDerived: true,
+      }
+      continue
+    }
+
+    merged.push(current)
+    current = { ...seg }
+  }
+
+  if (current) merged.push(current)
+
+  return merged.map((seg, i) => {
+    if (!seg._isDerived) return seg
+
+    const sourceIds = seg._sourceIds || [seg._sourceId || seg.id]
+    return {
+      ...seg,
+      id: `cap-derived-${sourceIds.join('-')}-${i}`,
+    }
+  })
 }
 
 /**
@@ -145,6 +222,11 @@ export function captionsToTracks(captions, options = {}) {
     if (finalStyle.lineHeight) textStyleObj.lineHeight = finalStyle.lineHeight
     if (finalStyle.backgroundPadding) textStyleObj.backgroundPadding = finalStyle.backgroundPadding
 
+    // Position is stored in textStyles.top/left (absolute canvas coords),
+    // NOT in clip.x/y which are drag offsets added on top.
+    textStyleObj.top = finalStyle.y
+    textStyleObj.left = finalStyle.x
+
     return {
       id: `caption-${timestamp}-${i}`,
       type: 'text',
@@ -155,8 +237,8 @@ export function captionsToTracks(captions, options = {}) {
       startFrame: Math.round(Math.max(0, start) * fps),
       durationFrames: Math.round(Math.max(0.1, duration) * fps),
       sourceStart: 0,
-      x: finalStyle.x,
-      y: finalStyle.y,
+      x: 0,
+      y: 0,
       scale: 100,
       rotation: 0,
       opacity: 100,

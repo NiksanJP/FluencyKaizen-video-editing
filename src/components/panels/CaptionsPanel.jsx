@@ -18,12 +18,6 @@ const VIDEO_EXTENSIONS = /\.(mp4|mov|webm|avi|mkv)$/i
 
 const FONT_FAMILIES = [...new Set(FONTS.map((f) => f.family))]
 
-const POSITION_PRESETS = {
-  top: 200,
-  middle: 860,
-  bottom: 1480,
-}
-
 const WEIGHT_OPTIONS = [
   { value: 400, label: 'Regular' },
   { value: 500, label: 'Medium' },
@@ -42,8 +36,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
 
   // Style controls
   const [selectedTemplate, setSelectedTemplate] = useState(null)
-  const [positionPreset, setPositionPreset] = useState('bottom')
-  const [customY, setCustomY] = useState(1480)
+  const [positionY, setPositionY] = useState(1480)
   const [fontFamily, setFontFamily] = useState('Inter')
   const [fontSize, setFontSize] = useState(42)
   const [fontWeight, setFontWeight] = useState(700)
@@ -65,7 +58,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
 
   // Compute final style from individual controls + template decorative props
   const captionStyle = useMemo(() => {
-    const y = positionPreset === 'custom' ? customY : POSITION_PRESETS[positionPreset]
+    const y = positionY
 
     const sharedDecorative = {}
     if (templateDecorative.shadowColor) sharedDecorative.shadowColor = templateDecorative.shadowColor
@@ -92,7 +85,7 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
       ...sharedDecorative,
     }
   }, [
-    positionPreset, customY,
+    positionY,
     fontFamily, fontSize, fontWeight,
     textAlign, textColor, bgColor,
     strokeWidth, strokeColor, templateDecorative,
@@ -211,6 +204,12 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
     }
   }, [selectedAsset, project?.id])
 
+  const updateCaption = useCallback((id, field, value) => {
+    setCaptionList((prev) =>
+      prev.map((cap) => (cap.id === id ? { ...cap, [field]: value } : cap))
+    )
+  }, [])
+
   const addToTimeline = useCallback(() => {
     if (splitCaptionList.length === 0) return
 
@@ -238,15 +237,15 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b">
+      <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0">
         <Mic className="h-4 w-4 text-muted-foreground" />
         <span className="font-medium text-sm">Captions</span>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-3 space-y-3">
+      <ScrollArea className="flex-1 min-w-0">
+        <div className="p-3 space-y-3 min-w-0 overflow-hidden">
           {/* Video Selection */}
           <div className="space-y-1.5">
             <Label className="text-xs">Source Video</Label>
@@ -342,65 +341,74 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
             <>
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-xs text-muted-foreground truncate min-w-0">
-                  {captionList.length} caption{captionList.length !== 1 ? 's' : ''}
+                  {splitCaptionList.length} segment{splitCaptionList.length !== 1 ? 's' : ''}
+                  {splitCaptionList.length > captionList.length && (
+                    <> (from {captionList.length} caption{captionList.length !== 1 ? 's' : ''})</>
+                  )}
                 </span>
               </div>
 
-              {captionList.map((caption, i) => (
-                <Card key={caption.id} className="min-w-0 overflow-hidden">
-                  <CardHeader className="p-2.5 pb-1.5 min-w-0">
-                    <CardTitle className="text-[10px] text-muted-foreground">
-                      #{i + 1} · {caption.startTime.toFixed(1)}s – {caption.endTime.toFixed(1)}s
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-2.5 pt-0 space-y-1.5 min-w-0">
-                    <p className="text-xs text-foreground break-words min-w-0">{caption.text}</p>
-                    {caption.words && caption.words.length > 0 && (
-                      <div className="flex flex-wrap gap-0.5 min-w-0 overflow-hidden">
-                        {caption.words.map((w, wi) => (
-                          <span
-                            key={wi}
-                            className="inline-block px-1 py-0.5 rounded bg-primary/10 text-[9px] text-primary"
-                            title={`${w.start?.toFixed(2)}s - ${w.end?.toFixed(2)}s`}
-                          >
-                            {w.word}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-
-              {/* Split Preview */}
-              {splitCaptionList.length > captionList.length && (
-                <div className="space-y-1.5 min-w-0">
-                  <span className="text-xs text-muted-foreground">
-                    Split Preview ({splitCaptionList.length} segments)
-                  </span>
-                  {splitCaptionList.map((seg) => {
-                    const isSplit = seg._splitTotal > 1
-                    return (
-                      <div
-                        key={seg.id}
-                        className={`rounded border p-2 text-[10px] space-y-0.5 min-w-0 overflow-hidden ${
-                          isSplit ? 'border-l-2 border-l-primary bg-muted/40' : 'bg-muted/20'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-muted-foreground gap-2 min-w-0">
-                          <span className="truncate">{seg.startTime.toFixed(1)}s - {seg.endTime.toFixed(1)}s</span>
-                          {isSplit && (
-                            <span className="shrink-0 px-1 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-medium">
-                              {seg._splitIndex + 1}/{seg._splitTotal}
+              {splitCaptionList.map((caption, i) => {
+                const isDerivedSegment = Boolean(caption._isDerived)
+                const sourceCount = caption._sourceIds?.length || (caption._sourceId ? 1 : 0)
+                const derivedLabel = sourceCount > 1 ? 'merged' : 'split'
+                const sourceCaptionId = caption._sourceId || caption.id
+                return (
+                  <div
+                    key={caption.id}
+                    className="rounded border bg-muted/20 min-w-0 overflow-hidden"
+                  >
+                    <div className="p-2 space-y-1 min-w-0">
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground min-w-0">
+                        <span className="shrink-0">#{i + 1}</span>
+                        {isDerivedSegment ? (
+                          <>
+                            <span className="tabular-nums">
+                              {caption.startTime.toFixed(1)}s - {caption.endTime.toFixed(1)}s
                             </span>
-                          )}
-                        </div>
-                        {seg.text && <p className="text-foreground break-words min-w-0">{seg.text}</p>}
+                            <span className="text-[9px] text-primary">{derivedLabel}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Input
+                              type="number"
+                              value={caption.startTime}
+                              onChange={(e) => updateCaption(sourceCaptionId, 'startTime', parseFloat(e.target.value) || 0)}
+                              className="h-5 w-14 text-[10px] px-1 tabular-nums"
+                              step={0.1}
+                              min={0}
+                            />
+                            <span>-</span>
+                            <Input
+                              type="number"
+                              value={caption.endTime}
+                              onChange={(e) => updateCaption(sourceCaptionId, 'endTime', parseFloat(e.target.value) || 0)}
+                              className="h-5 w-14 text-[10px] px-1 tabular-nums"
+                              step={0.1}
+                              min={0}
+                            />
+                            <span className="text-[9px]">s</span>
+                          </>
+                        )}
                       </div>
-                    )
-                  })}
-                </div>
-              )}
+                      {isDerivedSegment ? (
+                        <p
+                          className="w-full text-xs text-foreground border border-border/50 rounded px-1.5 py-1 bg-muted/30 break-words"
+                        >
+                          {caption.text}
+                        </p>
+                      ) : (
+                        <textarea
+                          value={caption.text}
+                          onChange={(e) => updateCaption(sourceCaptionId, 'text', e.target.value)}
+                          className="w-full text-xs text-foreground bg-transparent border border-border rounded px-1.5 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-ring min-w-0"
+                          rows={Math.max(1, Math.ceil(caption.text.length / 50))}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
 
               {/* Timeline Actions */}
               <div className="space-y-3 pt-2 border-t min-w-0">
@@ -456,37 +464,26 @@ export default function CaptionsPanel({ tracks, onTracksChange, fps = 30 }) {
 
                 {/* Position */}
                 <div className="space-y-2 min-w-0">
-                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                    Position
-                  </span>
-
-                  <div className="flex gap-1 min-w-0 flex-wrap">
-                    {['top', 'middle', 'bottom', 'custom'].map((preset) => (
-                      <Button
-                        key={preset}
-                        size="sm"
-                        variant={positionPreset === preset ? 'default' : 'outline'}
-                        className="h-6 text-[10px] min-w-0 flex-1 basis-0 capitalize"
-                        onClick={() => setPositionPreset(preset)}
-                      >
-                        {preset}
-                      </Button>
-                    ))}
+                  <div className="flex items-center justify-between min-w-0">
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Position
+                    </span>
+                    <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                      {positionY} px
+                    </span>
                   </div>
-
-                  {positionPreset === 'custom' && (
-                    <div className="flex items-center gap-2">
-                      <Label className="text-[10px] shrink-0">Custom Y:</Label>
-                      <Input
-                        type="number"
-                        value={customY}
-                        onChange={(e) => setCustomY(parseInt(e.target.value) || 0)}
-                        className="h-6 text-xs w-20"
-                        min={0}
-                        max={1920}
-                      />
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[9px] text-muted-foreground shrink-0">Up</span>
+                    <Slider
+                      value={[positionY]}
+                      onValueChange={([v]) => setPositionY(v)}
+                      min={0}
+                      max={1920}
+                      step={10}
+                      className="flex-1"
+                    />
+                    <span className="text-[9px] text-muted-foreground shrink-0">Down</span>
+                  </div>
                 </div>
 
                 {/* Font */}

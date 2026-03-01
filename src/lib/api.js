@@ -54,6 +54,12 @@ export const captions = {
     const removeListener = api.captions.onProgress(onProgress)
     try {
       const result = await api.captions.generate(projectId, assetName)
+      // The IPC invoke resolves at the same time as the 'complete' progress event,
+      // so the listener may be removed before the event fires. Emit completion
+      // from the return value to guarantee the UI updates.
+      if (result && !result.error) {
+        onProgress({ type: 'complete', data: result })
+      }
       return result
     } finally {
       removeListener()

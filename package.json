@@ -75,7 +75,6 @@
     "productName": "FluencyKaizen",
     "files": [
       "dist/**/*",
-      "server/lib/**/*",
       "electron/**/*",
       "pipeline/**/*",
       "package.json"

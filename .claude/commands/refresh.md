@@ -13,7 +13,7 @@ Steps performed:
 2. Regenerates `remotion/src/clip-data.ts` from the clip.json (this is what Root.tsx actually imports)
 3. Copies source video from `input/` → `remotion/public/` if not already present
 4. Kills any existing Remotion Studio process
-5. Launches a fresh Remotion Studio at http://localhost:3001
+5. Launches a fresh Remotion Studio at http://localhost:3000
 
 ## Example
 ```

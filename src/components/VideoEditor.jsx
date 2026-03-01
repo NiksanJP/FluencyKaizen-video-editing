@@ -457,7 +457,7 @@ export default function VideoEditor({ onBack }) {
           <ResizablePanelGroup direction="horizontal" className="flex-1">
             {/* Left panel - sidebar content */}
             <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
-              <div className="h-full border-r min-w-0 flex flex-col">
+              <div className="h-full border-r min-w-0 overflow-hidden flex flex-col">
                 {renderPanel()}
               </div>
             </ResizablePanel>
