@@ -30,8 +30,11 @@ export const assets = {
 
   delete: (projectId, fileName) => isElectron ? api.assets.delete(projectId, fileName) : Promise.resolve(),
 
-  /** Returns the asset:// URL for use in <video>/<img> src */
+  /** Returns a playable URL for the asset — HTTP in dev, asset:// in Electron prod */
   getUrl(projectId, fileName) {
+    if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+      return `/project-assets/${projectId}/${encodeURIComponent(fileName)}`
+    }
     return `asset://${projectId}/${encodeURIComponent(fileName)}`
   },
 }

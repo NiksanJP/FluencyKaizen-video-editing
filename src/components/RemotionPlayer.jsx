@@ -75,12 +75,28 @@ const getFontWeightNumber = (fontWeightStyle) => {
   return '400';
 };
 
+// Convert asset:// URLs to HTTP in dev mode (Chromium can't stream from custom protocols)
+const resolveAssetUrl = (url) => {
+  if (!url || !url.startsWith('asset://')) return url;
+  if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+    // Dev mode: rewrite to Vite middleware path
+    const withoutScheme = url.slice('asset://'.length);
+    const slashIdx = withoutScheme.indexOf('/');
+    if (slashIdx === -1) return url;
+    const projectId = withoutScheme.slice(0, slashIdx);
+    const fileName = withoutScheme.slice(slashIdx + 1);
+    return `/project-assets/${projectId}/${fileName}`;
+  }
+  return url; // Production (Electron): keep asset:// for protocol handler
+};
+
 // Resolve clip source path — supports HTTP URLs, blob URLs, and /api/ paths
 const getClipSource = (path) => {
   if (!path) return undefined;
   const trimmed = String(path).trim();
   if (!trimmed) return undefined;
-  if (/^(https?:|blob:|data:|asset:|\/api\/)/i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('asset://')) return resolveAssetUrl(trimmed);
+  if (/^(https?:|blob:|data:|\/api\/|\/project-assets\/)/i.test(trimmed)) return trimmed;
   return trimmed;
 };
 
@@ -497,6 +513,7 @@ const RemotionPlayer = React.forwardRef(({
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
   const [renderedDimensions, setRenderedDimensions] = useState({ width: 0, height: 0 });
+  const { getFontFamily } = useFonts();
 
   React.useImperativeHandle(forwardedRef, () => ({
     getCurrentFrame: () => playerRef.current?.getCurrentFrame?.() ?? 0,
@@ -639,6 +656,7 @@ const RemotionPlayer = React.forwardRef(({
               onClipSelect={onClipSelect}
               visibleClips={visibleClips}
               clipLayerMap={clipLayerMap}
+              getFontFamily={getFontFamily}
             />
           )}
         </div>

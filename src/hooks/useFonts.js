@@ -12,6 +12,24 @@ import { loadFont as loadPlayfairDisplay } from '@remotion/google-fonts/Playfair
 import { loadFont as loadRobotoMono } from '@remotion/google-fonts/RobotoMono';
 import { loadFont as loadSourceCodePro } from '@remotion/google-fonts/SourceCodePro';
 import { loadFont as loadNotoSansJP } from '@remotion/google-fonts/NotoSansJP';
+import { loadFont as loadNotoSerifJP } from '@remotion/google-fonts/NotoSerifJP';
+import { loadFont as loadZenMaruGothic } from '@remotion/google-fonts/ZenMaruGothic';
+import { loadFont as loadMPLUSRounded1c } from '@remotion/google-fonts/MPLUSRounded1c';
+import { loadFont as loadShipporiMincho } from '@remotion/google-fonts/ShipporiMincho';
+import { loadFont as loadZenKakuGothicNew } from '@remotion/google-fonts/ZenKakuGothicNew';
+import { loadFont as loadDelaGothicOne } from '@remotion/google-fonts/DelaGothicOne';
+import { loadFont as loadBIZUDGothic } from '@remotion/google-fonts/BIZUDGothic';
+
+// Suppress FontFace count warning for JP fonts (they have many glyphs)
+const loadJPFont = (loader, weights) => {
+  const origWarn = console.warn;
+  console.warn = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('over 20 `FontFace`')) return;
+    origWarn.apply(console, args);
+  };
+  try { return loader('normal', { weights }); }
+  finally { console.warn = origWarn; }
+};
 
 const FONT_LOADERS = {
   'Inter': () => loadInter('normal', { weights: ['400', '500', '600', '700'], subsets: ['latin'] }),
@@ -24,15 +42,14 @@ const FONT_LOADERS = {
   'Playfair Display': () => loadPlayfairDisplay('normal', { weights: ['400', '700'], subsets: ['latin'] }),
   'Roboto Mono': () => loadRobotoMono('normal', { weights: ['400', '500', '700'], subsets: ['latin'] }),
   'Source Code Pro': () => loadSourceCodePro('normal', { weights: ['400', '500', '600', '700'], subsets: ['latin'] }),
-  'Noto Sans JP': () => {
-    const origWarn = console.warn;
-    console.warn = (...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('over 20 `FontFace`')) return;
-      origWarn.apply(console, args);
-    };
-    try { return loadNotoSansJP('normal', { weights: ['400', '500', '700'] }); }
-    finally { console.warn = origWarn; }
-  },
+  'Noto Sans JP': () => loadJPFont(loadNotoSansJP, ['400', '500', '700']),
+  'Noto Serif JP': () => loadJPFont(loadNotoSerifJP, ['400', '500', '700']),
+  'Zen Maru Gothic': () => loadJPFont(loadZenMaruGothic, ['400', '500', '700']),
+  'M PLUS Rounded Onec': () => loadJPFont(loadMPLUSRounded1c, ['400', '700']),
+  'Shippori Mincho': () => loadJPFont(loadShipporiMincho, ['400', '500', '700']),
+  'Zen Kaku Gothic New': () => loadJPFont(loadZenKakuGothicNew, ['400', '500', '700']),
+  'Dela Gothic One': () => loadJPFont(loadDelaGothicOne, ['400']),
+  'BIZ UDGothic': () => loadJPFont(loadBIZUDGothic, ['400', '700']),
 };
 
 const getUniqueFontFamilies = () => {

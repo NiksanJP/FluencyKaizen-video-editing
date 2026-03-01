@@ -14,7 +14,16 @@ const parseDimensionToPixels = (value, reference) => {
   return Number.isFinite(numeric) ? numeric : undefined;
 };
 
-const DraggableClip = ({ clip, bounds, onSelect, onDragStart, layerZ = 0 }) => {
+const isTextClip = (clip) => {
+  if (!clip) return false;
+  const type = clip.type;
+  if (type === 'text' || type === 'animated-text') return true;
+  if (clip.mimeType === 'text/plain') return true;
+  if (typeof type === 'string' && type.startsWith('text/')) return true;
+  return false;
+};
+
+const DraggableClip = ({ clip, bounds, onSelect, onDragStart, onDoubleClick, layerZ = 0 }) => {
   const baseLeft = bounds.left ?? bounds.x ?? 0;
   const baseTop = bounds.top ?? bounds.y ?? 0;
   const clipTransform = bounds.transform || (bounds.rotation ? `rotate(${bounds.rotation}deg)` : '');
@@ -39,11 +48,17 @@ const DraggableClip = ({ clip, bounds, onSelect, onDragStart, layerZ = 0 }) => {
     onDragStart(e, clip, bounds);
   };
 
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    if (onDoubleClick) onDoubleClick(clip);
+  };
+
   return (
     <div
       style={style}
       onClick={(e) => { e.stopPropagation(); onSelect(clip.id); }}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
     >
       <div style={{ width: '100%', height: '100%', opacity: 0 }} />
     </div>
@@ -72,6 +87,102 @@ const TransformHandle = ({ type, position, onMouseDown }) => {
   );
 };
 
+const InlineTextEditor = ({ clip, bounds, scaleX, onSave, onCancel, getFontFamily }) => {
+  const editRef = useRef(null);
+  const initialText = (clip.textContent || clip.text || clip.name || 'Text').toString().replace(/\s+/g, ' ').trim();
+
+  useEffect(() => {
+    const el = editRef.current;
+    if (!el) return;
+    el.textContent = initialText;
+    el.focus();
+    // Select all text
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }, []);
+
+  const handleKeyDown = (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSave(editRef.current?.textContent || '');
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+    }
+  };
+
+  const handleBlur = () => {
+    onSave(editRef.current?.textContent || '');
+  };
+
+  const styles = clip.textStyles || {};
+  const fontSize = (parseFloat(styles.fontSize) || 24) * scaleX;
+  const fontFamily = getFontFamily ? getFontFamily(styles.fontFamily || 'Inter') : (styles.fontFamily || 'Inter, Arial, sans-serif');
+  const fontWeight = styles.fontWeight || '700';
+  const color = Array.isArray(styles.color) ? (styles.color[0] || '#ffffff') : (styles.color || '#ffffff');
+  const textAlign = styles.textAlign || 'center';
+  const letterSpacing = `${(parseFloat(styles.letterSpacing) || 0) * scaleX}px`;
+  const lineHeight = parseFloat(styles.lineHeight) || 1.1;
+  const backgroundColor = styles.backgroundColor || 'transparent';
+  const borderRadius = `${parseFloat(styles.borderRadius) || 0}px`;
+  const strokeWidth = styles.strokeWidth ? `${parseFloat(styles.strokeWidth) * scaleX}px` : undefined;
+  const strokeColor = styles.strokeColor || '#000000';
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: `${bounds.left ?? 0}px`,
+        top: `${bounds.top ?? 0}px`,
+        width: `${bounds.width}px`,
+        height: `${bounds.height}px`,
+        transform: bounds.transform || 'none',
+        transformOrigin: 'center center',
+        zIndex: 100,
+        pointerEvents: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: textAlign === 'left' ? 'flex-start' : textAlign === 'right' ? 'flex-end' : 'center',
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        ref={editRef}
+        contentEditable
+        suppressContentEditableWarning
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        style={{
+          width: '100%',
+          minHeight: `${fontSize * lineHeight}px`,
+          fontSize: `${fontSize}px`,
+          fontFamily,
+          fontWeight,
+          color,
+          textAlign,
+          letterSpacing,
+          lineHeight,
+          backgroundColor,
+          borderRadius,
+          outline: '2px solid #3b82f6',
+          outlineOffset: '2px',
+          padding: `${(parseFloat(styles.backgroundPadding) || 6) * scaleX}px`,
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          cursor: 'text',
+          WebkitTextStroke: strokeWidth ? `${strokeWidth} ${strokeColor}` : 'none',
+          caretColor: color,
+        }}
+      />
+    </div>
+  );
+};
+
 const InteractiveOverlay = ({
   width,
   height,
@@ -82,6 +193,7 @@ const InteractiveOverlay = ({
   onClipSelect,
   visibleClips = [],
   clipLayerMap = {},
+  getFontFamily,
 }) => {
   const overlayRootRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -92,6 +204,10 @@ const InteractiveOverlay = ({
   const [initialTransform, setInitialTransform] = useState({});
   const [mediaDimensions, setMediaDimensions] = useState({});
   const mediaLoadersRef = useRef({});
+
+  // Inline editing state
+  const [editingClipId, setEditingClipId] = useState(null);
+  const [editOriginalText, setEditOriginalText] = useState('');
 
   const isVisualClip = useCallback((clip) => {
     if (!clip) return false;
@@ -148,9 +264,9 @@ const InteractiveOverlay = ({
     if (!clip) return null;
     const clipScale = (Number.isFinite(clip.scale) ? clip.scale : 100) / 100;
     const clipRotation = Number.isFinite(clip.rotation) ? clip.rotation : 0;
-    const textClip = clip.type === 'text' || clip.type === 'animated-text' || clip.mimeType === 'text/plain' || (typeof clip.type === 'string' && clip.type.startsWith('text/'));
+    const textClipFlag = clip.type === 'text' || clip.type === 'animated-text' || clip.mimeType === 'text/plain' || (typeof clip.type === 'string' && clip.type.startsWith('text/'));
 
-    if (textClip) {
+    if (textClipFlag) {
       const compositionWidth = clip.width || width;
       const compositionHeight = clip.height || height;
       const clipX = clip.absoluteX ?? clip.x ?? 0;
@@ -171,8 +287,8 @@ const InteractiveOverlay = ({
     const containerWidth = width;
 
     const intrinsic = mediaDimensions[clip.id];
-    const sourceWidth = Number(intrinsic?.width) > 0 ? intrinsic.width : Number(clip.intrinsicWidth) > 0 ? clip.intrinsicWidth : clip.width && !textClip ? clip.width : containerWidth;
-    const sourceHeight = Number(intrinsic?.height) > 0 ? intrinsic.height : Number(clip.intrinsicHeight) > 0 ? clip.intrinsicHeight : clip.height && !textClip ? clip.height : containerHeight;
+    const sourceWidth = Number(intrinsic?.width) > 0 ? intrinsic.width : Number(clip.intrinsicWidth) > 0 ? clip.intrinsicWidth : clip.width && !textClipFlag ? clip.width : containerWidth;
+    const sourceHeight = Number(intrinsic?.height) > 0 ? intrinsic.height : Number(clip.intrinsicHeight) > 0 ? clip.intrinsicHeight : clip.height && !textClipFlag ? clip.height : containerHeight;
 
     const blurObjectFit = clip.blurStyles?.objectFit;
     const blurWidth = parseDimensionToPixels(clip.blurStyles?.width, containerWidth);
@@ -240,13 +356,47 @@ const InteractiveOverlay = ({
     return getClipBounds(selectedClip);
   }, [selectedClip, getClipBounds]);
 
+  // Double-click handler for text clips
+  const handleDoubleClick = useCallback((clip) => {
+    if (!isTextClip(clip)) return;
+    onClipSelect(clip.id);
+    const currentText = (clip.textContent || clip.text || clip.name || 'Text').toString().replace(/\s+/g, ' ').trim();
+    setEditOriginalText(currentText);
+    setEditingClipId(clip.id);
+  }, [onClipSelect]);
+
+  // Save edited text
+  const handleEditSave = useCallback((newText) => {
+    const trimmed = (newText || '').trim();
+    if (editingClipId && trimmed && trimmed !== editOriginalText) {
+      onClipUpdate(editingClipId, { textContent: trimmed, text: trimmed, name: trimmed });
+    }
+    setEditingClipId(null);
+    setEditOriginalText('');
+  }, [editingClipId, editOriginalText, onClipUpdate]);
+
+  // Cancel editing
+  const handleEditCancel = useCallback(() => {
+    setEditingClipId(null);
+    setEditOriginalText('');
+  }, []);
+
+  // Exit edit mode if selected clip changes away
+  useEffect(() => {
+    if (editingClipId && (!selectedClip || selectedClip.id !== editingClipId)) {
+      setEditingClipId(null);
+      setEditOriginalText('');
+    }
+  }, [selectedClip, editingClipId]);
+
   const handleDragStart = useCallback((e, clip, bounds) => {
+    if (editingClipId) return;
     if (!overlayRootRef.current) return;
     const rect = overlayRootRef.current.getBoundingClientRect();
     setIsDragging(true);
     setDragState({ clip, bounds, startX: e.clientX - rect.left, startY: e.clientY - rect.top, initialX: clip.x || 0, initialY: clip.y || 0 });
     e.preventDefault();
-  }, []);
+  }, [editingClipId]);
 
   const handleMouseMove = useCallback((e) => {
     if (isDragging && dragState && overlayRootRef.current) {
@@ -292,6 +442,7 @@ const InteractiveOverlay = ({
   }, []);
 
   const handleTransformStart = useCallback((e, mode, bounds) => {
+    if (editingClipId) return;
     if (!selectedClip || !bounds) return;
     e.stopPropagation();
     e.preventDefault();
@@ -302,7 +453,7 @@ const InteractiveOverlay = ({
     setInitialTransform({ x: selectedClip.x || 0, y: selectedClip.y || 0, scale: selectedClip.scale || 100, rotation: selectedClip.rotation || 0, centerX: bounds.centerX ?? ((bounds.x ?? 0) + bounds.width / 2), centerY: bounds.centerY ?? ((bounds.y ?? 0) + bounds.height / 2) });
     setIsTransforming(true);
     setTransformMode(mode);
-  }, [selectedClip]);
+  }, [selectedClip, editingClipId]);
 
   useEffect(() => {
     if (isDragging || isTransforming) {
@@ -316,10 +467,19 @@ const InteractiveOverlay = ({
   }, [isDragging, isTransforming, handleMouseMove, handleMouseUp]);
 
   const handleOverlayClick = useCallback((e) => {
-    if (overlayRootRef.current && e.target === overlayRootRef.current) onClipSelect(null);
-  }, [onClipSelect]);
+    if (overlayRootRef.current && e.target === overlayRootRef.current) {
+      if (editingClipId) {
+        // Let the blur handler on the editor save the text
+        setEditingClipId(null);
+        setEditOriginalText('');
+      }
+      onClipSelect(null);
+    }
+  }, [onClipSelect, editingClipId]);
 
   if (!width || !height || !renderedWidth || !renderedHeight) return null;
+
+  const isEditing = editingClipId && selectedClip?.id === editingClipId && selectedBounds;
 
   return (
     <div
@@ -338,10 +498,10 @@ const InteractiveOverlay = ({
       }}
     >
       {visibleClipBounds.map(({ clip, bounds, layerZ }) => (
-        <DraggableClip key={clip.id} clip={clip} bounds={bounds} layerZ={layerZ} onSelect={onClipSelect} onDragStart={handleDragStart} />
+        <DraggableClip key={clip.id} clip={clip} bounds={bounds} layerZ={layerZ} onSelect={onClipSelect} onDragStart={handleDragStart} onDoubleClick={handleDoubleClick} />
       ))}
 
-      {selectedClip && selectedBounds && (
+      {selectedClip && selectedBounds && !isEditing && (
         <div style={{
           position: 'absolute',
           left: `${selectedBounds.left ?? 0}px`,
@@ -361,6 +521,17 @@ const InteractiveOverlay = ({
           <TransformHandle type="rotate" position="top-center" onMouseDown={(e) => handleTransformStart(e, 'rotate', selectedBounds)} />
           <div style={{ position: 'absolute', top: '-28px', left: '50%', transform: 'translateX(-50%)', width: '2px', height: '28px', background: '#d4d4d8', pointerEvents: 'none' }} />
         </div>
+      )}
+
+      {isEditing && (
+        <InlineTextEditor
+          clip={selectedClip}
+          bounds={selectedBounds}
+          scaleX={scaleX}
+          onSave={handleEditSave}
+          onCancel={handleEditCancel}
+          getFontFamily={getFontFamily}
+        />
       )}
     </div>
   );

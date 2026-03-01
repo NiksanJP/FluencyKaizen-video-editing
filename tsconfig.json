@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -10,8 +12,21 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "types": ["bun-types"]
+    "types": [
+      "bun-types"
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx"
   },
-  "include": ["pipeline/**/*.ts"],
-  "exclude": ["node_modules", "dist", "remotion"]
+  "include": [
+    "pipeline/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "remotion"
+  ]
 }

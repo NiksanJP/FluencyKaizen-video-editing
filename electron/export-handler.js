@@ -77,6 +77,7 @@ function startAssetServer() {
 
     server.listen(0, '127.0.0.1', () => {
       const port = server.address().port
+      console.log(`[export] Asset server started on http://127.0.0.1:${port}`)
       resolve({
         server,
         port,
@@ -89,20 +90,46 @@ function startAssetServer() {
 }
 
 /**
- * Resolve asset:// URLs in track data to http://localhost URLs
- * served by the temporary asset server.
+ * Resolve asset://, file://, and bare filesystem paths in track data
+ * to http://127.0.0.1 URLs served by the temporary asset server.
  */
 function resolveAssetUrls(tracks, serverPort) {
+  const projectsResolved = path.resolve(PROJECTS_DIR)
+
   return tracks.map((track) => ({
     ...track,
     clips: (track.clips || []).map((clip) => {
       const resolved = { ...clip }
       for (const key of ['src', 'path']) {
-        if (typeof resolved[key] === 'string' && resolved[key].startsWith('asset://')) {
-          const url = new URL(resolved[key])
+        const val = resolved[key]
+        if (typeof val !== 'string') continue
+
+        // Already an HTTP URL — nothing to do
+        if (val.startsWith('http://') || val.startsWith('https://')) continue
+
+        if (val.startsWith('asset://')) {
+          const url = new URL(val)
           const projectId = url.hostname
-          const fileName = url.pathname.slice(1) // keep encoded
+          const fileName = url.pathname.slice(1)
           resolved[key] = `http://127.0.0.1:${serverPort}/projects/${projectId}/assets/${fileName}`
+          console.log(`[export] Resolved asset:// URL: ${val} → ${resolved[key]}`)
+        } else if (val.startsWith('file://')) {
+          const fsPath = fileURLToPath(val)
+          const relative = path.relative(projectsResolved, fsPath)
+          if (!relative.startsWith('..')) {
+            resolved[key] = `http://127.0.0.1:${serverPort}/projects/${relative}`
+            console.log(`[export] Resolved file:// URL: ${val} → ${resolved[key]}`)
+          } else {
+            console.warn(`[export] file:// URL outside projects dir, cannot serve: ${val}`)
+          }
+        } else if (path.isAbsolute(val)) {
+          const relative = path.relative(projectsResolved, val)
+          if (!relative.startsWith('..')) {
+            resolved[key] = `http://127.0.0.1:${serverPort}/projects/${relative}`
+            console.log(`[export] Resolved absolute path: ${val} → ${resolved[key]}`)
+          } else {
+            console.warn(`[export] Absolute path outside projects dir, cannot serve: ${val}`)
+          }
         }
       }
       return resolved
@@ -168,6 +195,18 @@ export function registerExportHandlers() {
       sendProgress({ stage: 'rendering', percent: 20, message: 'Preparing render...' })
 
       const resolvedTracks = resolveAssetUrls(tracks, assetServer.port)
+
+      // Warn about any clips that still have non-HTTP media URLs
+      for (const track of resolvedTracks) {
+        for (const clip of track.clips || []) {
+          for (const key of ['src', 'path']) {
+            const val = clip[key]
+            if (typeof val === 'string' && val && !val.startsWith('http://') && !val.startsWith('https://')) {
+              console.warn(`[export] Warning: clip "${clip.name || clip.id}" still has non-HTTP ${key}: ${val}`)
+            }
+          }
+        }
+      }
 
       const composition = await selectComposition({
         serveUrl: cachedBundlePath,
