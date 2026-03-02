@@ -38,7 +38,7 @@ export interface VocabCard {
 /**
  * Whisper output (word-level detail)
  */
-export interface WhisperWord {
+interface WhisperWord {
   word: string;
   start: number;
   end: number;

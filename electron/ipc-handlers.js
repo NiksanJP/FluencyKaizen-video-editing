@@ -322,6 +322,189 @@ function registerCaptionHandlers() {
   })
 }
 
+// ── Silence Detection ────────────────────────────────────────────────────────
+
+function registerSilenceHandlers() {
+  ipcMain.handle('silences:detect', async (event, projectId, assetName, options = {}) => {
+    const sender = event.sender
+    const projectDir = path.join(PROJECTS_DIR, projectId)
+    const assetsDir = path.join(projectDir, 'assets')
+    const assetPath = path.join(assetsDir, assetName)
+    const minSilenceDuration = options.minSilenceDuration ?? 0.3
+
+    // Validate
+    await fs.access(path.join(projectDir, 'project.json'))
+    await fs.access(assetPath)
+
+    const sendProgress = (data) => {
+      if (!sender.isDestroyed()) {
+        sender.send('silences:progress', data)
+      }
+    }
+
+    const childProcesses = []
+    let aborted = false
+
+    const abortHandler = () => { aborted = true }
+    ipcMain.once('silences:abort', abortHandler)
+
+    try {
+      // Check caption cache first — reuse existing Whisper data
+      const cachePath = captionCachePath(projectDir, assetName)
+      let segments = null
+
+      try {
+        const raw = await fs.readFile(cachePath, 'utf-8')
+        const cached = JSON.parse(raw)
+        if (cached && cached.segments && cached.segments.length > 0) {
+          sendProgress({ type: 'progress', stage: 'cached', percent: 80, message: 'Using cached transcription...' })
+          segments = cached.segments
+        }
+      } catch {}
+
+      if (!segments) {
+        // No cache — run Whisper
+        const tempDir = path.join(projectDir, 'silences-temp')
+        try {
+          await fs.mkdir(tempDir, { recursive: true })
+
+          // Stage 1: Extract audio
+          sendProgress({ type: 'progress', stage: 'extracting', percent: 10, message: 'Extracting audio...' })
+
+          const audioPath = path.join(tempDir, 'audio.wav')
+          await new Promise((resolve, reject) => {
+            const proc = spawn('ffmpeg', [
+              '-i', assetPath,
+              '-vn', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1',
+              '-y', audioPath,
+            ])
+            childProcesses.push(proc)
+            let stderr = ''
+            proc.stderr.on('data', (chunk) => { stderr += chunk.toString() })
+            proc.on('close', (code) => {
+              if (aborted) return reject(new Error('Aborted'))
+              if (code !== 0) return reject(new Error(`ffmpeg failed (code ${code}): ${stderr.slice(-200)}`))
+              resolve()
+            })
+            proc.on('error', reject)
+          })
+
+          if (aborted) return { error: 'Aborted' }
+
+          sendProgress({ type: 'progress', stage: 'extracting', percent: 30, message: 'Audio extracted' })
+
+          // Stage 2: Transcribe with Whisper
+          sendProgress({ type: 'progress', stage: 'transcribing', percent: 35, message: 'Transcribing with Whisper...' })
+
+          await new Promise((resolve, reject) => {
+            const proc = spawn('python3', [
+              '-m', 'whisper',
+              audioPath,
+              '--model', 'base',
+              '--output_format', 'json',
+              '--output_dir', tempDir,
+              '--word_timestamps', 'True',
+            ])
+            childProcesses.push(proc)
+            let stderr = ''
+            proc.stderr.on('data', (chunk) => {
+              stderr += chunk.toString()
+              if (stderr.includes('%|')) {
+                sendProgress({ type: 'progress', stage: 'transcribing', percent: 55, message: 'Whisper processing...' })
+              }
+            })
+            proc.on('close', (code) => {
+              if (aborted) return reject(new Error('Aborted'))
+              if (code !== 0) return reject(new Error(`Whisper failed (code ${code}): ${stderr.slice(-200)}`))
+              resolve()
+            })
+            proc.on('error', reject)
+          })
+
+          if (aborted) return { error: 'Aborted' }
+
+          sendProgress({ type: 'progress', stage: 'transcribing', percent: 75, message: 'Transcription complete' })
+
+          // Read Whisper output
+          let transcript
+          const whisperPath = path.join(tempDir, 'audio.json')
+          const transcriptPath = path.join(tempDir, 'transcript.json')
+          try {
+            transcript = JSON.parse(await fs.readFile(whisperPath, 'utf-8'))
+          } catch {
+            try {
+              transcript = JSON.parse(await fs.readFile(transcriptPath, 'utf-8'))
+            } catch {
+              throw new Error('Could not find Whisper output file')
+            }
+          }
+
+          segments = (transcript.segments || []).map((seg) => ({
+            text: (seg.text || '').trim(),
+            startTime: seg.start,
+            endTime: seg.end,
+            words: (seg.words || []).map((w) => ({
+              word: (w.word || w.text || '').trim(),
+              start: w.start,
+              end: w.end,
+            })),
+          }))
+
+          // Cache for future caption/silence use
+          try {
+            await fs.mkdir(path.dirname(cachePath), { recursive: true })
+            await fs.writeFile(cachePath, JSON.stringify({ videoFile: assetName, segments }, null, 2))
+          } catch (cacheErr) {
+            console.warn('Failed to cache transcription:', cacheErr.message)
+          }
+        } finally {
+          try {
+            await fs.rm(tempDir, { recursive: true, force: true })
+          } catch {}
+        }
+      }
+
+      if (aborted) return { error: 'Aborted' }
+
+      sendProgress({ type: 'progress', stage: 'analyzing', percent: 85, message: 'Computing speech segments...' })
+
+      // Compute speech segments — merge adjacent where gap < minSilenceDuration
+      const rawSpeech = segments
+        .filter((s) => s.startTime != null && s.endTime != null)
+        .map((s) => ({ start: s.startTime, end: s.endTime }))
+        .sort((a, b) => a.start - b.start)
+
+      const merged = []
+      for (const seg of rawSpeech) {
+        if (merged.length === 0) {
+          merged.push({ ...seg })
+          continue
+        }
+        const last = merged[merged.length - 1]
+        if (seg.start - last.end < minSilenceDuration) {
+          last.end = Math.max(last.end, seg.end)
+        } else {
+          merged.push({ ...seg })
+        }
+      }
+
+      sendProgress({ type: 'complete', data: { segments: merged } })
+      return { segments: merged }
+    } catch (error) {
+      if (!aborted) {
+        console.error('Silence detection error:', error)
+        sendProgress({ type: 'error', message: error.message || 'Unknown error' })
+      }
+      for (const cp of childProcesses) {
+        try { cp.kill() } catch {}
+      }
+      throw error
+    } finally {
+      ipcMain.removeListener('silences:abort', abortHandler)
+    }
+  })
+}
+
 // ── PTY ─────────────────────────────────────────────────────────────────────
 
 function registerPtyHandlers() {
@@ -444,6 +627,7 @@ export function registerAllHandlers() {
   registerProjectHandlers()
   registerAssetHandlers()
   registerCaptionHandlers()
+  registerSilenceHandlers()
   registerPtyHandlers()
   registerFileWatcherHandlers()
   registerExportHandlers()

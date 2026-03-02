@@ -8,6 +8,7 @@ const BaseTrackItem = React.memo(({
   trackId,
   onSelect,
   onDoubleClick,
+  onContextMenu,
   isSelected,
   children,
   baseColor,
@@ -67,6 +68,12 @@ const BaseTrackItem = React.memo(({
       onDoubleClick={(event) => {
         event.stopPropagation();
         if (onDoubleClick) onDoubleClick(clip);
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onSelect(clip.id);
+        if (onContextMenu) onContextMenu(event, clip, trackId);
       }}
     >
       <div style={itemContentStyle} className="h-full w-full flex items-stretch">

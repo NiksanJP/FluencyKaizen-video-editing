@@ -1,0 +1,87 @@
+Unused files (30)
+.next/types/routes.d.ts                          
+.next/types/validator.ts                         
+electron/preload.js                              
+next-env.d.ts                                    
+remotion/launch-studio.ts                        
+remotion/remotion.config.ts                      
+remotion/src/clip-data-all.ts                    
+remotion/src/clip-data.ts                        
+remotion/src/ClipComposition.tsx                 
+remotion/src/components/BilingualCaption.tsx     
+remotion/src/components/HighlightedText.tsx      
+remotion/src/components/HookTitle.tsx            
+remotion/src/components/VocabCard.tsx            
+remotion/src/index.tsx                           
+remotion/src/Root.tsx                            
+remotion/watch-clip.ts                           
+src/components/ui/alert-dialog.jsx               
+src/components/ui/alert.jsx                      
+src/components/ui/aspect-ratio.jsx               
+src/components/ui/avatar.jsx                     
+src/components/ui/checkbox.jsx                   
+src/components/ui/command.jsx                    
+src/components/ui/dropdown-menu.jsx              
+src/components/ui/field.jsx                      
+src/components/ui/form.jsx                       
+src/components/ui/input-group.jsx                
+src/components/ui/shadcn-io/typing-text/index.jsx
+src/components/ui/tabs.jsx                       
+src/components/ui/textarea.jsx                   
+src/remotion/RenderEntry.jsx                     
+Unused dependencies (9)
+@radix-ui/react-alert-dialog   package.json:22:6
+@radix-ui/react-aspect-ratio   package.json:23:6
+@radix-ui/react-checkbox       package.json:24:6
+@radix-ui/react-context-menu   package.json:25:6
+@radix-ui/react-dropdown-menu  package.json:27:6
+@radix-ui/react-label          package.json:28:6
+@radix-ui/react-tabs           package.json:33:6
+@remotion/media-utils          package.json:38:6
+uuid                           package.json:58:6
+Unlisted binaries (1)
+remotion  remotion/preview-all.ts
+Unused exports (40)
+analyzeWithGemini        function  pipeline/analyze.ts:11:23               
+TimelineComposition                src/components/RemotionPlayer.jsx:475:14
+badgeVariants                      src/components/ui/badge.jsx:31:17       
+buttonVariants                     src/components/ui/button.jsx:48:18      
+CardFooter                         src/components/ui/card.jsx:60:28        
+DialogPortal                       src/components/ui/dialog.jsx:85:3       
+DialogOverlay                      src/components/ui/dialog.jsx:86:3       
+DialogClose                        src/components/ui/dialog.jsx:87:3       
+DialogTrigger                      src/components/ui/dialog.jsx:88:3       
+ScrollBar                          src/components/ui/scroll-area.jsx:62:22 
+SelectGroup                        src/components/ui/select.jsx:111:3      
+SelectLabel                        src/components/ui/select.jsx:115:3      
+SelectSeparator                    src/components/ui/select.jsx:117:3      
+SelectScrollUpButton               src/components/ui/select.jsx:118:3      
+SelectScrollDownButton             src/components/ui/select.jsx:119:3      
+SheetPortal                        src/components/ui/sheet.jsx:100:3       
+SheetOverlay                       src/components/ui/sheet.jsx:101:3       
+SheetTrigger                       src/components/ui/sheet.jsx:102:3       
+SheetClose                         src/components/ui/sheet.jsx:103:3       
+SheetFooter                        src/components/ui/sheet.jsx:106:3       
+SidebarGroupAction                 src/components/ui/sidebar.jsx:609:3     
+SidebarInput                       src/components/ui/sidebar.jsx:613:3     
+SidebarInset                       src/components/ui/sidebar.jsx:614:3     
+SidebarMenuAction                  src/components/ui/sidebar.jsx:616:3     
+SidebarMenuBadge                   src/components/ui/sidebar.jsx:617:3     
+SidebarMenuSkeleton                src/components/ui/sidebar.jsx:620:3     
+SidebarMenuSub                     src/components/ui/sidebar.jsx:621:3     
+SidebarMenuSubButton               src/components/ui/sidebar.jsx:622:3     
+SidebarMenuSubItem                 src/components/ui/sidebar.jsx:623:3     
+SidebarSeparator                   src/components/ui/sidebar.jsx:626:3     
+SidebarTrigger                     src/components/ui/sidebar.jsx:627:3     
+splitText                function  src/utils/captionUtils.js:7:17          
+CAPTION_STYLE                      src/utils/captionUtils.js:160:14        
+formatDuration                     src/utils/formatUtils.js:8:14           
+formatDate                         src/utils/formatUtils.js:15:14          
+getClipTimelineStart               src/utils/timelineUtils.js:9:14         
+getClipTimelineDuration            src/utils/timelineUtils.js:11:14        
+SORT_OPTIONS                       src/utils/uploadSorting.js:1:14         
+getComparableDate                  src/utils/uploadSorting.js:14:14        
+compareUploads                     src/utils/uploadSorting.js:24:14        
+Unused exported types (1)
+WhisperWord  interface  pipeline/types.ts:41:18
+Configuration hints (1)

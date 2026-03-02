@@ -1,17 +1,10 @@
-export const SORT_OPTIONS = [
-  { value: 'date_desc', label: 'Date Added (Newest)' },
-  { value: 'date_asc', label: 'Date Added (Oldest)' },
-  { value: 'name_asc', label: 'Name (A-Z)' },
-  { value: 'name_desc', label: 'Name (Z-A)' },
-];
-
 const parseDate = (value) => {
   if (!value) return null;
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
 };
 
-export const getComparableDate = (upload) => {
+const getComparableDate = (upload) => {
   if (!upload) return null;
   const candidates = [upload.addedAt, upload.createdAt, upload.modifiedAt, upload.completedAt];
   for (const candidate of candidates) {
@@ -21,7 +14,7 @@ export const getComparableDate = (upload) => {
   return null;
 };
 
-export const compareUploads = (a, b, sortOption = 'date_desc') => {
+const compareUploads = (a, b, sortOption = 'date_desc') => {
   switch (sortOption) {
     case 'name_asc': {
       const aName = (a?.name || '').toLowerCase();

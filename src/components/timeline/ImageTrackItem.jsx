@@ -4,7 +4,7 @@ import BaseTrackItem from './BaseTrackItem';
 
 const DEFAULT_CLIP_COLOR = 'hsl(240, 3.7%, 15.9%)';
 
-const ImageTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, isSelected }) => {
+const ImageTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, onContextMenu, isSelected }) => {
   const baseColor = clip.color || DEFAULT_CLIP_COLOR;
 
   return (
@@ -13,6 +13,7 @@ const ImageTrackItem = React.memo(({ clip, trackId, onSelect, onDoubleClick, isS
       trackId={trackId}
       onSelect={onSelect}
       onDoubleClick={onDoubleClick}
+      onContextMenu={onContextMenu}
       isSelected={isSelected}
       baseColor={baseColor}
     >

@@ -6,9 +6,9 @@ export const isStaticAsset = (clip) => {
   return clip?.type === 'text' || clip?.type === 'image';
 };
 
-export const getClipTimelineStart = (clip) => Math.max(0, Number(clip?.start) || 0);
+const getClipTimelineStart = (clip) => Math.max(0, Number(clip?.start) || 0);
 
-export const getClipTimelineDuration = (clip) => Math.max(Number(clip?.duration) || 0, MIN_CLIP_DURATION);
+const getClipTimelineDuration = (clip) => Math.max(Number(clip?.duration) || 0, MIN_CLIP_DURATION);
 
 export const getSafePlacementWithinTrack = (track, clipId, desiredStart, duration) => {
   if (!track) return null;

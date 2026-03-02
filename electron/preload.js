@@ -35,6 +35,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
   },
 
+  // Silences
+  silences: {
+    detect: (projectId, assetName, options) =>
+      ipcRenderer.invoke('silences:detect', projectId, assetName, options),
+    abort: () => ipcRenderer.send('silences:abort'),
+    onProgress: (callback) => {
+      const handler = (_event, data) => callback(data)
+      ipcRenderer.on('silences:progress', handler)
+      return () => ipcRenderer.removeListener('silences:progress', handler)
+    },
+  },
+
   // Export
   export: {
     render: (options) => ipcRenderer.invoke('export:render', options),

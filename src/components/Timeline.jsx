@@ -9,6 +9,7 @@ import {
   SkipForward,
   Trash2,
   Scissors,
+  Volume2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TrackItem from '@/components/timeline/TrackItem';
@@ -119,6 +120,7 @@ const TimelineRows = ({
   selectedClipIds = [],
   onClipSelect,
   onClipDoubleClick,
+  onClipContextMenu,
   onSeek,
   currentFrame,
   fps,
@@ -610,6 +612,7 @@ const TimelineRows = ({
                               trackId={track.id}
                               onSelect={onClipSelect}
                               onDoubleClick={onClipDoubleClick}
+                              onContextMenu={onClipContextMenu}
                               isSelected={selectedClipIdsSet.has(clip.id)}
                             />
                           );
@@ -677,6 +680,7 @@ export default function Timeline({
   onTrackVisibilityChange,
   hiddenTrackIds,
   onClipDoubleClick,
+  onRemoveSilences,
 }) {
   const safeFps = Math.max(fps || 30, 1);
   const tracks = incomingTracks.length > 0 ? incomingTracks : [];
@@ -968,6 +972,20 @@ export default function Timeline({
     return currentTime > clipStart + 0.1 && currentTime < clipEnd - 0.1;
   }, [activeClip, currentFrame, safeFps]);
 
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const handleClipContextMenu = useCallback((event, clip, trackId) => {
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      clip,
+      trackId,
+    });
+  }, []);
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
   const handleSplitClip = useCallback(() => {
     if (!canSplitSelectedClip || !onTracksChange || !activeClip) return;
     const currentTime = currentFrame / safeFps;
@@ -1126,6 +1144,7 @@ export default function Timeline({
           selectedClipIds={activeSelectedClipIds}
           onClipSelect={handleClipIdsSelect}
           onClipDoubleClick={onClipDoubleClick}
+          onClipContextMenu={handleClipContextMenu}
           onSeek={onSeek}
           currentFrame={currentFrame}
           fps={safeFps}
@@ -1138,6 +1157,56 @@ export default function Timeline({
           onClipTrackChange={null}
         />
       </TimelineContext>
+
+      {/* Clip context menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-[200]"
+            onClick={closeContextMenu}
+            onContextMenu={(e) => { e.preventDefault(); closeContextMenu(); }}
+          />
+          <div
+            className="fixed z-[201] min-w-[160px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            {(contextMenu.clip.type === 'video' || contextMenu.clip.type === 'audio') && onRemoveSilences && (
+              <button
+                className="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={() => {
+                  onRemoveSilences(contextMenu.clip, contextMenu.trackId);
+                  closeContextMenu();
+                }}
+              >
+                <Volume2 className="w-4 h-4" />
+                Remove Silences
+              </button>
+            )}
+            <button
+              className="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+              onClick={() => {
+                handleSplitClip();
+                closeContextMenu();
+              }}
+              disabled={!canSplitSelectedClip}
+              style={!canSplitSelectedClip ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+            >
+              <Scissors className="w-4 h-4" />
+              Split at Playhead
+            </button>
+            <button
+              className="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => {
+                handleDeleteClip();
+                closeContextMenu();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

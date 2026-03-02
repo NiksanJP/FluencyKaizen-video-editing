@@ -250,6 +250,7 @@ export function registerExportHandlers() {
       return { success: true, outputPath }
     } catch (error) {
       console.error('Export error:', error)
+      cachedBundlePath = null
       sendProgress({ stage: 'error', percent: 0, message: error.message })
       throw error
     } finally {

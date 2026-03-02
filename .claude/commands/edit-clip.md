@@ -1,80 +1,60 @@
-# /edit-clip — Edit clip.json via natural language
+# /edit-clip — Edit project.json via natural language
 
 ## Usage
 ```
-/edit-clip [video-name]
-[natural language instruction]
+/edit-clip [natural language instruction]
 ```
 
 ## Description
-Allows natural language editing of the clip.json file. You describe what you want to change, and Claude updates the JSON accordingly.
+Edit the current project's `project.json` using plain English. Describe what you want to change and Claude will read the file, apply the change, and write it back. The editor reloads automatically.
 
 ## Examples
 
-### Change the hook title
+### Move a clip later
 ```
-/edit-clip example
-Change the English hook title to "Master These Business Phrases Today"
-```
-
-### Move the clip segment
-```
-/edit-clip example
-Start the clip 5 seconds later (at 12 seconds instead of 7)
+/edit-clip Move the first video clip 2 seconds later
 ```
 
-### Update vocabulary cards
+### Add a text overlay
 ```
-/edit-clip example
-Remove the third vocabulary card and add a new one for "ballpark figure"
-```
-
-### Adjust caption timing
-```
-/edit-clip example
-Make the first two subtitles appear together for 3 seconds
+/edit-clip Add a white bold title "Business English" at the top of the screen for 5 seconds
 ```
 
-### Highlight different words
+### Change track visibility
 ```
-/edit-clip example
-In the first subtitle, highlight "business" and "strategy" in yellow instead of "deal"
+/edit-clip Hide the captions track
+```
+
+### Scale an image
+```
+/edit-clip Scale the image clip on track 2 to 150%
+```
+
+### Delete a clip
+```
+/edit-clip Remove the second clip from the video track
+```
+
+### Change text content
+```
+/edit-clip Change the caption text to "新しいテキスト"
+```
+
+### Adjust opacity
+```
+/edit-clip Set opacity of the image clip to 80%
 ```
 
 ## Process
-1. Claude reads the current `output/[name]/clip.json`
-2. Parses the JSON into the ClipData structure
-3. Applies your requested changes
-4. Validates that the result matches the schema:
-   - Clip duration remains 30-60 seconds
-   - All timestamps are valid (in seconds, floats OK)
-   - Subtitle segments cover the full clip with no gaps
-   - Highlight words actually exist in the Japanese text
-   - Vocab cards have all required fields
-5. Writes the updated JSON back
-6. Confirms the changes and shows a preview
+1. Read `$FLUENCYKAIZEN_PROJECTS_DIR/$FLUENCYKAIZEN_PROJECT_ID/project.json`
+2. Parse and apply the requested change
+3. Update `lastModified` to `Date.now()`
+4. Sync all frame values: `startFrame = Math.round(start * fps)`
+5. Write the updated JSON back
+6. Confirm what changed
 
-## Schema Constraints
-
-Be aware these limits when editing:
-
-- **Clip duration**: Must stay between 30-60 seconds
-- **Subtitles**: Must cover the entire clip from startTime to endTime with no gaps
-- **Highlights**: Must be words/phrases that actually appear in the Japanese subtitle text
-- **Vocab cards**: Need triggerTime, duration, category, phrase, literal, nuance
-- **All timestamps**: In seconds (floats like 1.5 are OK)
-
-## Safe Editing
-
-You can safely:
-- Change any text (English, Japanese, category names)
-- Move clip boundaries (keeping 30-60s length)
-- Add/remove/reorder subtitles (maintaining coverage)
-- Add/remove/reorder vocab cards
-- Change highlight words (as long as they exist in the text)
-
-Avoid:
-- Creating gaps in subtitle coverage
-- Using highlight words that don't exist in the Japanese text
-- Making the clip shorter than 30s or longer than 60s
-- Removing required fields from vocab cards
+## Rules
+- Always update `lastModified`
+- Keep seconds and frames in sync
+- Clip/track IDs must stay unique
+- Track type must match its clips' type

@@ -18,6 +18,7 @@ import TextTemplatesPanel from '@/components/panels/TextTemplatesPanel'
 import ExportsPanel from '@/components/panels/ExportsPanel'
 import SettingsPanel from '@/components/panels/SettingsPanel'
 import { useProject } from '@/contexts/ProjectContext'
+import { silences } from '@/lib/api'
 
 const DEFAULT_TIMELINE_DURATION = 30 // seconds
 
@@ -246,6 +247,105 @@ export default function VideoEditor({ onBack }) {
       return next
     })
   }, [])
+
+  const handleRemoveSilences = useCallback(async (clip, trackId) => {
+    if (!project?.id) return
+
+    // Parse asset name from src URL (asset://projectId/filename.ext)
+    const srcUrl = clip.src || clip.path || ''
+    const assetMatch = srcUrl.match(/asset:\/\/[^/]+\/(.+)$/)
+    if (!assetMatch) {
+      toast.error('Cannot determine asset file for this clip')
+      return
+    }
+    const assetName = decodeURIComponent(assetMatch[1])
+
+    const toastId = toast.loading('Detecting silences...')
+
+    try {
+      const result = await silences.detect(project.id, assetName, (event) => {
+        if (event.type === 'progress') {
+          toast.loading(event.message || 'Processing...', { id: toastId })
+        }
+      })
+
+      if (!result || result.error === 'Aborted') {
+        toast.dismiss(toastId)
+        return
+      }
+
+      const speechSegments = result.segments || []
+
+      if (speechSegments.length === 0) {
+        toast.info('No speech detected — clip unchanged', { id: toastId })
+        return
+      }
+
+      // Filter segments to clip's source range (handles trimmed clips)
+      const clipSourceStart = clip.sourceStart ?? 0
+      const clipSourceEnd = clip.sourceEnd ?? (clipSourceStart + (clip.duration || 0))
+      const playbackRate = Math.max(clip.playbackRate || 1, 0.01)
+
+      const clampedSegments = speechSegments
+        .map((seg) => ({
+          start: Math.max(seg.start, clipSourceStart),
+          end: Math.min(seg.end, clipSourceEnd),
+        }))
+        .filter((seg) => seg.end > seg.start + 0.05) // filter tiny/empty segments
+
+      if (clampedSegments.length === 0) {
+        toast.info('No speech found in this clip range — clip unchanged', { id: toastId })
+        return
+      }
+
+      if (clampedSegments.length === 1) {
+        const seg = clampedSegments[0]
+        // Check if the single segment basically covers the whole clip
+        if (Math.abs(seg.start - clipSourceStart) < 0.1 && Math.abs(seg.end - clipSourceEnd) < 0.1) {
+          toast.info('No silences detected — clip unchanged', { id: toastId })
+          return
+        }
+      }
+
+      // Build sub-clips placed contiguously on the timeline
+      const clipTimelineStart = clip.start || 0
+      let timelinePos = clipTimelineStart
+      const now = Date.now()
+
+      const subClips = clampedSegments.map((seg, i) => {
+        const sourceDuration = seg.end - seg.start
+        const timelineDuration = sourceDuration / playbackRate
+        const subClip = {
+          ...clip,
+          id: `${clip.id}_rs${i}_${now}`,
+          start: timelinePos,
+          duration: sourceDuration,
+          startFrame: Math.round(timelinePos * fps),
+          durationFrames: Math.round(sourceDuration * fps),
+          sourceStart: seg.start,
+          sourceEnd: seg.end,
+        }
+        timelinePos += timelineDuration
+        return subClip
+      })
+
+      // Replace original clip in the track
+      handleTracksChange((prevTracks) =>
+        prevTracks.map((track) => {
+          if (track.id !== trackId) return track
+          const clipIndex = track.clips.findIndex((c) => c.id === clip.id)
+          if (clipIndex === -1) return track
+          const newClips = [...track.clips]
+          newClips.splice(clipIndex, 1, ...subClips)
+          return { ...track, clips: newClips }
+        })
+      )
+
+      toast.success(`Removed silences — ${subClips.length} clips created`, { id: toastId })
+    } catch (err) {
+      toast.error(`Failed to detect silences: ${err.message}`, { id: toastId })
+    }
+  }, [project?.id, fps, handleTracksChange])
 
   const probeMediaDimensions = useCallback((src, type) => {
     return new Promise((resolve) => {
@@ -509,6 +609,7 @@ export default function VideoEditor({ onBack }) {
                     onSkip={handleSkip}
                     onTrackVisibilityChange={handleTrackVisibilityChange}
                     hiddenTrackIds={hiddenTrackIds}
+                    onRemoveSilences={handleRemoveSilences}
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>

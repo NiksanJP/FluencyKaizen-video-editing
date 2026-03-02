@@ -1,5 +1,5 @@
 import { Composition, registerRoot } from 'remotion';
-import { TimelineComposition } from '../components/RemotionPlayer';
+import { TimelineComposition } from './TimelineComposition';
 
 const RemotionRoot = () => {
   return (

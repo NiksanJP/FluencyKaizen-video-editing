@@ -4,7 +4,7 @@
  * @param {number} maxChars
  * @returns {string[]}
  */
-export function splitText(text, maxChars) {
+function splitText(text, maxChars) {
   const normalizedText = (text || '').trim()
   const normalizedMaxChars = Math.max(1, Math.floor(Number(maxChars) || 1))
 
@@ -157,7 +157,7 @@ export function splitCaptions(captionList, maxChars) {
 /**
  * Default text style for captions on a 1080x1920 canvas.
  */
-export const CAPTION_STYLE = {
+const CAPTION_STYLE = {
   fontFamily: 'Inter',
   fontWeight: 700,
   fontSize: 42,

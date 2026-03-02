@@ -69,6 +69,32 @@ export const captions = {
   abort: () => isElectron ? api.captions.abort() : undefined,
 }
 
+export const silences = {
+  /**
+   * Detect speech segments using Whisper (reuses caption cache if available).
+   * @param {string} projectId
+   * @param {string} assetName
+   * @param {(event: object) => void} onProgress
+   * @param {object} [options]
+   * @returns {Promise<{ segments: Array<{ start: number, end: number }> }>}
+   */
+  async detect(projectId, assetName, onProgress, options) {
+    if (!isElectron) return { segments: [] }
+    const removeListener = api.silences.onProgress(onProgress)
+    try {
+      const result = await api.silences.detect(projectId, assetName, options)
+      if (result && !result.error) {
+        onProgress({ type: 'complete', data: result })
+      }
+      return result
+    } finally {
+      removeListener()
+    }
+  },
+
+  abort: () => isElectron ? api.silences.abort() : undefined,
+}
+
 export const exportVideo = {
   /**
    * Render the timeline to MP4.
