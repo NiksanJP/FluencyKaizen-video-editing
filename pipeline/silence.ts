@@ -259,9 +259,9 @@ export async function removeSilence(
   const originalDuration = clipEnd - clipStart;
   const compressedDuration = originalDuration - totalRemoved;
 
-  if (compressedDuration < 10) {
+  if (compressedDuration < 5) {
     console.log(
-      `⏭️  Compressed duration too short (${compressedDuration.toFixed(1)}s < 10s) — skipping`
+      `⏭️  Compressed duration too short (${compressedDuration.toFixed(1)}s < 5s) — skipping`
     );
     return null;
   }

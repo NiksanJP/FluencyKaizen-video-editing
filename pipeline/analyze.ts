@@ -106,6 +106,7 @@ ${transcriptText}
    - Contains clear, useful business English phrases
    - Has good bilingual balance (EN + JP)
    - Would engage viewers on TikTok/YouTube Shorts
+   - **Duration: MUST be 30-60 seconds long** (endTime - startTime ≥ 30). If the full video is short, use the entire video. Never select less than 15 seconds.
 
 ⚠️ TIMESTAMP RULE: All timestamps (subtitle startTime/endTime, vocabCard triggerTime) must use ABSOLUTE timestamps matching the input transcript — NOT relative to clip start. If your selected clip starts at 120s, the first subtitle startTime should be ~120, not 0.
 
@@ -140,12 +141,14 @@ ${hasWordTimestamps ? `
    ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words Japanese learners already know (e.g. "meeting", "schedule", "team")
 
 4. **Hook Title**: Create a catchy 1-line title in both EN and JA:
-   ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting:
-   - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total. Count each character (kanji, kana, punctuation) as 1.
-     Good: "英語で交渉術" (6 chars ✓), "会議の表現" (5 chars ✓)
+   - Use 1-2 relevant emojis to make it visually engaging (e.g. 📊💼🎯🔥✅🗣️)
+   - Make it feel like a YouTube Shorts thumbnail — exciting, curiosity-inducing
+   ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting (emojis count as 1):
+   - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total. Count each character (kanji, kana, punctuation, emoji) as 1.
+     Good: "📊英語で交渉術" (7 chars ✓), "🎯会議の表現" (6 chars ✓)
      Bad: "ビジネス英語の重要フレーズ" (13 chars ✗ — TOO LONG)
    - English: ≤ ${LIMITS.hookTitle.en} characters, benefit-focused, max 6 words
-     Good: "Negotiate Like a Native" (23 chars ✓)
+     Good: "Negotiate Like a Native 🔥" (25 chars ✓)
      Bad: "Essential Business Phrases You Need to Know Today" (50 chars ✗ — TOO LONG)
 
 ## Output Schema (MUST be valid JSON)

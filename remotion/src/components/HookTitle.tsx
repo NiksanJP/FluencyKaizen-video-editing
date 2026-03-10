@@ -7,8 +7,7 @@ interface HookTitleProps {
 
 /**
  * Persistent hook title at top center
- * Large, bold, white text with black stroke
- * Visible for entire clip duration
+ * Yellow bold text on black background, matching thumbnail-style design
  */
 export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
   const s = styleConfig.hookTitle;
@@ -25,27 +24,37 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        paddingLeft: s.paddingX,
+        paddingRight: s.paddingX,
       }}
     >
-      {/* Japanese title only */}
       <div
         style={{
-          fontFamily: s.fontFamily,
-          fontSize: s.fontSize,
-          color: s.color,
-          fontWeight: s.fontWeight,
-          textAlign: "center",
-          whiteSpace: "nowrap",
-          paddingLeft: s.paddingX,
-          paddingRight: s.paddingX,
+          backgroundColor: "rgba(0, 0, 0, 0.88)",
+          borderRadius: s.borderRadius,
           paddingTop: s.paddingY,
           paddingBottom: s.paddingY,
-          width: "100%",
-          boxSizing: "border-box",
-          textShadow: s.textShadow,
+          paddingLeft: s.paddingX,
+          paddingRight: s.paddingX,
+          textAlign: "center",
+          maxWidth: "100%",
         }}
       >
-        {title.ja}
+        <div
+          style={{
+            fontFamily: s.fontFamily,
+            fontSize: s.fontSize,
+            color: s.color,
+            fontWeight: s.fontWeight,
+            textAlign: "center",
+            lineHeight: s.lineHeight,
+            WebkitTextStroke: s.textStroke,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          } as React.CSSProperties}
+        >
+          {title.ja}
+        </div>
       </div>
     </div>
   );
