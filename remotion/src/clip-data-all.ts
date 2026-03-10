@@ -2,148 +2,194 @@ import type { ClipData } from "../../pipeline/types";
 
 const allClips: Record<string, ClipData> = {
   "001": {
-  "videoFile": "001.mp4",
+  "videoFile": "clip_trimmed.mp4",
   "hookTitle": {
-    "ja": "進捗報告",
-    "en": "Concise Progress Update"
+    "ja": "報告のコツ",
+    "en": "Concise Business Reports"
   },
   "clip": {
-    "startTime": 13.4,
-    "endTime": 43.4
+    "startTime": 0,
+    "endTime": 10.34000000000001
   },
   "subtitles": [
     {
-      "startTime": 13.4,
-      "endTime": 14.3,
-      "en": "Good morning,",
-      "ja": "おはようございます、",
-      "highlights": ["おはようございます"],
-      "enHighlights": []
+      "startTime": 0.1000000000000032,
+      "endTime": 1.780000000000003,
+      "en": "Good morning, Nick.",
+      "ja": "おはよう、ニック。",
+      "highlights": [
+        "おはよう"
+      ],
+      "enHighlights": [
+        "Good morning"
+      ]
     },
     {
-      "startTime": 14.78,
-      "endTime": 15.08,
-      "en": "Nick.",
-      "ja": "ニック。",
-      "highlights": ["ニック"],
-      "enHighlights": []
+      "startTime": 1.9600000000000026,
+      "endTime": 3.1800000000000033,
+      "en": "We're here today to...",
+      "ja": "今日は話し合うために",
+      "highlights": [
+        "話し合う"
+      ],
+      "enHighlights": [
+        "discuss"
+      ]
     },
     {
-      "startTime": 15.26,
-      "endTime": 16.24,
-      "en": "We're here today to",
-      "ja": "今日は〜について",
-      "highlights": ["今日"],
-      "enHighlights": ["today"]
-    },
-    {
-      "startTime": 16.18,
-      "endTime": 16.48,
-      "en": "discuss",
-      "ja": "話し合うために",
-      "highlights": ["話し合う"],
-      "enHighlights": ["discuss"]
-    },
-    {
-      "startTime": 16.54,
-      "endTime": 17.08,
+      "startTime": 3.240000000000002,
+      "endTime": 3.780000000000001,
       "en": "your progress",
-      "ja": "あなたの進捗",
-      "highlights": ["進捗"],
-      "enHighlights": ["progress"]
+      "ja": "あなたの進捗状況を",
+      "highlights": [
+        "進捗状況"
+      ],
+      "enHighlights": [
+        "progress"
+      ]
     },
     {
-      "startTime": 17.24,
-      "endTime": 18,
-      "en": "on the market",
-      "ja": "市場の",
-      "highlights": ["市場"],
-      "enHighlights": ["market"]
+      "startTime": 3.9400000000000013,
+      "endTime": 5.0000000000000036,
+      "en": "on the market research",
+      "ja": "市場調査について",
+      "highlights": [
+        "市場調査"
+      ],
+      "enHighlights": [
+        "market research"
+      ]
     },
     {
-      "startTime": 18,
-      "endTime": 18.66,
-      "en": "research analysis",
-      "ja": "調査分析",
-      "highlights": ["調査分析"],
-      "enHighlights": ["research analysis"]
+      "startTime": 5.060000000000002,
+      "endTime": 5.360000000000003,
+      "en": "analysis",
+      "ja": "分析です",
+      "highlights": [
+        "分析"
+      ],
+      "enHighlights": [
+        "analysis"
+      ]
     },
     {
-      "startTime": 18.9,
-      "endTime": 19.76,
+      "startTime": 5.600000000000001,
+      "endTime": 6.460000000000004,
       "en": "for Project X.",
-      "ja": "プロジェクトXの件です。",
-      "highlights": ["プロジェクトX"],
-      "enHighlights": ["Project X"]
+      "ja": "プロジェクトXの",
+      "highlights": [
+        "プロジェクトX"
+      ],
+      "enHighlights": [
+        "Project X"
+      ]
     },
     {
-      "startTime": 20.34,
-      "endTime": 21.14,
-      "en": "Please provide a",
-      "ja": "提供してください",
-      "highlights": ["提供"],
-      "enHighlights": ["provide"]
+      "startTime": 6.720000000000006,
+      "endTime": 7.760000000000005,
+      "en": "Please provide a concise",
+      "ja": "簡潔に提供してください",
+      "highlights": [
+        "簡潔に"
+      ],
+      "enHighlights": [
+        "concise"
+      ]
     },
     {
-      "startTime": 21.08,
-      "endTime": 21.74,
-      "en": "concise update.",
-      "ja": "簡潔な最新情報。",
-      "highlights": ["簡潔な", "最新情報"],
-      "enHighlights": ["concise update"]
+      "startTime": 7.820000000000007,
+      "endTime": 8.120000000000005,
+      "en": "update.",
+      "ja": "更新を",
+      "highlights": [
+        "更新"
+      ],
+      "enHighlights": [
+        "update"
+      ]
     },
     {
-      "startTime": 22.62,
-      "endTime": 23.42,
-      "en": "Good morning, Mr.",
-      "ja": "おはようございます、",
-      "highlights": ["おはようございます"],
-      "enHighlights": []
+      "startTime": 8.580000000000009,
+      "endTime": 9.620000000000008,
+      "en": "Good morning, Mr. Tanaka.",
+      "ja": "田中さん、おはようございます。",
+      "highlights": [
+        "おはようございます"
+      ],
+      "enHighlights": [
+        "Good morning"
+      ]
     },
     {
-      "startTime": 23.36,
-      "endTime": 23.66,
-      "en": "Tanaka.",
-      "ja": "田中さん。",
-      "highlights": ["田中"],
-      "enHighlights": []
-    },
-    {
-      "startTime": 23.78,
-      "endTime": 24.34,
+      "startTime": 9.740000000000009,
+      "endTime": 10.300000000000008,
       "en": "How are you?",
       "ja": "お元気ですか？",
-      "highlights": ["お元気ですか"],
-      "enHighlights": []
+      "highlights": [
+        "お元気ですか"
+      ],
+      "enHighlights": [
+        "How are you"
+      ]
     }
   ],
   "vocabCards": [
     {
-      "triggerTime": 16.8,
+      "triggerTime": 2.8800000000000026,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "discuss",
+      "literal": "議論する、話し合う",
+      "nuance": "特定の議題や問題について意見を交換したり、解決策を探ったりする行為。会議や打ち合わせでよく使われる基本的なビジネス動詞です。"
+    },
+    {
+      "triggerTime": 3.480000000000004,
       "duration": 3.5,
       "category": "ビジネス英語",
       "phrase": "progress",
-      "literal": "進捗、進み具合",
-      "nuance": "プロジェクトやタスクの進行状況を指すビジネス英語の基本単語。報告や確認の際に頻繁に使われる。"
+      "literal": "進捗、前進",
+      "nuance": "ビジネスにおけるプロジェクトやタスクの進行状況や達成度を指します。上司への報告やチーム内での共有によく使われます。"
     },
     {
-      "triggerTime": 18.1,
+      "triggerTime": 4.400000000000002,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "market research",
-      "literal": "市場調査",
-      "nuance": "ビジネスにおいて、製品やサービスを市場に投入する前に行う情報収集と分析活動。戦略立案の基礎となる。"
+      "phrase": "market research analysis",
+      "literal": "市場調査分析",
+      "nuance": "特定の市場に関する情報を収集・分析し、ビジネス戦略に役立てること。新製品開発やマーケティング戦略立案の基礎となります。"
     },
     {
-      "triggerTime": 21.5,
+      "triggerTime": 7.460000000000004,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "concise update",
-      "literal": "簡潔な最新情報",
-      "nuance": "ビジネスの場で、状況や結果を短く要点を押さえて報告する際に使う表現。長々しい説明を避け、効率的なコミュニケーションを求めるニュアンスがある。"
+      "phrase": "concise",
+      "literal": "簡潔な、要約された",
+      "nuance": "長々と説明せず、要点を短くまとめること。ビジネスシーンでは、会議での発言やメール、報告書などで「簡潔に」伝える能力が重視されます。"
     }
   ],
-  "videoDuration": 30
+  "videoDuration": 10.34000000000001,
+  "silenceGaps": [
+    {
+      "originalStart": 0,
+      "originalEnd": 13.299999999999997,
+      "duration": 13.299999999999997
+    },
+    {
+      "originalStart": 19.92,
+      "originalEnd": 20.24,
+      "duration": 0.31999999999999673
+    },
+    {
+      "originalStart": 22.1,
+      "originalEnd": 22.52,
+      "duration": 0.41999999999999815
+    },
+    {
+      "originalStart": 24.380000000000003,
+      "originalEnd": 40,
+      "duration": 15.619999999999997
+    }
+  ]
 } as unknown as ClipData
 };
 

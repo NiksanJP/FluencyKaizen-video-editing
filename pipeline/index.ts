@@ -14,6 +14,7 @@ import { join, basename, extname, resolve, dirname } from "path";
 import { copyFileSync } from "fs";
 import { transcribe } from "./transcribe.js";
 import { analyzeWithGemini } from "./analyze.js";
+import { removeSilence } from "./silence.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -119,7 +120,18 @@ async function main() {
     const clipData = await analyzeWithGemini(transcript, videoFileName);
     clipData.videoDuration = videoDuration;
 
-    // Step 4: Write outputs
+    // Step 4: Remove silence (jump-cut editing)
+    console.log(`\n✂️  Step 4: Removing silence gaps...`);
+    const silenceResult = await removeSilence(clipData, transcript, inputForTranscribe, outputDir);
+    if (silenceResult) {
+      const totalRemoved = silenceResult.gaps.reduce((acc, g) => acc + g.duration, 0);
+      console.log(`✅ Removed ${silenceResult.gaps.length} gap(s), saved ${totalRemoved.toFixed(1)}s`);
+      console.log(`   Compressed: ${silenceResult.compressedDuration.toFixed(1)}s`);
+    } else {
+      console.log(`⏭️  No silence removed — using original clip`);
+    }
+
+    // Step 5: Write outputs
     const clipPath = join(outputDir, "clip.json");
     await writeFile(clipPath, JSON.stringify(clipData, null, 2));
     console.log(`💾 Saved: ${clipPath}`);

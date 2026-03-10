@@ -16,6 +16,7 @@ export interface ClipData {
   };
   subtitles: SubtitleSegment[];
   vocabCards: VocabCard[];
+  silenceGaps?: SilenceGap[]; // gaps removed by silence detection (audit trail)
 }
 
 export interface SubtitleSegment {
@@ -34,6 +35,12 @@ export interface VocabCard {
   phrase: string;
   literal: string;
   nuance: string;
+}
+
+export interface SilenceGap {
+  originalStart: number; // absolute source video time (seconds)
+  originalEnd: number;   // absolute source video time (seconds)
+  duration: number;      // originalEnd - originalStart
 }
 
 /**

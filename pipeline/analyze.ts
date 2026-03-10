@@ -115,8 +115,8 @@ ${transcriptText}
    - Good examples: "show up on the 30th" (19), "like never before" (17), "ladies and gentlemen" (20)
    - If a phrase exceeds ${LIMITS.subtitle.en} characters, split at the nearest natural pause
    - Provide Japanese translation of what was said
-   - Identify 1-2 key business words/phrases in the Japanese line for highlighting (yellow color) → put in `highlights`
-   - Identify the same 1-2 corresponding business words/phrases as they appear in the English line → put in `enHighlights` (must be exact substrings of the English text)
+   - Identify 1-2 key business words/phrases in the Japanese line for highlighting (yellow color) → put in \`highlights\`
+   - Identify the same 1-2 corresponding business words/phrases as they appear in the English line → put in \`enHighlights\` (must be exact substrings of the English text)
 ${hasWordTimestamps ? `
    ⚠️ WORD-LEVEL TIMESTAMPS: Each word in the transcript has a bracketed timestamp (e.g. "hello[1.24] world[1.56]").
    - Use these EXACT timestamps for subtitle startTime (first word's timestamp) and endTime (last word's timestamp + ~0.3s).
@@ -187,7 +187,7 @@ ${hasWordTimestamps ? `
 - Ensure clip duration is 30-60 seconds
 - Subtitles must cover the entire clip with no gaps
 - Each subtitle segment should be 2-4 seconds
-- `highlights` words must actually appear in the Japanese text; `enHighlights` words must actually appear in the English text
+- \`highlights\` words must actually appear in the Japanese text; \`enHighlights\` words must actually appear in the English text
 - **hookTitle.ja must be ≤ ${LIMITS.hookTitle.ja} characters** — count each character as 1, no exceptions
 - **hookTitle.en must be ≤ ${LIMITS.hookTitle.en} characters** — keep it short and punchy
 - **Each subtitle en must be ≤ ${LIMITS.subtitle.en} characters** — use exact words spoken, split at natural pauses

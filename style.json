@@ -70,7 +70,7 @@
       "fontStyle": "italic"
     },
     "fadeInFrames": 10,
-    "holdFrames": 30,
+    "holdFrames": 40,
     "fadeOutFrames": 10
   }
 }

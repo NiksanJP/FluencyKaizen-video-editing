@@ -7,6 +7,7 @@
 // all clips, symlinks any missing videos into remotion/public/, then opens Studio.
 
 import { readdir, readFile, writeFile, symlink, access } from "fs/promises";
+import { existsSync } from "fs";
 import { resolve, dirname } from "path";
 import { $ } from "bun";
 
@@ -52,8 +53,10 @@ async function ensureVideoSymlinks(clips: ClipEntry[]) {
     try {
       await access(target);
     } catch {
-      // Symlink from input/ to remotion/public/
-      const source = resolve(projectRoot, "input", clip.videoFile);
+      // Check output/[name]/ first (for trimmed videos), then fall back to input/
+      const outputSource = resolve(outputDir, clip.name, clip.videoFile);
+      const inputSource = resolve(projectRoot, "input", clip.videoFile);
+      const source = existsSync(outputSource) ? outputSource : inputSource;
       try {
         await symlink(source, target);
         console.log(`🔗 Linked ${clip.videoFile} → remotion/public/`);
