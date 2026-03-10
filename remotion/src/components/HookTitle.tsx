@@ -1,14 +1,11 @@
 import React from "react";
+import { staticFile } from "remotion";
 import styleConfig from "../../../style.json";
 
 interface HookTitleProps {
   title: { ja: string; en: string };
 }
 
-/**
- * Persistent hook title at top center
- * Yellow bold text on black background, matching thumbnail-style design
- */
 export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
   const s = styleConfig.hookTitle;
 
@@ -23,11 +20,12 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        gap: 10,
         paddingLeft: s.paddingX,
         paddingRight: s.paddingX,
       }}
     >
+      {/* Main hook title */}
       <div
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.88)",
@@ -48,13 +46,59 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             fontWeight: s.fontWeight,
             textAlign: "center",
             lineHeight: s.lineHeight,
-            WebkitTextStroke: s.textStroke,
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-          } as React.CSSProperties}
+          }}
         >
           {title.ja}
         </div>
+      </div>
+
+      {/* "in Fluency Kaizen" branding row */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          backgroundColor: "rgba(0, 0, 0, 0.72)",
+          borderRadius: s.brandingBorderRadius,
+          paddingTop: s.brandingPaddingY,
+          paddingBottom: s.brandingPaddingY,
+          paddingLeft: s.brandingPaddingX,
+          paddingRight: s.brandingPaddingX,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: s.fontFamily,
+            fontSize: s.brandingFontSize,
+            color: "rgba(255,255,255,0.85)",
+            fontWeight: "500",
+            letterSpacing: 1,
+          }}
+        >
+          in
+        </span>
+        <img
+          src={staticFile("logo.png")}
+          style={{
+            height: s.logoHeight,
+            width: "auto",
+            objectFit: "contain",
+          }}
+        />
+        <span
+          style={{
+            fontFamily: s.fontFamily,
+            fontSize: s.brandingFontSize,
+            color: "#ffffff",
+            fontWeight: "700",
+            letterSpacing: 0.5,
+          }}
+        >
+          Fluency Kaizen
+        </span>
       </div>
     </div>
   );

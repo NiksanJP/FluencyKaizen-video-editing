@@ -4,8 +4,8 @@ const allClips: Record<string, ClipData> = {
   "001": {
   "videoFile": "clip_trimmed.mp4",
   "hookTitle": {
-    "ja": "✅会議英語術",
-    "en": "Master Meeting English! ✅"
+    "ja": "📊進捗報告",
+    "en": "📊 Progress Report English"
   },
   "clip": {
     "startTime": 0,
@@ -16,21 +16,17 @@ const allClips: Record<string, ClipData> = {
       "startTime": 0,
       "endTime": 1.6799999999999997,
       "en": "Good morning, Nick.",
-      "ja": "おはようございます、ニックさん。",
-      "highlights": [
-        "おはようございます"
-      ],
-      "enHighlights": [
-        "Good morning"
-      ]
+      "ja": "おはようございます、ニック。",
+      "highlights": [],
+      "enHighlights": []
     },
     {
       "startTime": 1.8599999999999994,
       "endTime": 3.08,
       "en": "We're here today to...",
-      "ja": "本日は、〜について話し合うために参りました。",
+      "ja": "本日は、〜について話し合います",
       "highlights": [
-        "話し合う"
+        "話し合います"
       ],
       "enHighlights": [
         "discuss"
@@ -38,32 +34,34 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 3.1599999999999984,
-      "endTime": 4.4399999999999995,
-      "en": "your progress on the",
-      "ja": "あなたの進捗状況について",
+      "endTime": 4.6,
+      "en": "your progress on the...",
+      "ja": "市場の進捗について",
       "highlights": [
-        "進捗状況"
+        "進捗",
+        "市場"
       ],
       "enHighlights": [
-        "progress"
+        "progress",
+        "market"
       ]
     },
     {
-      "startTime": 4.299999999999999,
-      "endTime": 5.26,
-      "en": "market research analysis",
-      "ja": "市場調査分析の件です。",
+      "startTime": 4.6,
+      "endTime": 5.799999999999999,
+      "en": "research analysis for",
+      "ja": "調査分析を",
       "highlights": [
-        "市場調査分析"
+        "調査分析"
       ],
       "enHighlights": [
-        "market research analysis"
+        "research analysis"
       ]
     },
     {
-      "startTime": 5.499999999999998,
+      "startTime": 5.76,
       "endTime": 6.360000000000001,
-      "en": "for Project X.",
+      "en": "Project X.",
       "ja": "プロジェクトXの件です。",
       "highlights": [
         "プロジェクトX"
@@ -74,21 +72,9 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 6.9399999999999995,
-      "endTime": 7.74,
-      "en": "Please provide a",
-      "ja": "提供してください",
-      "highlights": [
-        "提供してください"
-      ],
-      "enHighlights": [
-        "provide"
-      ]
-    },
-    {
-      "startTime": 7.700000000000001,
       "endTime": 8.339999999999998,
-      "en": "concise update.",
-      "ja": "簡潔な最新情報",
+      "en": "Please provide a...",
+      "ja": "簡潔な最新情報をお願いします。",
       "highlights": [
         "簡潔な",
         "最新情報"
@@ -103,44 +89,32 @@ const allClips: Record<string, ClipData> = {
       "endTime": 10.26,
       "en": "Good morning, Mr. Tanaka.",
       "ja": "おはようございます、田中さん。",
-      "highlights": [
-        "おはようございます"
-      ],
-      "enHighlights": [
-        "Good morning"
-      ]
+      "highlights": [],
+      "enHighlights": []
     },
     {
       "startTime": 10.38,
       "endTime": 10.94,
       "en": "How are you?",
       "ja": "お元気ですか？",
-      "highlights": [
-        "お元気ですか"
-      ],
-      "enHighlights": [
-        "How are you"
-      ]
+      "highlights": [],
+      "enHighlights": []
     },
     {
       "startTime": 11.140000000000002,
       "endTime": 12.140000000000002,
       "en": "I'm well. Thank you.",
-      "ja": "元気です。ありがとうございます。",
-      "highlights": [
-        "元気です"
-      ],
-      "enHighlights": [
-        "I'm well"
-      ]
+      "ja": "元気です。ありがとう。",
+      "highlights": [],
+      "enHighlights": []
     },
     {
       "startTime": 12.660000000000005,
       "endTime": 12.980000000000004,
       "en": "Let's proceed.",
-      "ja": "では、始めましょう。",
+      "ja": "進めましょう。",
       "highlights": [
-        "始めましょう"
+        "進めましょう"
       ],
       "enHighlights": [
         "proceed"
@@ -153,32 +127,40 @@ const allClips: Record<string, ClipData> = {
       "duration": 3.5,
       "category": "ビジネス英語",
       "phrase": "progress",
-      "literal": "進捗、前進",
-      "nuance": "仕事の進み具合や達成度を表す。ビジネスでは「進捗状況」という意味でよく使われる。"
+      "literal": "進歩、前進",
+      "nuance": "ビジネスではプロジェクトやタスクの『進捗状況』を指すことが多いです。進捗報告を求めたり、自分の進捗を伝えたりする際に使います。"
     },
     {
-      "triggerTime": 4.299999999999999,
+      "triggerTime": 4.959999999999999,
       "duration": 3.5,
       "category": "ビジネス英語",
       "phrase": "market research analysis",
       "literal": "市場調査分析",
-      "nuance": "顧客ニーズや競合他社を把握するための調査と、その結果の分析を指す。"
+      "nuance": "特定の商品やサービスの市場を調査し、そのデータを分析するビジネスプロセスです。新しい事業計画や戦略立案の基礎となります。"
     },
     {
       "triggerTime": 7.700000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "concise update",
-      "literal": "簡潔な最新情報",
-      "nuance": "長々とせず、要点をまとめた最新の状況報告を求める際に使う表現。忙しい上司への報告などに適している。"
+      "phrase": "concise",
+      "literal": "簡潔な、簡明な",
+      "nuance": "ビジネスにおいて、無駄な情報を省き、要点を的確に伝えることを指します。特に報告やプレゼンテーションで求められる資質です。"
+    },
+    {
+      "triggerTime": 8.040000000000001,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "update",
+      "literal": "更新、最新情報",
+      "nuance": "ビジネスでは、プロジェクトの進捗や状況に関する『最新情報』や『報告』という意味でよく使われます。動詞としても名詞としても活用できます。"
     },
     {
       "triggerTime": 11.040000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
       "phrase": "proceed",
-      "literal": "続ける、進む",
-      "nuance": "会議や議論を「次に進める」「本題に入る」というフォーマルな表現。カジュアルな場面ではあまり使わない。"
+      "literal": "進む、続行する",
+      "nuance": "会議や議論を『進める』、次の段階へ『移行する』といった場面で使われるフォーマルな表現です。許可や指示を出す際にも使えます。"
     }
   ],
   "videoDuration": 12.99,

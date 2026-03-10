@@ -5,6 +5,7 @@ import styleConfig from "../../../style.json";
 
 interface VocabCardProps {
   card: VocabCardType;
+  top?: number; // override position from ClipComposition
 }
 
 /**
@@ -15,7 +16,7 @@ interface VocabCardProps {
  * - Literal translation (smaller)
  * - Nuance/context (italic, Japanese)
  */
-export const VocabCard: React.FC<VocabCardProps> = ({ card }) => {
+export const VocabCard: React.FC<VocabCardProps> = ({ card, top }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = styleConfig.vocabCard;
@@ -37,7 +38,7 @@ export const VocabCard: React.FC<VocabCardProps> = ({ card }) => {
     <div
       style={{
         position: "absolute",
-        bottom: s.bottom,
+        top: top ?? s.top,
         left: "50%",
         zIndex: 200,
         opacity,

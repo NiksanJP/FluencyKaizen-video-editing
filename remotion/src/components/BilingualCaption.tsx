@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useLayoutEffect } from "react";
 import { Sequence, useVideoConfig } from "remotion";
 import type { SubtitleSegment } from "../../../pipeline/types";
 import { HighlightedText } from "./HighlightedText";
@@ -7,6 +7,7 @@ import styleConfig from "../../../style.json";
 interface BilingualCaptionProps {
   subtitles: SubtitleSegment[];
   clipStart: number; // Offset in seconds
+  onCaptionBottom?: (bottom: number) => void; // px from composition top
 }
 
 /**
@@ -19,6 +20,7 @@ interface BilingualCaptionProps {
 export const BilingualCaption: React.FC<BilingualCaptionProps> = ({
   subtitles,
   clipStart,
+  onCaptionBottom,
 }) => {
   const { fps } = useVideoConfig();
   const s = styleConfig.caption;
@@ -44,7 +46,7 @@ export const BilingualCaption: React.FC<BilingualCaptionProps> = ({
             from={startFrame}
             durationInFrames={Math.max(1, durationFrames)}
           >
-            <CaptionContent subtitle={subtitle} />
+            <CaptionContent subtitle={subtitle} onBottom={onCaptionBottom} />
           </Sequence>
         );
       })}
@@ -55,13 +57,22 @@ export const BilingualCaption: React.FC<BilingualCaptionProps> = ({
 /**
  * Individual caption segment renderer
  */
-const CaptionContent: React.FC<{ subtitle: SubtitleSegment }> = ({
+const CaptionContent: React.FC<{ subtitle: SubtitleSegment; onBottom?: (bottom: number) => void }> = ({
   subtitle,
+  onBottom,
 }) => {
   const s = styleConfig.caption;
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (ref.current && onBottom) {
+      onBottom(ref.current.offsetTop + ref.current.offsetHeight);
+    }
+  });
 
   return (
     <div
+      ref={ref}
       style={{
         position: "absolute",
         top: s.top,

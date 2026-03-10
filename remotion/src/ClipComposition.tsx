@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Video, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
 import { HookTitle } from "./components/HookTitle";
@@ -22,6 +22,11 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
   const { durationInFrames, fps } = useVideoConfig();
   const [clipData, setClipData] = useState<ClipData | null>(propClipData || null);
   const [error, setError] = useState<string | null>(null);
+  // Dynamically tracks the bottom edge of the active caption so VocabCard never overlaps it
+  const [vocabTop, setVocabTop] = useState(styleConfig.caption.top + 160);
+  const handleCaptionBottom = useCallback((bottom: number) => {
+    setVocabTop(bottom + 16);
+  }, []);
 
   if (error) {
     return (
@@ -101,17 +106,18 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
         <BilingualCaption
           subtitles={clipData.subtitles.slice(0, styleConfig.caption.maxCount)}
           clipStart={clipData.clip.startTime}
+          onCaptionBottom={handleCaptionBottom}
         />
       </Sequence>
 
-      {/* Vocabulary cards — positioned at absolute timestamps */}
+      {/* Vocabulary cards — dynamically positioned below the active caption */}
       {clipData.vocabCards.slice(0, styleConfig.vocabCard.maxCount).map((card, idx) => (
         <Sequence
           key={idx}
           from={Math.floor(card.triggerTime * fps)}
           durationInFrames={Math.floor(card.duration * fps)}
         >
-          <VocabCard card={card} />
+          <VocabCard card={card} top={vocabTop} />
         </Sequence>
       ))}
     </div>
