@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Video, Sequence, useVideoConfig, staticFile } from "remotion";
+import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
 import { HookTitle } from "./components/HookTitle";
 import { BilingualCaption } from "./components/BilingualCaption";
@@ -82,7 +82,7 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       }}
     >
       {/* Background video — centered for landscape videos in portrait canvas */}
-      <Video
+      <OffthreadVideo
         src={staticFile(clipData.videoFile)}
         style={{
           position: "absolute",

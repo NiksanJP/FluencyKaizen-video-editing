@@ -2,7 +2,7 @@ import type { ClipData } from "../../pipeline/types";
 
 const allClips: Record<string, ClipData> = {
   "001": {
-  "videoFile": "clip_trimmed.mp4",
+  "videoFile": "clip_trimmed_web.mp4",
   "hookTitle": {
     "ja": "📊進捗報告",
     "en": "📊 Progress Report English"
