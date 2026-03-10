@@ -92,6 +92,11 @@ export async function analyzeWithGemini(
         .map((seg) => `[${seg.start.toFixed(1)}s - ${seg.end.toFixed(1)}s] ${seg.text}`)
         .join("\n");
 
+  // Compute speech statistics so Gemini knows how much actual speech exists
+  const allWords = transcript.segments.flatMap(s => s.words || [{ start: s.start, end: s.end }]);
+  const firstWordTime = allWords[0]?.start ?? 0;
+  const lastWordTime = allWords[allWords.length - 1]?.end ?? 0;
+
   const prompt = `You are a professional video editor specializing in Business English educational content for Japanese learners.
 
 ## Task
@@ -102,13 +107,9 @@ ${transcriptText}
 
 ## Instructions
 
-1. **Select Clip**: Choose the best segment that:
-   - Contains clear, useful business English phrases
-   - Has good bilingual balance (EN + JP)
-   - Would engage viewers on TikTok/YouTube Shorts
-   - **Duration: MUST be 30-60 seconds long** (endTime - startTime ≥ 30). If the full video is short, use the entire video. Never select less than 15 seconds.
+1. **Clip Range**: Use the ENTIRE video. Set clip.startTime = ${firstWordTime.toFixed(1)} and clip.endTime = ${lastWordTime.toFixed(1)}. Silence removal is handled automatically — your job is subtitles, vocab cards, and hook title.
 
-⚠️ TIMESTAMP RULE: All timestamps (subtitle startTime/endTime, vocabCard triggerTime) must use ABSOLUTE timestamps matching the input transcript — NOT relative to clip start. If your selected clip starts at 120s, the first subtitle startTime should be ~120, not 0.
+⚠️ TIMESTAMP RULE: All timestamps (subtitle startTime/endTime, vocabCard triggerTime) must use ABSOLUTE timestamps matching the input transcript — NOT relative to clip start.
 
 2. **Subtitles**: For each 2-4 second segment within the clip:
    ⚠️ MOST IMPORTANT RULE: The English text MUST be the EXACT words spoken in the video at that timestamp. Do NOT paraphrase, rearrange, or invent text. Use the transcript to extract the actual spoken words for each time range.
@@ -187,7 +188,7 @@ ${hasWordTimestamps ? `
 \`\`\`
 
 ## Requirements
-- Subtitles must cover the entire clip with no gaps
+- Subtitles must cover all speech segments within the clip (silence gaps will be automatically removed)
 - Each subtitle segment should be 2-4 seconds
 - \`highlights\` words must actually appear in the Japanese text; \`enHighlights\` words must actually appear in the English text
 - **hookTitle.ja must be ≤ ${LIMITS.hookTitle.ja} characters** — count each character as 1, no exceptions

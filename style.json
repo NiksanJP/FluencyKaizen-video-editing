@@ -18,7 +18,6 @@
     "logoHeight": 68
   },
   "caption": {
-    "maxCount": 40,
     "en": {
       "fontFamily": "sans-serif",
       "fontSize": 62,

@@ -106,7 +106,7 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {/* Bilingual captions — positioned at absolute timestamps */}
       <Sequence from={0} durationInFrames={durationInFrames}>
         <BilingualCaption
-          subtitles={clipData.subtitles.slice(0, styleConfig.caption.maxCount)}
+          subtitles={clipData.subtitles}
           clipStart={clipData.clip.startTime}
           onCaptionBottom={handleCaptionBottom}
         />
