@@ -858,8 +858,8 @@ const allClips: Record<string, ClipData> = {
   "005": {
   "videoFile": "005/clip_trimmed.mp4",
   "hookTitle": {
-    "ja": "💼タスク保留！",
-    "en": "Mastering Project Pauses ✅"
+    "ja": "💼優先順位交渉",
+    "en": "Master Project..."
   },
   "clip": {
     "startTime": 0,
@@ -867,24 +867,12 @@ const allClips: Record<string, ClipData> = {
   },
   "subtitles": [
     {
-      "startTime": 0,
-      "endTime": 0.2599999999999998,
-      "en": "Nick",
-      "ja": "ニック",
-      "highlights": [
-        "ニック"
-      ],
-      "enHighlights": [
-        "Nick"
-      ]
-    },
-    {
       "startTime": 0.7799999999999994,
       "endTime": 1.5599999999999987,
-      "en": "thank you for scheduling",
-      "ja": "スケジュールの調整をしていただき",
+      "en": "Thank you for scheduling",
+      "ja": "このミーティングを組んでくれて",
       "highlights": [
-        "スケジュールの調整"
+        "ミーティングを組んで"
       ],
       "enHighlights": [
         "scheduling"
@@ -894,7 +882,7 @@ const allClips: Record<string, ClipData> = {
       "startTime": 1.5999999999999996,
       "endTime": 2.4399999999999995,
       "en": "this one on one.",
-      "ja": "この1対1の面談",
+      "ja": "この1対1の面談を。",
       "highlights": [
         "1対1の面談"
       ],
@@ -904,79 +892,96 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 2.879999999999999,
-      "endTime": 4.079999999999998,
-      "en": "I understand there are a",
-      "ja": "いくつかあるようですね",
+      "endTime": 3.9399999999999977,
+      "en": "I understand there are",
+      "ja": "いくつか項目があると理解しています",
       "highlights": [
-        "いくつか"
+        "項目がある",
+        "理解しています"
       ],
       "enHighlights": [
-        "there are"
+        "understand"
       ]
     },
     {
-      "startTime": 3.9399999999999977,
-      "endTime": 5.059999999999999,
-      "en": "few items we need to",
-      "ja": "いくつか議論すべき項目が",
+      "startTime": 3.7799999999999976,
+      "endTime": 4.960000000000001,
+      "en": "a few items we need",
+      "ja": "いくつか話し合うべき項目が",
       "highlights": [
-        "議論すべき項目"
+        "話し合うべき",
+        "項目"
       ],
       "enHighlights": [
-        "items we need"
+        "items",
+        "need"
       ]
     },
     {
-      "startTime": 4.879999999999999,
-      "endTime": 5.939999999999998,
-      "en": "discuss regarding current",
-      "ja": "現在の～について議論を",
+      "startTime": 4.759999999999998,
+      "endTime": 5.460000000000001,
+      "en": "to discuss regarding",
+      "ja": "議論する必要があります",
       "highlights": [
-        "議論"
+        "議論する"
       ],
       "enHighlights": [
         "discuss regarding"
       ]
     },
     {
-      "startTime": 6,
-      "endTime": 7.5,
-      "en": "priorities and project X.",
-      "ja": "優先事項とプロジェクトXについて",
+      "startTime": 5.640000000000001,
+      "endTime": 6.300000000000001,
+      "en": "current priorities",
+      "ja": "現在の優先事項と",
       "highlights": [
-        "優先事項",
+        "優先事項"
+      ],
+      "enHighlights": [
+        "current priorities"
+      ]
+    },
+    {
+      "startTime": 6.539999999999999,
+      "endTime": 7.5,
+      "en": "and Project X.",
+      "ja": "プロジェクトXについて。",
+      "highlights": [
         "プロジェクトX"
       ],
       "enHighlights": [
-        "priorities",
-        "project X"
+        "Project X"
       ]
     },
     {
       "startTime": 7.939999999999998,
-      "endTime": 8.939999999999998,
-      "en": "Please proceed with your",
-      "ja": "どうぞ、あなたの、",
-      "highlights": [],
-      "enHighlights": []
+      "endTime": 8.779999999999998,
+      "en": "Please proceed with",
+      "ja": "どうぞ進めてください",
+      "highlights": [
+        "進めてください"
+      ],
+      "enHighlights": [
+        "proceed with"
+      ]
     },
     {
-      "startTime": 8.779999999999998,
+      "startTime": 8.64,
       "endTime": 9.079999999999998,
-      "en": "updates.",
-      "ja": "最新情報をお願いします。",
+      "en": "your updates.",
+      "ja": "最新情報を。",
       "highlights": [
         "最新情報"
       ],
       "enHighlights": [
-        "updates."
+        "updates"
       ]
     },
     {
       "startTime": 9.340000000000003,
-      "endTime": 10.640000000000004,
+      "endTime": 11.080000000000005,
       "en": "Hey, Mr. Tanaka, yeah,",
-      "ja": "田中さん、ええと、",
+      "ja": "田中さん、ええ",
       "highlights": [
         "田中さん"
       ],
@@ -986,25 +991,35 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 10.960000000000004,
-      "endTime": 12.660000000000004,
-      "en": "I'm actually working...",
-      "ja": "実は取り組んでいるのはプロジェクトYです。",
+      "endTime": 11.680000000000003,
+      "en": "I'm actually working",
+      "ja": "実は取り組んでいます",
       "highlights": [
-        "取り組んでいる",
+        "取り組んでいます"
+      ],
+      "enHighlights": [
+        "working"
+      ]
+    },
+    {
+      "startTime": 11.780000000000005,
+      "endTime": 12.660000000000004,
+      "en": "on Project Y.",
+      "ja": "プロジェクトYに。",
+      "highlights": [
         "プロジェクトY"
       ],
       "enHighlights": [
-        "working on",
-        "Project Y."
+        "Project Y"
       ]
     },
     {
       "startTime": 13.040000000000003,
       "endTime": 13.840000000000003,
       "en": "I'm actually parking",
-      "ja": "実は一時停止しているのは",
+      "ja": "実は保留にしています",
       "highlights": [
-        "一時停止している"
+        "保留にしています"
       ],
       "enHighlights": [
         "parking"
@@ -1012,12 +1027,12 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 14.060000000000006,
-      "endTime": 15.360000000000003,
-      "en": "Project X for now due",
-      "ja": "プロジェクトXを当面、～のため",
+      "endTime": 15.520000000000003,
+      "en": "Project X for now",
+      "ja": "プロジェクトXを一時的に",
       "highlights": [
         "プロジェクトX",
-        "当面"
+        "一時的に"
       ],
       "enHighlights": [
         "Project X",
@@ -1026,25 +1041,35 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 15.420000000000005,
-      "endTime": 16.920000000000005,
-      "en": "to stakeholder...",
-      "ja": "ステークホルダーの優先順位の変更のためです。",
+      "endTime": 16.300000000000004,
+      "en": "due to stakeholder",
+      "ja": "ステークホルダーの",
       "highlights": [
-        "ステークホルダー",
-        "優先順位の変更"
+        "ステークホルダー"
       ],
       "enHighlights": [
-        "stakeholder",
-        "reprioritization."
+        "stakeholder"
+      ]
+    },
+    {
+      "startTime": 16.360000000000003,
+      "endTime": 16.920000000000005,
+      "en": "reprioritization.",
+      "ja": "優先順位変更のため。",
+      "highlights": [
+        "優先順位変更"
+      ],
+      "enHighlights": [
+        "reprioritization"
       ]
     },
     {
       "startTime": 18.320000000000007,
-      "endTime": 19.84000000000001,
+      "endTime": 19.56000000000001,
       "en": "I'll get back to this",
-      "ja": "これについては後でまた",
+      "ja": "これについてはまた後で",
       "highlights": [
-        "後でまた"
+        "また後で"
       ],
       "enHighlights": [
         "get back to this"
@@ -1052,24 +1077,26 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 19.540000000000006,
-      "endTime": 20.62000000000001,
-      "en": "when I have",
-      "ja": "～する際に",
-      "highlights": [],
-      "enHighlights": []
-    },
-    {
-      "startTime": 20.860000000000007,
-      "endTime": 22.540000000000006,
-      "en": "parking project X.",
-      "ja": "プロジェクトXを一時停止します。",
+      "endTime": 21.16000000000001,
+      "en": "when I have parking",
+      "ja": "保留しているプロジェクトを",
       "highlights": [
-        "プロジェクトX",
-        "一時停止"
+        "保留している"
       ],
       "enHighlights": [
-        "parking",
-        "project X."
+        "parking"
+      ]
+    },
+    {
+      "startTime": 21.74000000000001,
+      "endTime": 22.540000000000006,
+      "en": "Project X.",
+      "ja": "プロジェクトXを。",
+      "highlights": [
+        "プロジェクトX"
+      ],
+      "enHighlights": [
+        "Project X"
       ]
     },
     {
@@ -1077,16 +1104,20 @@ const allClips: Record<string, ClipData> = {
       "endTime": 23.74000000000001,
       "en": "I see.",
       "ja": "なるほど。",
-      "highlights": [],
-      "enHighlights": []
+      "highlights": [
+        "なるほど"
+      ],
+      "enHighlights": [
+        "I see"
+      ]
     },
     {
       "startTime": 23.98000000000001,
       "endTime": 24.88000000000001,
       "en": "Could you elaborate on",
-      "ja": "詳しくご説明いただけますか",
+      "ja": "詳しく説明いただけますか",
       "highlights": [
-        "詳しくご説明"
+        "詳しく説明"
       ],
       "enHighlights": [
         "elaborate on"
@@ -1094,70 +1125,86 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 24.92000000000001,
-      "endTime": 27.06000000000001,
-      "en": "the stakeholder...",
-      "ja": "ステークホルダーの優先順位の変更について",
+      "endTime": 25.38000000000001,
+      "en": "the stakeholder",
+      "ja": "そのステークホルダーの",
       "highlights": [
-        "ステークホルダー",
-        "優先順位の変更"
+        "ステークホルダー"
       ],
       "enHighlights": [
-        "stakeholder",
+        "stakeholder"
+      ]
+    },
+    {
+      "startTime": 25.56000000000001,
+      "endTime": 26.98000000000001,
+      "en": "reprioritization that",
+      "ja": "優先順位の再設定は",
+      "highlights": [
+        "優先順位の再設定"
+      ],
+      "enHighlights": [
         "reprioritization"
       ]
     },
     {
-      "startTime": 26.680000000000007,
+      "startTime": 26.960000000000008,
       "endTime": 28.12000000000001,
-      "en": "that necessitates...",
-      "ja": "この保留を必要とするのは。",
+      "en": "necessitates this hold?",
+      "ja": "この保留を必要としますか？",
       "highlights": [
-        "この保留",
-        "必要とする"
+        "保留を必要とします"
       ],
       "enHighlights": [
-        "necessitates",
-        "this hold"
+        "necessitates this hold"
       ]
     },
     {
       "startTime": 28.70000000000001,
-      "endTime": 30.140000000000004,
-      "en": "It's critical we...",
-      "ja": "私たちは理解することが非常に重要です",
+      "endTime": 29.600000000000012,
+      "en": "It's critical we",
+      "ja": "私たちが理解することは",
       "highlights": [
-        "非常に重要",
-        "理解"
+        "理解すること"
       ],
       "enHighlights": [
-        "critical",
         "understand"
       ]
     },
     {
-      "startTime": 29.840000000000007,
-      "endTime": 31.480000000000008,
-      "en": "the impact on the...",
-      "ja": "プロジェクトXへの影響を",
+      "startTime": 29.46000000000001,
+      "endTime": 30.340000000000007,
+      "en": "understand the impact",
+      "ja": "影響を理解することが",
       "highlights": [
-        "影響",
+        "影響を理解する"
+      ],
+      "enHighlights": [
+        "understand the impact"
+      ]
+    },
+    {
+      "startTime": 30.280000000000005,
+      "endTime": 31.220000000000002,
+      "en": "on the Project X",
+      "ja": "プロジェクトXの",
+      "highlights": [
         "プロジェクトX"
       ],
       "enHighlights": [
-        "impact",
-        "project X"
+        "Project X"
       ]
     },
     {
       "startTime": 31.18000000000001,
       "endTime": 31.480000000000008,
       "en": "timeline.",
-      "ja": "タイムラインへの。",
+      "ja": "タイムラインに与える。",
       "highlights": [
         "タイムライン"
       ],
       "enHighlights": [
-        "timeline."
+        "timeline"
       ]
     },
     {
@@ -1174,9 +1221,9 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 34.08,
-      "endTime": 35.400000000000006,
+      "endTime": 35.7,
       "en": "how busy I am,",
-      "ja": "私がどれほど忙しいか",
+      "ja": "私がどれだけ忙しいか",
       "highlights": [
         "忙しい"
       ],
@@ -1186,29 +1233,49 @@ const allClips: Record<string, ClipData> = {
     },
     {
       "startTime": 36.000000000000014,
-      "endTime": 38.520000000000024,
-      "en": "the stakeholder came...",
-      "ja": "ステークホルダーが来て私に公の場で伝えてきました",
+      "endTime": 36.800000000000026,
+      "en": "the stakeholder came",
+      "ja": "ステークホルダーが来て",
       "highlights": [
-        "ステークホルダー",
+        "ステークホルダー"
+      ],
+      "enHighlights": [
+        "stakeholder"
+      ]
+    },
+    {
+      "startTime": 37.10000000000002,
+      "endTime": 38.24000000000002,
+      "en": "and told me in public",
+      "ja": "公の場で私に言いました",
+      "highlights": [
         "公の場"
       ],
       "enHighlights": [
-        "stakeholder",
         "public"
       ]
     },
     {
       "startTime": 38.22000000000003,
-      "endTime": 40.56000000000002,
-      "en": "channels that you are...",
-      "ja": "チャンネルであなたもこのタスクの優先順位を",
+      "endTime": 39.40000000000002,
+      "en": "channels that you are",
+      "ja": "チャンネルで、あなたも",
       "highlights": [
-        "チャンネル",
+        "チャンネル"
+      ],
+      "enHighlights": [
+        "channels"
+      ]
+    },
+    {
+      "startTime": 39.22000000000003,
+      "endTime": 40.56000000000002,
+      "en": "also in to reprioritize",
+      "ja": "このタスクの優先順位を",
+      "highlights": [
         "優先順位を"
       ],
       "enHighlights": [
-        "channels",
         "reprioritize"
       ]
     },
@@ -1216,113 +1283,179 @@ const allClips: Record<string, ClipData> = {
       "startTime": 41.280000000000015,
       "endTime": 41.76000000000002,
       "en": "this task.",
-      "ja": "変更するようにと。",
+      "ja": "再設定するように。",
       "highlights": [
-        "タスク"
+        "再設定するように"
       ],
       "enHighlights": [
-        "task."
+        "this task"
       ]
     },
     {
       "startTime": 42.08000000000001,
-      "endTime": 44.48000000000002,
-      "en": "While I appreciate...",
-      "ja": "直接のコミュニケーションはありがたいですが",
+      "endTime": 43.880000000000024,
+      "en": "While I appreciate the",
+      "ja": "直接の連絡はありがたいですが",
       "highlights": [
-        "直接のコミュニケーション"
+        "直接の連絡"
       ],
       "enHighlights": [
         "direct communication"
       ]
     },
     {
-      "startTime": 45.62000000000002,
-      "endTime": 48.54000000000002,
-      "en": "significant project...",
-      "ja": "このような重要なプロジェクトの変更は正式な文書が必要です。",
+      "startTime": 43.800000000000026,
+      "endTime": 44.48000000000002,
+      "en": "direct communication,",
+      "ja": "感謝しますが",
       "highlights": [
-        "重要なプロジェクトの変更",
-        "正式な文書"
+        "感謝します"
       ],
       "enHighlights": [
-        "significant project changes",
-        "formal documentation."
+        "appreciate"
+      ]
+    },
+    {
+      "startTime": 45.62000000000002,
+      "endTime": 46.24000000000002,
+      "en": "significant project",
+      "ja": "重要なプロジェクトの",
+      "highlights": [
+        "重要なプロジェクト"
+      ],
+      "enHighlights": [
+        "significant project"
+      ]
+    },
+    {
+      "startTime": 46.46000000000002,
+      "endTime": 47.72000000000003,
+      "en": "changes like this need",
+      "ja": "変更には公式な",
+      "highlights": [
+        "変更"
+      ],
+      "enHighlights": [
+        "changes"
+      ]
+    },
+    {
+      "startTime": 47.86000000000003,
+      "endTime": 48.54000000000002,
+      "en": "formal documentation.",
+      "ja": "文書が必要です。",
+      "highlights": [
+        "文書"
+      ],
+      "enHighlights": [
+        "formal documentation"
       ]
     },
     {
       "startTime": 49.50000000000003,
-      "endTime": 51.14000000000003,
-      "en": "Please send a formal...",
-      "ja": "正式な確認書を詳細を明記した",
+      "endTime": 50.46000000000002,
+      "en": "Please send a formal",
+      "ja": "正式なものを送ってください",
       "highlights": [
-        "正式な確認書",
-        "詳細を明記した"
+        "正式な"
       ],
       "enHighlights": [
-        "formal confirmation",
+        "formal"
+      ]
+    },
+    {
+      "startTime": 50.48000000000002,
+      "endTime": 51.36000000000003,
+      "en": "confirmation detailing",
+      "ja": "確認を詳細に記した",
+      "highlights": [
+        "確認",
+        "詳細に記した"
+      ],
+      "enHighlights": [
+        "confirmation",
         "detailing"
       ]
     },
     {
       "startTime": 51.64000000000003,
-      "endTime": 52.880000000000024,
-      "en": "the new priority...",
-      "ja": "新しい優先順位の構造と",
+      "endTime": 52.46000000000002,
+      "en": "the new priority",
+      "ja": "新しい優先順位の",
       "highlights": [
-        "新しい優先順位",
+        "優先順位"
+      ],
+      "enHighlights": [
+        "priority"
+      ]
+    },
+    {
+      "startTime": 52.58000000000003,
+      "endTime": 53.72000000000003,
+      "en": "structure and its",
+      "ja": "構造とその",
+      "highlights": [
         "構造"
       ],
       "enHighlights": [
-        "new priority",
         "structure"
       ]
     },
     {
-      "startTime": 53.020000000000024,
+      "startTime": 53.74000000000002,
       "endTime": 54.920000000000016,
-      "en": "and its impact on...",
-      "ja": "そのプロジェクトXへの影響を。",
+      "en": "impact on Project X.",
+      "ja": "プロジェクトXへの影響を。",
       "highlights": [
-        "影響",
-        "プロジェクトX"
+        "プロジェクトX",
+        "影響"
       ],
       "enHighlights": [
-        "impact",
-        "project X."
+        "Project X",
+        "impact"
       ]
     },
     {
       "startTime": 55.34000000000002,
-      "endTime": 57.34000000000002,
-      "en": "This is essential for...",
-      "ja": "これはポートフォリオ管理にとって不可欠です。",
+      "endTime": 56.64000000000003,
+      "en": "This is essential for",
+      "ja": "これは不可欠です",
       "highlights": [
-        "不可欠",
+        "不可欠です"
+      ],
+      "enHighlights": [
+        "essential"
+      ]
+    },
+    {
+      "startTime": 56.58000000000003,
+      "endTime": 57.34000000000002,
+      "en": "portfolio management.",
+      "ja": "ポートフォリオ管理に。",
+      "highlights": [
         "ポートフォリオ管理"
       ],
       "enHighlights": [
-        "essential",
-        "portfolio management."
+        "portfolio management"
       ]
     },
     {
       "startTime": 58.12000000000002,
-      "endTime": 59.800000000000026,
-      "en": "Okay, I'll just let",
-      "ja": "承知しました。ただ",
+      "endTime": 60.04000000000002,
+      "en": "Okay, I'll just let you",
+      "ja": "了解しました、ただ",
       "highlights": [
-        "承知しました"
+        "了解しました"
       ],
       "enHighlights": [
         "Okay"
       ]
     },
     {
-      "startTime": 59.50000000000003,
-      "endTime": 60.36000000000003,
-      "en": "you know I'm putting",
-      "ja": "お伝えしておきますが、私は",
+      "startTime": 59.920000000000016,
+      "endTime": 61.54000000000002,
+      "en": "know I'm putting this",
+      "ja": "お伝えしておきます",
       "highlights": [
         "お伝えしておきます"
       ],
@@ -1331,69 +1464,76 @@ const allClips: Record<string, ClipData> = {
       ]
     },
     {
-      "startTime": 61.020000000000024,
+      "startTime": 61.48000000000002,
       "endTime": 62.84000000000002,
-      "en": "this project to hold...",
-      "ja": "このプロジェクトを今のところ保留にします。",
+      "en": "project to hold for now.",
+      "ja": "このプロジェクトを保留にします。",
       "highlights": [
-        "プロジェクトを保留",
-        "今のところ"
+        "プロジェクトを保留"
       ],
       "enHighlights": [
-        "project to hold",
-        "for now."
+        "project to hold"
       ]
     },
     {
       "startTime": 63.10000000000001,
-      "endTime": 64.06,
-      "en": "Understood, Nick.",
-      "ja": "承知しました、ニック。",
+      "endTime": 64.76,
+      "en": "Understood, Nick. Just",
+      "ja": "承知しました、ニック。ただ",
       "highlights": [
-        "承知しました",
-        "ニック"
+        "承知しました"
       ],
       "enHighlights": [
-        "Understood",
-        "Nick."
+        "Understood"
       ]
     },
     {
-      "startTime": 64.46000000000001,
-      "endTime": 65.96000000000001,
-      "en": "Just ensure the...",
-      "ja": "正式な連絡を確実に",
+      "startTime": 64.60000000000001,
+      "endTime": 65.64,
+      "en": "ensure the formal",
+      "ja": "正式な連絡が",
       "highlights": [
-        "正式な連絡",
-        "確実に"
+        "正式な連絡"
       ],
       "enHighlights": [
-        "formal communication",
-        "ensure"
+        "formal"
       ]
     },
     {
       "startTime": 65.66000000000001,
-      "endTime": 66.78,
-      "en": "is sent soon for",
-      "ja": "早く送ってください",
+      "endTime": 66.82000000000001,
+      "en": "communication is sent",
+      "ja": "送られることを確認して",
       "highlights": [
-        "早く"
+        "送られること",
+        "確認して"
       ],
       "enHighlights": [
-        "sent soon"
+        "communication is sent"
       ]
     },
     {
-      "startTime": 67.06,
-      "endTime": 68.3,
-      "en": "proper record keeping.",
-      "ja": "適切な記録のために。",
+      "startTime": 66.7,
+      "endTime": 68.02000000000001,
+      "en": "soon for proper record",
+      "ja": "適切な記録保持のために",
       "highlights": [
-        "適切な記録"
+        "適切な記録保持"
       ],
       "enHighlights": [
-        "proper record keeping."
+        "proper record"
+      ]
+    },
+    {
+      "startTime": 68,
+      "endTime": 68.3,
+      "en": "keeping.",
+      "ja": "お願いします。",
+      "highlights": [
+        "お願いします"
+      ],
+      "enHighlights": [
+        "keeping"
       ]
     },
     {
@@ -1405,165 +1545,219 @@ const allClips: Record<string, ClipData> = {
         "最新情報"
       ],
       "enHighlights": [
-        "update."
+        "update"
       ]
     },
     {
       "startTime": 70.36,
       "endTime": 71.64,
       "en": "No worries, thank you.",
-      "ja": "どういたしまして、ありがとうございます。",
-      "highlights": [],
-      "enHighlights": []
+      "ja": "どういたしまして、ありがとう。",
+      "highlights": [
+        "どういたしまして"
+      ],
+      "enHighlights": [
+        "No worries"
+      ]
     },
     {
       "startTime": 71.82,
-      "endTime": 73.42,
-      "en": "To summarize, we are...",
-      "ja": "まとめると、私たちは一時停止しています",
+      "endTime": 73.6,
+      "en": "To summarize, we are",
+      "ja": "要約すると、私たちは",
       "highlights": [
-        "まとめると",
-        "一時停止"
+        "要約すると"
       ],
       "enHighlights": [
-        "To summarize",
-        "parking"
+        "To summarize"
       ]
     },
     {
       "startTime": 73.44,
-      "endTime": 78.16,
-      "en": "Project X for the...",
-      "ja": "プロジェクトXを当面の間、ステークホルダーの優先順位の変更に基づき一時停止しています。",
+      "endTime": 74.6,
+      "en": "parking Project X",
+      "ja": "プロジェクトXを保留に",
       "highlights": [
-        "プロジェクトX",
-        "当面の間",
-        "ステークホルダー",
-        "優先順位の変更"
+        "プロジェクトXを保留"
       ],
       "enHighlights": [
-        "Project X",
-        "time being",
-        "stakeholder",
-        "reprioritization."
+        "parking Project X"
+      ]
+    },
+    {
+      "startTime": 74.64,
+      "endTime": 75.46,
+      "en": "for the time being",
+      "ja": "当面の間",
+      "highlights": [
+        "当面の間"
+      ],
+      "enHighlights": [
+        "for the time being"
+      ]
+    },
+    {
+      "startTime": 76.67999999999999,
+      "endTime": 77.74,
+      "en": "based on stakeholder",
+      "ja": "ステークホルダーの",
+      "highlights": [
+        "ステークホルダー"
+      ],
+      "enHighlights": [
+        "stakeholder"
+      ]
+    },
+    {
+      "startTime": 77.86,
+      "endTime": 78.16,
+      "en": "reprioritization.",
+      "ja": "優先順位変更に基づき。",
+      "highlights": [
+        "優先順位変更"
+      ],
+      "enHighlights": [
+        "reprioritization"
       ]
     },
     {
       "startTime": 79.36,
-      "endTime": 81.64,
-      "en": "It is crucial that...",
-      "ja": "あなたが正式な確認書を送ることが不可欠です",
+      "endTime": 80.83999999999999,
+      "en": "It is crucial that you",
+      "ja": "あなたが送ることが重要です",
       "highlights": [
-        "不可欠",
-        "正式な確認書"
+        "重要です"
       ],
       "enHighlights": [
-        "crucial",
+        "crucial"
+      ]
+    },
+    {
+      "startTime": 80.69999999999999,
+      "endTime": 81.36,
+      "en": "send the formal",
+      "ja": "正式な",
+      "highlights": [
+        "正式な"
+      ],
+      "enHighlights": [
         "formal"
       ]
     },
     {
       "startTime": 81.33999999999999,
-      "endTime": 83.16,
-      "en": "confirmation to...",
-      "ja": "適切な調整を確実にするための確認書を",
+      "endTime": 82.52,
+      "en": "confirmation to ensure",
+      "ja": "確認を送ることは",
       "highlights": [
-        "適切な調整",
-        "確実にする"
+        "確認を送る"
       ],
       "enHighlights": [
         "confirmation",
-        "ensure",
+        "ensure"
+      ]
+    },
+    {
+      "startTime": 82.52,
+      "endTime": 83.58,
+      "en": "proper alignment and",
+      "ja": "適切な整合性と",
+      "highlights": [
+        "適切な整合性"
+      ],
+      "enHighlights": [
         "proper alignment"
       ]
     },
     {
-      "startTime": 83.28,
+      "startTime": 83.72,
       "endTime": 84.3,
-      "en": "and record keeping.",
-      "ja": "記録を保持するためです。",
+      "en": "record keeping.",
+      "ja": "記録保持のために。",
       "highlights": [
-        "記録を保持"
+        "記録保持"
       ],
       "enHighlights": [
-        "record keeping."
+        "record keeping"
       ]
     },
     {
       "startTime": 84.82,
-      "endTime": 85.89999999999999,
-      "en": "Thank you for the...",
-      "ja": "最新情報ありがとう、ニック。",
+      "endTime": 85.66,
+      "en": "Thank you for the update,",
+      "ja": "最新情報ありがとう",
       "highlights": [
-        "最新情報",
-        "ニック"
+        "最新情報"
       ],
       "enHighlights": [
-        "update",
-        "Nick."
+        "update"
       ]
     },
     {
-      "startTime": 86.24,
-      "endTime": 86.97999999999999,
-      "en": "Have a productive day.",
-      "ja": "良い一日を。",
+      "startTime": 85.6,
+      "endTime": 86.74,
+      "en": "Nick. Have a productive",
+      "ja": "ニック。生産的な一日に",
       "highlights": [
-        "良い一日"
+        "生産的な一日"
       ],
       "enHighlights": [
-        "productive day."
+        "productive day"
       ]
     },
     {
-      "startTime": 87.78,
+      "startTime": 86.67999999999999,
       "endTime": 88.08,
-      "en": "Goodbye.",
-      "ja": "さようなら。",
-      "highlights": [],
-      "enHighlights": []
+      "en": "day. Goodbye.",
+      "ja": "なりますように。さようなら。",
+      "highlights": [
+        "さようなら"
+      ],
+      "enHighlights": [
+        "Goodbye"
+      ]
     }
   ],
   "vocabCards": [
+    {
+      "triggerTime": 1.8599999999999994,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "one on one",
+      "literal": "1対1の",
+      "nuance": "ビジネスシーンで、上司と部下、または同僚間で個人的な議論やフィードバックのために行われる非公式または公式なミーティングを指します。"
+    },
     {
       "triggerTime": 13.540000000000003,
       "duration": 3.5,
       "category": "社内英語",
       "phrase": "parking Project X",
       "literal": "プロジェクトXを駐車する",
-      "nuance": "プロジェクトXの作業を一時的に中断する、保留にするという意味。「park a project/task」で「一時停止する」「棚上げする」というビジネスでよく使われる表現。"
+      "nuance": "プロジェクトやタスクを一時的に中断し、保留にするという意味です。優先順位の変更やリソース不足が理由で使われます。"
     },
     {
-      "triggerTime": 1.8599999999999994,
-      "duration": 3.5,
-      "category": "社内英語",
-      "phrase": "one on one",
-      "literal": "1対1",
-      "nuance": "個別面談や1対1のミーティングを指す。上司と部下の定期的な面談など、ビジネスシーンで頻繁に使われる。"
-    },
-    {
-      "triggerTime": 24.180000000000007,
+      "triggerTime": 16.000000000000004,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "elaborate on",
-      "literal": "～について詳しく述べる",
-      "nuance": "話題について詳細な情報を提供する、または説明を補足するという意味。ビジネスの会議や議論で、より具体的な説明を求める際に用いられる。"
+      "phrase": "stakeholder reprioritization",
+      "literal": "利害関係者の再優先順位付け",
+      "nuance": "プロジェクトやタスクの優先順位が、主要な関係者（ステークホルダー）の判断によって変更されることを意味します。ビジネスにおいて頻繁に発生します。"
     },
     {
-      "triggerTime": 26.960000000000008,
+      "triggerTime": 47.86000000000003,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "necessitates this hold",
-      "literal": "この保留を必要とする",
-      "nuance": "特定の状況や行動が、何か（この場合は「保留」）を不可避にする、または必須にするという意味。「necessitate」はややフォーマルな表現。"
+      "phrase": "formal documentation",
+      "literal": "正式な文書",
+      "nuance": "ビジネスにおいて、公的に認められ、記録として残る正式な書類や書面を指します。重要な決定や変更には不可欠です。"
     },
     {
-      "triggerTime": 74.64,
+      "triggerTime": 67.34,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "for the time being",
-      "literal": "今のところ",
-      "nuance": "「当面の間」「差し当たり」という意味で、一時的な状況や決定を表現する際に使われる。将来的に変更される可能性があることを示唆する。"
+      "phrase": "proper record keeping",
+      "literal": "適切な記録保持",
+      "nuance": "正確で体系的な記録を維持することを指します。コンプライアンス、監査、将来の参照のために重要です。"
     }
   ],
   "videoDuration": 88.189,

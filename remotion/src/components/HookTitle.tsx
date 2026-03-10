@@ -20,7 +20,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 10,
+        gap: 3,
         paddingLeft: s.paddingX,
         paddingRight: s.paddingX,
       }}

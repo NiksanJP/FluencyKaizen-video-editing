@@ -55,19 +55,15 @@ async function ensureVideoSymlinks(clips: ClipEntry[]) {
     await mkdir(clipPublicDir, { recursive: true });
 
     const target = resolve(clipPublicDir, clip.videoFile);
+    // Always copy to ensure preview uses the latest video from the pipeline
+    const outputSource = resolve(outputDir, clip.name, clip.videoFile);
+    const inputSource = resolve(projectRoot, "input", clip.videoFile);
+    const source = existsSync(outputSource) ? outputSource : inputSource;
     try {
-      await access(target);
+      await copyFile(source, target);
+      console.log(`📋 Copied ${clip.videoFile} → remotion/public/${clip.name}/`);
     } catch {
-      // Check output/[name]/ first (for trimmed videos), then fall back to input/
-      const outputSource = resolve(outputDir, clip.name, clip.videoFile);
-      const inputSource = resolve(projectRoot, "input", clip.videoFile);
-      const source = existsSync(outputSource) ? outputSource : inputSource;
-      try {
-        await copyFile(source, target);
-        console.log(`📋 Copied ${clip.videoFile} → remotion/public/${clip.name}/`);
-      } catch {
-        console.warn(`⚠️  Could not copy ${clip.videoFile} — video may not play`);
-      }
+      console.warn(`⚠️  Could not copy ${clip.videoFile} — video may not play`);
     }
   }
 }
