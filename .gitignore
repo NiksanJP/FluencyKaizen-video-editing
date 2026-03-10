@@ -5,6 +5,12 @@ bun.lockb
 package-lock.json
 yarn.lock
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
 # Environment variables
 .env
 .env.local
@@ -14,6 +20,12 @@ yarn.lock
 output/
 dist/
 .remotion/
+transcript/
+
+# Audio intermediates
+*.wav
+*.mp3
+*.aac
 
 # Input media (large files)
 input/

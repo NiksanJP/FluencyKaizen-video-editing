@@ -64,7 +64,7 @@ const CaptionContent: React.FC<{ subtitle: SubtitleSegment }> = ({
     <div
       style={{
         position: "absolute",
-        bottom: s.bottom,
+        top: s.top,
         left: s.marginX,
         right: s.marginX,
         zIndex: 50,
@@ -88,7 +88,7 @@ const CaptionContent: React.FC<{ subtitle: SubtitleSegment }> = ({
           maxWidth: "100%",
         }}
       >
-        {subtitle.en}
+        <HighlightedText text={subtitle.en} highlights={subtitle.enHighlights ?? []} />
       </div>
 
       {/* Japanese caption with highlights */}

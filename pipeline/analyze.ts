@@ -49,8 +49,12 @@ export async function analyzeWithGemini(
                   type: SchemaType.ARRAY,
                   items: { type: SchemaType.STRING },
                 },
+                enHighlights: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING },
+                },
               },
-              required: ["startTime", "endTime", "en", "ja", "highlights"],
+              required: ["startTime", "endTime", "en", "ja", "highlights", "enHighlights"],
             },
           },
           vocabCards: {
@@ -111,19 +115,29 @@ ${transcriptText}
    - Good examples: "show up on the 30th" (19), "like never before" (17), "ladies and gentlemen" (20)
    - If a phrase exceeds ${LIMITS.subtitle.en} characters, split at the nearest natural pause
    - Provide Japanese translation of what was said
-   - Identify 1-2 key business words/phrases in the Japanese line for highlighting (yellow color)
+   - Identify 1-2 key business words/phrases in the Japanese line for highlighting (yellow color) → put in `highlights`
+   - Identify the same 1-2 corresponding business words/phrases as they appear in the English line → put in `enHighlights` (must be exact substrings of the English text)
 ${hasWordTimestamps ? `
    ⚠️ WORD-LEVEL TIMESTAMPS: Each word in the transcript has a bracketed timestamp (e.g. "hello[1.24] world[1.56]").
    - Use these EXACT timestamps for subtitle startTime (first word's timestamp) and endTime (last word's timestamp + ~0.3s).
    - Split subtitles at gaps of >0.3 seconds between consecutive words — these are natural speech pauses.
    - Do NOT guess or interpolate timestamps. Every subtitle boundary must align with an actual word timestamp from the transcript.` : `   ⚠️ Split at natural speech pauses and phrase boundaries — never mid-phrase.`}
 
-3. **Vocabulary Cards**: Extract 3-5 important business English phrases:
+3. **Vocabulary Cards**: Extract 3-5 expressions that Japanese learners would NOT understand even with basic English knowledge. Prioritize in this order:
+   a. **Corporate jargon / office idioms** — phrases that are common in business but confusing to non-natives:
+      Examples: "park this", "circle back", "ping me", "take this offline", "loop you in", "move the needle", "boil the ocean", "low-hanging fruit", "bandwidth", "drill down", "touch base", "on the same page", "run it up the flagpole"
+   b. **Misleading phrases** — words that sound simple but have a completely different meaning in context:
+      Examples: "I'll table that" (means postpone, not put on the table), "Let's shelve it", "That's a hard pass", "I'm sold", "Not in my wheelhouse"
+   c. **Difficult vocabulary or formal expressions** non-natives would likely not know
+
+   For each card:
    - phrase: The English expression exactly as said
-   - literal: Word-by-word translation to Japanese
-   - nuance: Contextual meaning and when/how to use
-   - category: e.g. "ビジネス英語", "スラング", "表現"
+   - literal: Word-by-word translation to Japanese (including the misleading literal meaning if relevant)
+   - nuance: Contextual meaning in business Japanese, when/how to use it — make this the main educational value
+   - category: "社内英語" for office jargon, "スラング" for casual/informal, "ビジネス英語" for formal expressions
    - Place cards strategically throughout the clip (don't all appear at once)
+
+   ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words Japanese learners already know (e.g. "meeting", "schedule", "team")
 
 4. **Hook Title**: Create a catchy 1-line title in both EN and JA:
    ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting:
@@ -152,7 +166,8 @@ ${hasWordTimestamps ? `
       "endTime": number,
       "en": "string",
       "ja": "string",
-      "highlights": ["word1", "word2"]
+      "highlights": ["日本語ワード1", "日本語ワード2"],
+      "enHighlights": ["English word1", "English phrase2"]
     }
   ],
   "vocabCards": [
@@ -172,7 +187,7 @@ ${hasWordTimestamps ? `
 - Ensure clip duration is 30-60 seconds
 - Subtitles must cover the entire clip with no gaps
 - Each subtitle segment should be 2-4 seconds
-- Highlight words should actually appear in the Japanese text
+- `highlights` words must actually appear in the Japanese text; `enHighlights` words must actually appear in the English text
 - **hookTitle.ja must be ≤ ${LIMITS.hookTitle.ja} characters** — count each character as 1, no exceptions
 - **hookTitle.en must be ≤ ${LIMITS.hookTitle.en} characters** — keep it short and punchy
 - **Each subtitle en must be ≤ ${LIMITS.subtitle.en} characters** — use exact words spoken, split at natural pauses
@@ -367,7 +382,8 @@ function validateClipData(data: unknown): asserts data is ClipData {
         typeof sub.endTime !== "number" ||
         typeof sub.en !== "string" ||
         typeof sub.ja !== "string" ||
-        !Array.isArray(sub.highlights)) {
+        !Array.isArray(sub.highlights) ||
+        !Array.isArray(sub.enHighlights)) {
       throw new Error(`Invalid subtitle segment: ${JSON.stringify(sub)}`);
     }
   }

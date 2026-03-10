@@ -80,8 +80,12 @@ export const VocabCard: React.FC<VocabCardProps> = ({ card }) => {
             fontSize: s.phrase.fontSize,
             fontWeight: s.phrase.fontWeight,
             color: s.phrase.color,
-            marginBottom: 11,
+            marginBottom: 8,
             lineHeight: 1.2,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {card.phrase}
@@ -93,8 +97,12 @@ export const VocabCard: React.FC<VocabCardProps> = ({ card }) => {
             fontFamily: s.literal.fontFamily,
             fontSize: s.literal.fontSize,
             color: s.literal.color,
-            marginBottom: 15,
+            marginBottom: 11,
             fontStyle: s.literal.fontStyle,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {card.literal}
@@ -108,7 +116,11 @@ export const VocabCard: React.FC<VocabCardProps> = ({ card }) => {
             color: s.nuance.color,
             fontStyle: s.nuance.fontStyle,
             borderTop: `1px solid ${s.borderColor}33`,
-            paddingTop: 15,
+            paddingTop: 11,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {card.nuance}

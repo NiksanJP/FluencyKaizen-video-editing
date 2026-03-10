@@ -76,8 +76,20 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
         overflow: "hidden",
       }}
     >
-      {/* Background video — plays full length */}
-      <Video src={staticFile(clipData.videoFile)} />
+      {/* Background video — centered for landscape videos in portrait canvas */}
+      <Video
+        src={staticFile(clipData.videoFile)}
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          height: "auto",
+          minHeight: "100%",
+          objectFit: "contain",
+        }}
+      />
 
       {/* Hook title — visible during clip segment */}
       <Sequence from={clipStartFrame} durationInFrames={clipEndFrame - clipStartFrame}>

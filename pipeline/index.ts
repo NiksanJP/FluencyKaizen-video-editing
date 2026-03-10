@@ -13,7 +13,7 @@ import { writeFile } from "fs/promises";
 import { join, basename, extname, resolve, dirname } from "path";
 import { copyFileSync } from "fs";
 import { transcribe } from "./transcribe.js";
-import { analyzeWithLLM } from "./analyze.js";
+import { analyzeWithGemini } from "./analyze.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -116,7 +116,7 @@ async function main() {
     }
 
     // Step 3: Analyze with Ollama
-    const clipData = await analyzeWithLLM(transcript, videoFileName);
+    const clipData = await analyzeWithGemini(transcript, videoFileName);
     clipData.videoDuration = videoDuration;
 
     // Step 4: Write outputs

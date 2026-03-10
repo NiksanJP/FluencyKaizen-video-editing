@@ -24,10 +24,11 @@ export async function transcribe(
 
   // Step 1: Extract audio at 16kHz mono
   console.log("📹 Extracting audio from video...");
+  const shellPath = `/opt/homebrew/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/bin:/bin:${process.env.PATH || ""}`;
   try {
     execSync(
       `ffmpeg -i "${videoPath}" -acodec pcm_s16le -ar 16000 -ac 1 "${audioPath}" -y -loglevel quiet`,
-      { stdio: "inherit" }
+      { stdio: "inherit", env: { ...process.env, PATH: shellPath } }
     );
   } catch (e) {
     throw new Error(
@@ -40,8 +41,8 @@ export async function transcribe(
   const model = process.env.WHISPER_MODEL || "base";
   try {
     execSync(
-      `python3 -m whisper "${audioPath}" --model ${model} --output_format json --output_dir "${outputDir}" --word_timestamps True`,
-      { stdio: "inherit" }
+      `whisper "${audioPath}" --model ${model} --output_format json --output_dir "${outputDir}" --word_timestamps True`,
+      { stdio: "inherit", env: { ...process.env, PATH: shellPath } }
     );
   } catch (e) {
     throw new Error(

@@ -23,7 +23,8 @@ export interface SubtitleSegment {
   endTime: number;
   en: string;
   ja: string;
-  highlights: string[];
+  highlights: string[];      // Japanese words to highlight (legacy / ja alias)
+  enHighlights: string[];    // English words/phrases to highlight
 }
 
 export interface VocabCard {
