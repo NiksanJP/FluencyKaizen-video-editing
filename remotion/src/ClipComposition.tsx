@@ -3,10 +3,13 @@ import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
 import { BilingualCaption } from "./components/BilingualCaption";
 import { VocabCard } from "./components/VocabCard";
+import { HookTitle } from "./components/HookTitle";
 import styleConfig from "../../style.json";
+import allClips from "./clip-data-all";
 
 interface ClipCompositionProps {
   clipData?: ClipData;
+  clipName?: string;
 }
 
 /**
@@ -16,36 +19,22 @@ interface ClipCompositionProps {
  * - Hook title (persistent)
  * - Bilingual captions (synced)
  * - Vocabulary cards (timed pop-ups)
+ *
+ * Reads clip data directly from clip-data-all (HMR-aware) so edits
+ * to clip.json are reflected instantly without switching compositions.
  */
-export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: propClipData }) => {
+export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: propClipData, clipName }) => {
   const { durationInFrames, fps } = useVideoConfig();
-  const [clipData, setClipData] = useState<ClipData | null>(propClipData || null);
-  const [error, setError] = useState<string | null>(null);
+
+  // Read fresh data from clip-data-all on every render (HMR updates this import).
+  // Fall back to the prop for single-clip mode or when name is unavailable.
+  const clipData = (clipName && allClips?.[clipName]) || propClipData || null;
+
   // Dynamically tracks the bottom edge of the active caption so VocabCard never overlaps it
   const [vocabTop, setVocabTop] = useState(styleConfig.caption.top + 160);
   const handleCaptionBottom = useCallback((bottom: number) => {
     setVocabTop(bottom + 16);
   }, []);
-
-  if (error) {
-    return (
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "#000",
-          color: "#f00",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 24,
-          padding: 20,
-          textAlign: "center",
-        }}
-      >
-        ❌ Error: {error}
-      </div>
-    );
-  }
 
   if (!clipData) {
     return (
@@ -96,6 +85,9 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
           objectFit: "contain",
         }}
       />
+
+      {/* Hook title with branding */}
+      <HookTitle title={clipData.hookTitle} />
 
       {/* Bilingual captions — positioned at absolute timestamps */}
       <Sequence from={0} durationInFrames={durationInFrames}>

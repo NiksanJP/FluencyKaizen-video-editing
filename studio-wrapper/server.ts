@@ -73,7 +73,7 @@ try {
           try { client.send(msg); } catch {}
         }
       }
-    }, 400);
+    }, 50);
   });
 } catch {}
 
@@ -112,9 +112,10 @@ function spawnWithPTY(
   command: string[],
   session: CompositionSession,
   env?: Record<string, string>,
+  cwd?: string,
 ): PtyHandle {
   const proc = Bun.spawn(["python3", ptyBridge, ...command], {
-    cwd: projectRoot,
+    cwd: cwd || projectRoot,
     env: {
       ...process.env,
       TERM: "xterm-256color",
@@ -235,11 +236,12 @@ async function getOrCreateSession(
       sessions.delete(compId);
       return session;
     }
+    const compDir = resolve(outputDir, compId);
     const args = ["claude", "--dangerously-skip-permissions", "--model", "claude-haiku-4-5-20251001"];
     if (contextPrompt) {
       args.push("--append-system-prompt", contextPrompt);
     }
-    session.handle = spawnWithPTY(args, session);
+    session.handle = spawnWithPTY(args, session, undefined, compDir);
   } else {
     if (!commandExists("aider")) {
       ws.send(
@@ -251,14 +253,24 @@ async function getOrCreateSession(
       sessions.delete(compId);
       return session;
     }
+    const compDir = resolve(outputDir, compId);
+    const aiderFiles = [
+      resolve(compDir, "clip.json"),
+      resolve(compDir, "audio.json"),
+      resolve(compDir, "style.json"),
+      resolve(compDir, "ClipComposition.tsx"),
+      resolve(compDir, "components/HookTitle.tsx"),
+      resolve(compDir, "components/BilingualCaption.tsx"),
+      resolve(compDir, "components/VocabCard.tsx"),
+      resolve(compDir, "components/HighlightedText.tsx"),
+    ];
     const args = [
       "aider",
       "--model", "gemini/gemini-2.5-flash",
       "--message-file", contextPromptPath,
-      "--file", resolve(outputDir, compId, "clip.json"),
-      "--file", resolve(outputDir, compId, "audio.json"),
+      ...aiderFiles.flatMap((f) => ["--file", f]),
     ];
-    session.handle = spawnWithPTY(args, session);
+    session.handle = spawnWithPTY(args, session, undefined, compDir);
   }
 
   return session;

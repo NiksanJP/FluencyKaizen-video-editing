@@ -15,6 +15,7 @@ import { copyFileSync } from "fs";
 import { transcribe } from "./transcribe.js";
 import { analyzeWithGemini } from "./analyze.js";
 import { removeSilence } from "./silence.js";
+import { generateClipTsx } from "./generate-tsx.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -135,6 +136,9 @@ async function main() {
     const clipPath = join(outputDir, "clip.json");
     await writeFile(clipPath, JSON.stringify(clipData, null, 2));
     console.log(`💾 Saved: ${clipPath}`);
+
+    // Step 6: Generate per-clip TSX + style.json
+    await generateClipTsx(videoName, outputDir, projectRoot);
 
     console.log(`\n✨ Pipeline complete! Next steps:`);
     console.log(`   1. Review/edit: output/${videoName}/clip.json`);

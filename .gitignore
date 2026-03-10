@@ -55,6 +55,10 @@ npm-debug.log*
 studio-wrapper/.build/
 studio-wrapper/.context-prompt.txt
 
+# Auto-generated per-clip Remotion sources (synced from output/)
+remotion/src/clips/
+remotion/src/clip-compositions.ts
+
 input/*
 
 *.mp4
