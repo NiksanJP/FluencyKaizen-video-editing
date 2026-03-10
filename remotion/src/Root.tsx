@@ -27,13 +27,13 @@ export const RemotionRoot: React.FC = () => {
     return (
       <>
         {Object.entries(allClips).map(([name, clipData]) => {
-          const duration = clipData.videoDuration || clipData.clip.endTime;
+          const duration = clipData.clip.endTime - clipData.clip.startTime;
           return (
             <Composition
               key={name}
               id={name.replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-")}
               component={ClipComposition}
-              durationInFrames={Math.ceil(duration * 30)}
+              durationInFrames={Math.floor(duration * 30)}
               fps={30}
               width={1080}
               height={1920}
@@ -47,12 +47,12 @@ export const RemotionRoot: React.FC = () => {
 
   // Single-clip mode: original behavior
   if (singleClip) {
-    const duration = singleClip.videoDuration || singleClip.clip.endTime;
+    const duration = singleClip.clip.endTime - singleClip.clip.startTime;
     return (
       <Composition
         id="ClipComposition"
         component={ClipComposition}
-        durationInFrames={Math.ceil(duration * 30)}
+        durationInFrames={Math.floor(duration * 30)}
         fps={30}
         width={1080}
         height={1920}

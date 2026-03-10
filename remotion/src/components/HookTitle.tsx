@@ -97,7 +97,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             letterSpacing: 0.5,
           }}
         >
-          Fluency 改善
+          Fluency <span style={{ color: "#FFD700" }}>改善</span>
         </span>
       </div>
 

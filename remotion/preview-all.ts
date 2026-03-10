@@ -6,7 +6,7 @@
 // Scans output/[name]/clip.json, generates a single TypeScript file that exports
 // all clips, symlinks any missing videos into remotion/public/, then opens Studio.
 
-import { readdir, readFile, writeFile, symlink, access } from "fs/promises";
+import { readdir, readFile, writeFile, copyFile, access } from "fs/promises";
 import { existsSync } from "fs";
 import { resolve, dirname } from "path";
 import { $ } from "bun";
@@ -48,8 +48,13 @@ async function discoverClips(): Promise<ClipEntry[]> {
 }
 
 async function ensureVideoSymlinks(clips: ClipEntry[]) {
+  const { mkdir } = await import("fs/promises");
   for (const clip of clips) {
-    const target = resolve(publicDir, clip.videoFile);
+    // Use a per-clip subdirectory to avoid filename collisions between clips
+    const clipPublicDir = resolve(publicDir, clip.name);
+    await mkdir(clipPublicDir, { recursive: true });
+
+    const target = resolve(clipPublicDir, clip.videoFile);
     try {
       await access(target);
     } catch {
@@ -58,10 +63,10 @@ async function ensureVideoSymlinks(clips: ClipEntry[]) {
       const inputSource = resolve(projectRoot, "input", clip.videoFile);
       const source = existsSync(outputSource) ? outputSource : inputSource;
       try {
-        await symlink(source, target);
-        console.log(`🔗 Linked ${clip.videoFile} → remotion/public/`);
+        await copyFile(source, target);
+        console.log(`📋 Copied ${clip.videoFile} → remotion/public/${clip.name}/`);
       } catch {
-        console.warn(`⚠️  Could not link ${clip.videoFile} — video may not play`);
+        console.warn(`⚠️  Could not copy ${clip.videoFile} — video may not play`);
       }
     }
   }
@@ -71,7 +76,9 @@ async function generateAllClipsFile(clips: ClipEntry[]) {
   const imports = `import type { ClipData } from "../../pipeline/types";\n`;
 
   const entries = clips.map((clip) => {
-    return `  ${JSON.stringify(clip.name)}: ${JSON.stringify(clip.data, null, 2)} as unknown as ClipData`;
+    // Patch videoFile to use per-clip subdirectory path so clips don't share filenames
+    const patchedData = { ...(clip.data as Record<string, unknown>), videoFile: `${clip.name}/${clip.videoFile}` };
+    return `  ${JSON.stringify(clip.name)}: ${JSON.stringify(patchedData, null, 2)} as unknown as ClipData`;
   });
 
   const content = `${imports}

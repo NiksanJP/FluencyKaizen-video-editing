@@ -84,6 +84,8 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {/* Background video — centered for landscape videos in portrait canvas */}
       <OffthreadVideo
         src={staticFile(clipData.videoFile)}
+        startFrom={clipStartFrame}
+        endAt={clipEndFrame}
         style={{
           position: "absolute",
           top: "50%",
@@ -97,12 +99,12 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       />
 
       {/* Hook title — visible during clip segment */}
-      <Sequence from={clipStartFrame} durationInFrames={clipEndFrame - clipStartFrame}>
+      <Sequence from={0} durationInFrames={durationInFrames}>
         <HookTitle title={clipData.hookTitle} />
       </Sequence>
 
       {/* Bilingual captions — positioned at absolute timestamps */}
-      <Sequence from={clipStartFrame} durationInFrames={clipEndFrame - clipStartFrame}>
+      <Sequence from={0} durationInFrames={durationInFrames}>
         <BilingualCaption
           subtitles={clipData.subtitles.slice(0, styleConfig.caption.maxCount)}
           clipStart={clipData.clip.startTime}
@@ -114,7 +116,7 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {clipData.vocabCards.slice(0, styleConfig.vocabCard.maxCount).map((card, idx) => (
         <Sequence
           key={idx}
-          from={Math.floor(card.triggerTime * fps)}
+          from={Math.floor((card.triggerTime - clipData.clip.startTime) * fps)}
           durationInFrames={Math.floor(card.duration * fps)}
         >
           <VocabCard card={card} top={vocabTop} />

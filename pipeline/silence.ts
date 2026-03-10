@@ -39,6 +39,14 @@ export function detectSilenceGaps(
 
   if (inClip.length < 2) return [];
 
+  // Normalize stretched word endings — Whisper sometimes assigns the silent period
+  // after a word to that word's end timestamp, hiding the gap from inter-word detection.
+  const MAX_WORD_DURATION = 1.5; // seconds
+  const normalized = inClip.map((w) => ({
+    start: w.start,
+    end: Math.min(w.end, w.start + MAX_WORD_DURATION),
+  }));
+
   const gaps: SilenceGap[] = [];
 
   // Leading silence (clipStart → first word)
@@ -51,9 +59,9 @@ export function detectSilenceGaps(
     }
   }
 
-  // Inter-word gaps
-  for (let i = 0; i < inClip.length - 1; i++) {
-    const wordEnd = inClip[i].end;
+  // Inter-word gaps (use normalized end times to expose hidden silence)
+  for (let i = 0; i < normalized.length - 1; i++) {
+    const wordEnd = normalized[i].end;
     const nextStart = inClip[i + 1].start;
     const gapDuration = nextStart - wordEnd;
     if (gapDuration > threshold) {
@@ -69,8 +77,8 @@ export function detectSilenceGaps(
     }
   }
 
-  // Trailing silence (last word → clipEnd)
-  const lastWordEnd = inClip[inClip.length - 1].end;
+  // Trailing silence (last word → clipEnd); use normalized end to catch hidden trailing silence
+  const lastWordEnd = normalized[normalized.length - 1].end;
   if (clipEnd - lastWordEnd > threshold) {
     const gapStart = lastWordEnd + padding;
     const gapEnd = clipEnd;
