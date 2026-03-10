@@ -40,16 +40,47 @@
     const overlay = document.getElementById('loadingOverlay');
     frame.addEventListener('load', () => overlay.classList.add('hidden'));
 
+    function getCompositionIdFromStudioHref(href) {
+      try {
+        const url = new URL(href);
+        const decodeSafely = (value) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        };
+
+        const fromRoute = (route) => {
+          if (!route) return null;
+          const pathOnly = decodeSafely(route).split(/[?#]/)[0];
+          const segments = pathOnly.split('/').filter(Boolean);
+          if (segments.length === 0) return null;
+          if (segments[0] === 'assets' || segments[0] === 'outputs') return null;
+          if (segments[0] === 'compositions') return decodeSafely(segments[1] || '') || null; // legacy path style
+          return decodeSafely(segments[segments.length - 1] || '') || null; // Remotion v4 SPA style: /<compositionId>
+        };
+
+        const pathRoute = url.pathname.replace(/^\/remotion-studio(?=\/|$)/, '');
+        const queryRoute = url.search.startsWith('?') ? url.search.slice(1) : '';
+        const hashRoute = url.hash.startsWith('#') ? url.hash.slice(1) : '';
+
+        return fromRoute(pathRoute) || fromRoute(queryRoute) || fromRoute(hashRoute);
+      } catch {
+        return null;
+      }
+    }
+
     // Poll iframe URL for composition changes
     let lastCompId = null;
     setInterval(() => {
       try {
         const href = frame.contentWindow.location.href;
-        const m = href.match(/\/compositions\/([^/?#]+)/);
-        if (m && m[1] !== lastCompId) {
-          lastCompId = m[1];
+        const compId = getCompositionIdFromStudioHref(href);
+        if (compId && compId !== lastCompId) {
+          lastCompId = compId;
           if (window.activateCompositionTabs) {
-            window.activateCompositionTabs(m[1]);
+            window.activateCompositionTabs(compId);
           }
         }
       } catch(e) {
@@ -71,13 +102,15 @@
             if (msg.type !== 'clip-data-updated' || reloadInFlight) return;
 
             let compositionPath = null;
+            let compositionId = null;
             try {
               const href = frame.contentWindow.location.href;
+              compositionId = getCompositionIdFromStudioHref(href);
               const url = new URL(href);
               compositionPath = url.pathname + url.search + url.hash;
             } catch { return; }
 
-            if (!compositionPath || !compositionPath.includes('/compositions/')) return;
+            if (!compositionPath || !compositionId) return;
 
             reloadInFlight = true;
             setTimeout(() => {
