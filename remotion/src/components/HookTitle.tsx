@@ -54,7 +54,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
         </div>
       </div>
 
-      {/* "in Fluency Kaizen" branding row */}
+      {/* "in Fluency 改善" branding row */}
       <div
         style={{
           display: "flex",
@@ -97,8 +97,22 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             letterSpacing: 0.5,
           }}
         >
-          Fluency Kaizen
+          Fluency 改善
         </span>
+      </div>
+
+      {/* URL */}
+      <div
+        style={{
+          fontFamily: s.fontFamily,
+          fontSize: s.urlFontSize,
+          color: "#ffffff",
+          fontWeight: "400",
+          letterSpacing: 1,
+          opacity: 0.8,
+        }}
+      >
+        fluencykaizen.com
       </div>
     </div>
   );
