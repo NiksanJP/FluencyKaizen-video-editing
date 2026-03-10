@@ -1,251 +1,173 @@
 import type { ClipData } from "../../pipeline/types";
 
 const clipData: ClipData = {
-  "videoFile": "video_001.mp4",
+  "videoFile": "clip_trimmed_web.mp4",
   "hookTitle": {
-    "ja": "影響力を高める",
-    "en": "Be the Ultimate Needle Mover"
+    "ja": "📊進捗報告",
+    "en": "📊 Progress Report English"
   },
   "clip": {
     "startTime": 0,
-    "endTime": 38.06
+    "endTime": 12.99
   },
   "subtitles": [
     {
       "startTime": 0,
-      "endTime": 1.36,
-      "en": "So you're going to...",
-      "ja": "だから、あなたは～しなければならない",
+      "endTime": 1.6799999999999997,
+      "en": "Good morning, Nick.",
+      "ja": "おはようございます、ニック。",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 1.8599999999999994,
+      "endTime": 3.08,
+      "en": "We're here today to...",
+      "ja": "本日は、〜について話し合います",
       "highlights": [
-        "しなければならない"
+        "話し合います"
+      ],
+      "enHighlights": [
+        "discuss"
       ]
     },
     {
-      "startTime": 1.24,
-      "endTime": 2.74,
-      "en": "show up on the 30th",
-      "ja": "30日には現れて",
+      "startTime": 3.1599999999999984,
+      "endTime": 4.6,
+      "en": "your progress on the...",
+      "ja": "市場の進捗について",
       "highlights": [
-        "現れて"
+        "進捗",
+        "市場"
+      ],
+      "enHighlights": [
+        "progress",
+        "market"
       ]
     },
     {
-      "startTime": 3.1,
-      "endTime": 3.72,
-      "en": "at Summerslam",
-      "ja": "サマースラムで",
+      "startTime": 4.6,
+      "endTime": 5.799999999999999,
+      "en": "research analysis for",
+      "ja": "調査分析を",
       "highlights": [
-        "サマースラムで"
+        "調査分析"
+      ],
+      "enHighlights": [
+        "research analysis"
       ]
     },
     {
-      "startTime": 4.16,
-      "endTime": 5.2,
-      "en": "and become Roman",
-      "ja": "そしてロマンとなり",
+      "startTime": 5.76,
+      "endTime": 6.360000000000001,
+      "en": "Project X.",
+      "ja": "プロジェクトXの件です。",
       "highlights": [
-        "ロマン"
+        "プロジェクトX"
+      ],
+      "enHighlights": [
+        "Project X"
       ]
     },
     {
-      "startTime": 5.34,
-      "endTime": 6.56,
-      "en": "Reigns like never before",
-      "ja": "これまでにないレインズに",
+      "startTime": 6.9399999999999995,
+      "endTime": 8.339999999999998,
+      "en": "Please provide a...",
+      "ja": "簡潔な最新情報をお願いします。",
       "highlights": [
-        "これまでにない"
+        "簡潔な",
+        "最新情報"
+      ],
+      "enHighlights": [
+        "concise",
+        "update"
       ]
     },
     {
-      "startTime": 6.92,
-      "endTime": 7.96,
-      "en": "the greatest performance",
-      "ja": "最高のパフォーマンス",
-      "highlights": [
-        "最高のパフォーマンス"
-      ]
+      "startTime": 9.22,
+      "endTime": 10.26,
+      "en": "Good morning, Mr. Tanaka.",
+      "ja": "おはようございます、田中さん。",
+      "highlights": [],
+      "enHighlights": []
     },
     {
-      "startTime": 8.34,
-      "endTime": 10.34,
-      "en": "in the history of Roman",
-      "ja": "ロマンの歴史の中で",
-      "highlights": [
-        "歴史の中で"
-      ]
+      "startTime": 10.38,
+      "endTime": 10.94,
+      "en": "How are you?",
+      "ja": "お元気ですか？",
+      "highlights": [],
+      "enHighlights": []
     },
     {
-      "startTime": 10.42,
-      "endTime": 11.7,
-      "en": "Reigns' career that",
-      "ja": "レインズのキャリアが",
-      "highlights": [
-        "キャリア"
-      ]
+      "startTime": 11.140000000000002,
+      "endTime": 12.140000000000002,
+      "en": "I'm well. Thank you.",
+      "ja": "元気です。ありがとう。",
+      "highlights": [],
+      "enHighlights": []
     },
     {
-      "startTime": 11.9,
-      "endTime": 13.38,
-      "en": "both violent, the most",
-      "ja": "最も暴力的で、最も",
+      "startTime": 12.660000000000005,
+      "endTime": 12.980000000000004,
+      "en": "Let's proceed.",
+      "ja": "進めましょう。",
       "highlights": [
-        "暴力的で"
-      ]
-    },
-    {
-      "startTime": 13.34,
-      "endTime": 15.04,
-      "en": "diabolical, the most",
-      "ja": "悪魔的で、最も",
-      "highlights": [
-        "悪魔的で"
-      ]
-    },
-    {
-      "startTime": 15.04,
-      "endTime": 16.82,
-      "en": "dangerous, a beast slayer",
-      "ja": "危険な獣殺し",
-      "highlights": [
-        "危険な",
-        "獣殺し"
-      ]
-    },
-    {
-      "startTime": 17.38,
-      "endTime": 18.64,
-      "en": "a conqueror, conqueror",
-      "ja": "征服者、征服者",
-      "highlights": [
-        "征服者"
-      ]
-    },
-    {
-      "startTime": 19.2,
-      "endTime": 20.22,
-      "en": "the go-to-ball goats",
-      "ja": "頼りになる歴代最高",
-      "highlights": [
-        "頼りになる",
-        "歴代最高"
-      ]
-    },
-    {
-      "startTime": 20.82,
-      "endTime": 21.92,
-      "en": "so that they say that",
-      "ja": "だから彼らはこう言う",
-      "highlights": [
-        "彼らはこう言う"
-      ]
-    },
-    {
-      "startTime": 22.12,
-      "endTime": 23.04,
-      "en": "the end of the match,",
-      "ja": "試合の終わりに",
-      "highlights": [
-        "試合の終わり"
-      ]
-    },
-    {
-      "startTime": 23.48,
-      "endTime": 24.22,
-      "en": "ladies and gentlemen,",
-      "ja": "皆様、",
-      "highlights": [
-        "皆様"
-      ]
-    },
-    {
-      "startTime": 24.82,
-      "endTime": 27.04,
-      "en": "your winner, the ultimate",
-      "ja": "勝者は、究極の",
-      "highlights": [
-        "勝者は",
-        "究極の"
-      ]
-    },
-    {
-      "startTime": 27.24,
-      "endTime": 29.16,
-      "en": "needle mover, the head",
-      "ja": "時代の牽引者、トップ",
-      "highlights": [
-        "牽引者",
-        "トップ"
-      ]
-    },
-    {
-      "startTime": 29.06,
-      "endTime": 30.76,
-      "en": "of the table, the",
-      "ja": "テーブルの長、その",
-      "highlights": [
-        "テーブルの長"
-      ]
-    },
-    {
-      "startTime": 30.5,
-      "endTime": 31.38,
-      "en": "dribble chief",
-      "ja": "支配者",
-      "highlights": [
-        "支配者"
-      ]
-    },
-    {
-      "startTime": 32.28,
-      "endTime": 34.12,
-      "en": "he got boned himself.",
-      "ja": "彼は骨抜きにされた。",
-      "highlights": [
-        "骨抜きにされた"
-      ]
-    },
-    {
-      "startTime": 36.36,
-      "endTime": 38.06,
-      "en": "Roman Reigns.",
-      "ja": "ローマン・レインズ。",
-      "highlights": [
-        "ローマン・レインズ"
+        "進めましょう"
+      ],
+      "enHighlights": [
+        "proceed"
       ]
     }
   ],
   "vocabCards": [
     {
-      "triggerTime": 1.24,
+      "triggerTime": 3.380000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "show up on the 30th",
-      "literal": "30日に現れる",
-      "nuance": "会議やイベントに指定された日に出席する際に使う。納期や期限についても使える。"
+      "phrase": "progress",
+      "literal": "進歩、前進",
+      "nuance": "ビジネスではプロジェクトやタスクの『進捗状況』を指すことが多いです。進捗報告を求めたり、自分の進捗を伝えたりする際に使います。"
     },
     {
-      "triggerTime": 7.24,
+      "triggerTime": 4.959999999999999,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "greatest performance",
-      "literal": "最高の業績",
-      "nuance": "個人やチームの成果、企業の業績など、達成された結果が非常に優れていることを指す。"
+      "phrase": "market research analysis",
+      "literal": "市場調査分析",
+      "nuance": "特定の商品やサービスの市場を調査し、そのデータを分析するビジネスプロセスです。新しい事業計画や戦略立案の基礎となります。"
     },
     {
-      "triggerTime": 26.74,
+      "triggerTime": 7.700000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "ultimate needle mover",
-      "literal": "究極の現状を変えるもの",
-      "nuance": "ビジネスにおいて、状況や指標を大きく好転させる、決定的な影響力を持つ人や事柄を指す。"
+      "phrase": "concise",
+      "literal": "簡潔な、簡明な",
+      "nuance": "ビジネスにおいて、無駄な情報を省き、要点を的確に伝えることを指します。特に報告やプレゼンテーションで求められる資質です。"
     },
     {
-      "triggerTime": 28.86,
+      "triggerTime": 8.040000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "head of the table",
-      "literal": "テーブルの長",
-      "nuance": "家族や組織のリーダー、意思決定者。責任ある立場の人を指す。"
+      "phrase": "update",
+      "literal": "更新、最新情報",
+      "nuance": "ビジネスでは、プロジェクトの進捗や状況に関する『最新情報』や『報告』という意味でよく使われます。動詞としても名詞としても活用できます。"
+    },
+    {
+      "triggerTime": 11.040000000000001,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "proceed",
+      "literal": "進む、続行する",
+      "nuance": "会議や議論を『進める』、次の段階へ『移行する』といった場面で使われるフォーマルな表現です。許可や指示を出す際にも使えます。"
+    }
+  ],
+  "videoDuration": 12.99,
+  "silenceGaps": [
+    {
+      "originalStart": 24.44,
+      "originalEnd": 27.639999999999997,
+      "duration": 3.1999999999999957
     }
   ]
 };

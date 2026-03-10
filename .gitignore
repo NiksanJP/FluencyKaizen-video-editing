@@ -51,6 +51,10 @@ npm-debug.log*
 *.tmp
 .turbo/
 
+# Studio wrapper build artifacts
+studio-wrapper/.build/
+studio-wrapper/.context-prompt.txt
+
 input/*
 
 *.mp4

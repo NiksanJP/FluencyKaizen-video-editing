@@ -89,18 +89,22 @@ export default allClips;
   console.log(`✅ Generated clip-data-all.ts with ${clips.length} clip(s)`);
 }
 
-// Main
-const clips = await discoverClips();
+export { discoverClips, ensureVideoSymlinks, generateAllClipsFile };
 
-if (clips.length === 0) {
-  console.error("No clips found in output/. Run /process-video first.");
-  process.exit(1);
+// Only run as a script when executed directly (not when imported)
+if (import.meta.main) {
+  const clips = await discoverClips();
+
+  if (clips.length === 0) {
+    console.error("No clips found in output/. Run /process-video first.");
+    process.exit(1);
+  }
+
+  console.log(`Found ${clips.length} clip(s): ${clips.map((c) => c.name).join(", ")}\n`);
+
+  await ensureVideoSymlinks(clips);
+  await generateAllClipsFile(clips);
+
+  console.log("\n🚀 Launching Remotion Studio...\n");
+  await $`cd ${resolve(projectRoot, "remotion")} && bun remotion studio`.quiet();
 }
-
-console.log(`Found ${clips.length} clip(s): ${clips.map((c) => c.name).join(", ")}\n`);
-
-await ensureVideoSymlinks(clips);
-await generateAllClipsFile(clips);
-
-console.log("\n🚀 Launching Remotion Studio...\n");
-await $`cd ${resolve(projectRoot, "remotion")} && bun remotion studio`.quiet();
