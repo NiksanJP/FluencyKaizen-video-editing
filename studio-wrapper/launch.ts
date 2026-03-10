@@ -152,21 +152,46 @@ if (!existsSync(resolve(wrapperDir, "node_modules"))) {
   console.log("  Dependencies installed");
 }
 
+// --- Find free ports ---
+
+import { createServer } from "net";
+
+function findFreePort(preferred: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const srv = createServer();
+    srv.listen(preferred, () => {
+      srv.close(() => resolve(preferred));
+    });
+    srv.on("error", () => {
+      // Preferred port busy — let OS pick one
+      const srv2 = createServer();
+      srv2.listen(0, () => {
+        const port = (srv2.address() as import("net").AddressInfo).port;
+        srv2.close(() => resolve(port));
+      });
+      srv2.on("error", reject);
+    });
+  });
+}
+
+const remotionPort = await findFreePort(3000);
+const wrapperPort = await findFreePort(4000);
+
 // --- Start child processes ---
 
 const children: Array<import("bun").Subprocess> = [];
 
-// 1. File watcher
-console.log(`\nStarting file watcher for ${clipName}...`);
-const watcher = Bun.spawn(["bun", resolve(projectRoot, "remotion/watch-clip.ts"), clipName], {
+// 1. File watcher (watches all clips in output/)
+console.log(`\nStarting file watcher for all clips...`);
+const watcher = Bun.spawn(["bun", resolve(projectRoot, "remotion/watch-clip.ts")], {
   cwd: projectRoot,
   stdio: ["ignore", "inherit", "inherit"],
 });
 children.push(watcher);
 
-// 2. Remotion Studio (port 3000)
-console.log("Starting Remotion Studio on port 3000...");
-const studio = Bun.spawn(["bun", "remotion", "studio", "--no-open"], {
+// 2. Remotion Studio
+console.log(`Starting Remotion Studio on port ${remotionPort}...`);
+const studio = Bun.spawn(["bun", "remotion", "studio", "--no-open", "--port", String(remotionPort)], {
   cwd: resolve(projectRoot, "remotion"),
   stdio: ["ignore", "pipe", "inherit"],
   env: { ...process.env },
@@ -178,7 +203,7 @@ console.log("Waiting for Remotion Studio...");
 let studioReady = false;
 for (let i = 0; i < 60; i++) {
   try {
-    const res = await fetch("http://localhost:3000");
+    const res = await fetch(`http://localhost:${remotionPort}`);
     if (res.ok) {
       studioReady = true;
       break;
@@ -194,15 +219,16 @@ if (!studioReady) {
 }
 console.log("  Remotion Studio is ready");
 
-// 3. Wrapper server (port 4000)
-console.log("Starting studio wrapper on port 4000...");
+// 3. Wrapper server
+console.log(`Starting studio wrapper on port ${wrapperPort}...`);
 const wrapper = Bun.spawn(["bun", resolve(wrapperDir, "server.ts")], {
   cwd: projectRoot,
   stdio: ["ignore", "inherit", "inherit"],
   env: {
     ...process.env,
     STUDIO_CLIP_NAME: clipName,
-    STUDIO_PORT: "4000",
+    STUDIO_PORT: String(wrapperPort),
+    REMOTION_PORT: String(remotionPort),
   },
 });
 children.push(wrapper);
@@ -211,11 +237,11 @@ children.push(wrapper);
 await Bun.sleep(1000);
 
 // 4. Open browser
-console.log("\n🚀 Opening browser to http://localhost:4000\n");
+console.log(`\n🚀 Opening browser to http://localhost:${wrapperPort}\n`);
 try {
-  await $`open http://localhost:4000`.quiet();
+  await $`open http://localhost:${wrapperPort}`.quiet();
 } catch {
-  console.log("  Could not open browser automatically. Navigate to http://localhost:4000");
+  console.log(`  Could not open browser automatically. Navigate to http://localhost:${wrapperPort}`);
 }
 
 console.log("Press Ctrl+C to stop all processes.\n");

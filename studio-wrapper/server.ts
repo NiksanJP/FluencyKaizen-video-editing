@@ -33,6 +33,7 @@ const __dir = dirname(import.meta.path);
 const projectRoot = resolve(__dir, "..");
 const ptyBridge = resolve(__dir, "pty-bridge.py");
 const clipName = process.env.STUDIO_CLIP_NAME || "unknown";
+const remotionPort = process.env.REMOTION_PORT || "3000";
 
 // MIME types for static files
 const MIME: Record<string, string> = {
@@ -227,11 +228,11 @@ const server = Bun.serve({
       // Fall through to Remotion proxy
     }
 
-    // Fallback: reverse-proxy everything else to Remotion Studio on port 3000
+    // Fallback: reverse-proxy everything else to Remotion Studio
     // This lets the iframe at /remotion-studio load, and all its sub-requests
     // (JS bundles, CSS, HMR websockets, API calls) resolve naturally.
     const remotionPath = path === "/remotion-studio" ? "/" : path;
-    const remotionUrl = `http://localhost:3000${remotionPath}${url.search}`;
+    const remotionUrl = `http://localhost:${remotionPort}${remotionPath}${url.search}`;
 
     // WebSocket upgrade (Remotion HMR)
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {

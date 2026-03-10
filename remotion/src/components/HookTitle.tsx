@@ -101,20 +101,6 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
           Fluency <span style={{ color: "#FFD700" }}>改善</span>
         </span>
       </div>
-
-      {/* URL */}
-      <div
-        style={{
-          fontFamily: s.fontFamily,
-          fontSize: s.urlFontSize,
-          color: "#ffffff",
-          fontWeight: "400",
-          letterSpacing: 1,
-          opacity: 0.8,
-        }}
-      >
-        fluencykaizen.com
-      </div>
     </div>
   );
 };

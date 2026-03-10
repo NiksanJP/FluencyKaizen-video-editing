@@ -1,50 +1,54 @@
 #!/usr/bin/env bun
 /**
- * Watch output/[name]/clip.json and regenerate remotion/src/clip-data.ts on changes.
+ * Watch all output clip.json files and regenerate clip-data-all.ts on changes.
  * Remotion's built-in HMR detects the source file change and auto-refreshes the Studio.
  *
- * Usage: bun remotion/watch-clip.ts <video-name>
+ * Usage: bun remotion/watch-clip.ts
  */
 
 import { watch } from "fs";
-import { readFile, writeFile, copyFile, access } from "fs/promises";
+import { readdir, readFile, writeFile } from "fs/promises";
 import { resolve, dirname } from "path";
 
-const name = process.argv[2];
-if (!name) {
-  console.error("Usage: bun remotion/watch-clip.ts <video-name>");
-  process.exit(1);
-}
-
 const projectRoot = resolve(dirname(import.meta.dir));
-const clipJsonPath = resolve(projectRoot, `output/${name}/clip.json`);
-const clipDataTsPath = resolve(projectRoot, "remotion/src/clip-data.ts");
+const outputDir = resolve(projectRoot, "output");
+const clipDataAllPath = resolve(projectRoot, "remotion/src/clip-data-all.ts");
 
-async function syncClipData() {
+async function regenerateAllClips() {
   try {
-    const json = await readFile(clipJsonPath, "utf-8");
-    // Validate it's parseable
-    JSON.parse(json);
+    const dirs = (await readdir(outputDir)).sort();
+    const entries: string[] = [];
 
-    const tsContent = `import type { ClipData } from "../../pipeline/types";\n\nconst clipData: ClipData = ${json};\n\nexport default clipData;\n`;
-    await writeFile(clipDataTsPath, tsContent);
-    console.log(`✅ [${new Date().toLocaleTimeString()}] clip-data.ts updated from clip.json`);
+    for (const dir of dirs) {
+      const clipPath = resolve(outputDir, dir, "clip.json");
+      try {
+        const raw = await readFile(clipPath, "utf-8");
+        const data = JSON.parse(raw);
+        const patchedData = { ...data, videoFile: `${dir}/${data.videoFile}` };
+        entries.push(`  ${JSON.stringify(dir)}: ${JSON.stringify(patchedData, null, 2)} as unknown as ClipData`);
+      } catch {}
+    }
+
+    const content = `import type { ClipData } from "../../pipeline/types";\n\nconst allClips: Record<string, ClipData> = {\n${entries.join(",\n")}\n};\n\nexport default allClips;\n`;
+    await writeFile(clipDataAllPath, content);
+    console.log(`✅ [${new Date().toLocaleTimeString()}] clip-data-all.ts updated (${entries.length} clip(s))`);
   } catch (err) {
-    console.error(`⚠️  Failed to sync clip.json:`, (err as Error).message);
+    console.error(`⚠️  Failed to regenerate clip-data-all.ts:`, (err as Error).message);
   }
 }
 
 // Initial sync
-await syncClipData();
+await regenerateAllClips();
 
 // Watch for changes
-console.log(`👀 Watching ${clipJsonPath} for changes...`);
-console.log("   Edit clip.json (or run /edit-clip) and Remotion Studio will auto-refresh.\n");
+console.log(`👀 Watching ${outputDir} for clip.json changes...`);
+console.log("   Edit any clip.json (or run /edit-clip) and Remotion Studio will auto-refresh.\n");
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-watch(clipJsonPath, () => {
-  // Debounce rapid file system events
-  if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(syncClipData, 200);
+watch(outputDir, { recursive: true }, (_event, filename) => {
+  if (filename?.endsWith("clip.json")) {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(regenerateAllClips, 200);
+  }
 });
