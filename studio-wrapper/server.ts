@@ -17,6 +17,17 @@
 
 import { resolve, dirname, extname } from "path";
 import { readFile } from "fs/promises";
+import { execFileSync } from "child_process";
+
+/** Check if a command exists on the system PATH */
+function commandExists(cmd: string): boolean {
+  try {
+    execFileSync("which", [cmd], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const __dir = dirname(import.meta.path);
 const projectRoot = resolve(__dir, "..");
@@ -67,7 +78,7 @@ const activePTYs: Set<PtyHandle> = new Set();
 
 function spawnWithPTY(
   command: string[],
-  ws: { send: (data: string | Uint8Array) => void; readyState: number },
+  ws: { send: (data: string | Uint8Array) => void; readyState: number; close: () => void },
   env?: Record<string, string>,
 ): PtyHandle {
   // Use pty-bridge.py to allocate a real PTY for the child process.
@@ -135,7 +146,7 @@ function spawnWithPTY(
     } catch {}
   })();
 
-  // Clean up on process exit
+  // Clean up on process exit — close the WebSocket so the client can reconnect
   proc.exited.then((exitCode) => {
     activePTYs.delete(handle);
     if (ws.readyState === 1) {
@@ -144,6 +155,10 @@ function spawnWithPTY(
           `\r\n\x1b[33m[Process exited with code ${exitCode}]\x1b[0m\r\n`,
         ),
       );
+      // Give the client a moment to receive the message before closing
+      setTimeout(() => {
+        try { ws.close(); } catch {}
+      }, 500);
     }
   });
 
@@ -152,6 +167,7 @@ function spawnWithPTY(
 
 const server = Bun.serve({
   port: parseInt(process.env.STUDIO_PORT || "4000"),
+  idleTimeout: 255,  // max allowed — prevents request timeout for slow Remotion proxy responses
   async fetch(req, server) {
     const url = new URL(req.url);
     const path = url.pathname;
@@ -245,38 +261,90 @@ const server = Bun.serve({
     }
   },
   websocket: {
+    idleTimeout: 0,       // Disable idle timeout — AI sessions can be quiet for long periods
+    sendPings: true,      // Keep connections alive with automatic pings
+    maxPayloadLength: 16 * 1024 * 1024, // 16 MB — large AI responses
     open(ws) {
       const data = ws.data as any;
 
       // Proxy WebSocket for Remotion HMR
       if (data.proxy) {
         const upstream = data.upstream as WebSocket;
-        upstream.addEventListener("message", (event) => {
-          if (ws.readyState === 1) {
-            if (event.data instanceof ArrayBuffer) {
-              ws.send(new Uint8Array(event.data));
-            } else {
-              ws.send(event.data);
+
+        function attachUpstreamListeners(us: WebSocket) {
+          us.addEventListener("message", (event) => {
+            if (ws.readyState === 1) {
+              if (event.data instanceof ArrayBuffer) {
+                ws.send(new Uint8Array(event.data));
+              } else {
+                ws.send(event.data);
+              }
             }
-          }
-        });
-        upstream.addEventListener("close", () => ws.close());
-        upstream.addEventListener("error", () => ws.close());
+          });
+          us.addEventListener("close", () => {
+            // Reconnect to upstream Remotion instead of closing the client
+            if (ws.readyState === 1) {
+              setTimeout(() => {
+                try {
+                  const newUpstream = new WebSocket(us.url);
+                  newUpstream.addEventListener("open", () => {
+                    (ws.data as any).upstream = newUpstream;
+                    attachUpstreamListeners(newUpstream);
+                  });
+                  newUpstream.addEventListener("error", () => {
+                    // If reconnect fails, schedule another attempt
+                    setTimeout(() => {
+                      if (ws.readyState === 1) {
+                        // Give up after upstream is truly gone — client will handle it
+                        try { ws.close(); } catch {}
+                      }
+                    }, 5000);
+                  });
+                } catch {
+                  try { ws.close(); } catch {}
+                }
+              }, 1000);
+            }
+          });
+          us.addEventListener("error", () => {
+            // error is followed by close, which triggers reconnect above
+          });
+        }
+
+        attachUpstreamListeners(upstream);
         return;
       }
 
       const endpoint = data.endpoint as string;
       console.log(`WebSocket connected: ${endpoint}`);
 
-      let handle: PtyHandle;
+      let handle: PtyHandle | undefined;
 
       if (endpoint === "/ws/claude") {
+        if (!commandExists("claude")) {
+          ws.send(
+            new TextEncoder().encode(
+              "\x1b[31mError: 'claude' CLI not found.\r\nInstall it with: npm install -g @anthropic-ai/claude-code\x1b[0m\r\n",
+            ),
+          );
+          ws.close();
+          return;
+        }
         const args = ["claude", "--dangerously-skip-permissions"];
         if (contextPrompt) {
-          args.push("-p", contextPrompt);
+          args.push("--append-system-prompt", contextPrompt);
         }
         handle = spawnWithPTY(args, ws);
       } else if (endpoint === "/ws/gemini") {
+        if (!commandExists("aider")) {
+          ws.send(
+            new TextEncoder().encode(
+              "\x1b[31mError: 'aider' CLI not found.\r\nInstall it with: pip3 install aider-chat\x1b[0m\r\n",
+            ),
+          );
+          ws.close();
+          return;
+        }
         handle = spawnWithPTY(
           [
             "aider",
@@ -296,7 +364,9 @@ const server = Bun.serve({
         return;
       }
 
-      (ws.data as any).pty = handle;
+      if (handle) {
+        (ws.data as any).pty = handle;
+      }
     },
     message(ws, message) {
       const data = ws.data as any;

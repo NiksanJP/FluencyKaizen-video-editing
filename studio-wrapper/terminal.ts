@@ -5,10 +5,17 @@ import { WebLinksAddon } from "@xterm/addon-web-links";
 interface TerminalInstance {
   term: Terminal;
   fitAddon: FitAddon;
-  ws: WebSocket;
+  ws: WebSocket | null;
+  wsPath: string;
+  reconnectTimer: ReturnType<typeof setTimeout> | null;
+  reconnectDelay: number;
+  intentionallyClosed: boolean;
 }
 
 const terminals: Record<string, TerminalInstance> = {};
+
+const RECONNECT_BASE_DELAY = 1000;   // 1s initial
+const RECONNECT_MAX_DELAY = 15000;   // 15s cap
 
 const THEME = {
   background: "#1e1e1e",
@@ -34,6 +41,54 @@ const THEME = {
   brightWhite: "#ffffff",
 };
 
+function connectWebSocket(inst: TerminalInstance) {
+  const { term, wsPath } = inst;
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  const ws = new WebSocket(`${protocol}//${location.host}${wsPath}`);
+  ws.binaryType = "arraybuffer";
+  inst.ws = ws;
+
+  ws.addEventListener("open", () => {
+    // Reset backoff on successful connection
+    inst.reconnectDelay = RECONNECT_BASE_DELAY;
+    // Send initial size
+    const dims = { type: "resize", cols: term.cols, rows: term.rows };
+    ws.send(JSON.stringify(dims));
+  });
+
+  ws.addEventListener("message", (event) => {
+    if (event.data instanceof ArrayBuffer) {
+      term.write(new Uint8Array(event.data));
+    } else {
+      term.write(event.data);
+    }
+  });
+
+  ws.addEventListener("close", () => {
+    inst.ws = null;
+    if (inst.intentionallyClosed) return;
+    term.write("\r\n\x1b[33m[Disconnected — reconnecting...]\x1b[0m\r\n");
+    scheduleReconnect(inst);
+  });
+
+  ws.addEventListener("error", () => {
+    // close event will fire after this, which triggers reconnect
+  });
+}
+
+function scheduleReconnect(inst: TerminalInstance) {
+  if (inst.reconnectTimer) return; // already scheduled
+  if (inst.intentionallyClosed) return;
+
+  inst.reconnectTimer = setTimeout(() => {
+    inst.reconnectTimer = null;
+    inst.term.write(`\x1b[90m[Reconnecting...]\x1b[0m\r\n`);
+    connectWebSocket(inst);
+    // Exponential backoff
+    inst.reconnectDelay = Math.min(inst.reconnectDelay * 1.5, RECONNECT_MAX_DELAY);
+  }, inst.reconnectDelay);
+}
+
 function createTerminal(id: string, wsPath: string) {
   const container = document.getElementById(`terminal-${id}`);
   if (!container) return;
@@ -54,49 +109,34 @@ function createTerminal(id: string, wsPath: string) {
   term.open(container);
   fitAddon.fit();
 
-  // Connect WebSocket
-  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  const ws = new WebSocket(`${protocol}//${location.host}${wsPath}`);
-
-  ws.binaryType = "arraybuffer";
-
-  ws.addEventListener("open", () => {
-    // Send initial size
-    const dims = { type: "resize", cols: term.cols, rows: term.rows };
-    ws.send(JSON.stringify(dims));
-  });
-
-  ws.addEventListener("message", (event) => {
-    if (event.data instanceof ArrayBuffer) {
-      term.write(new Uint8Array(event.data));
-    } else {
-      term.write(event.data);
-    }
-  });
-
-  ws.addEventListener("close", () => {
-    term.write("\r\n\x1b[31m[Connection closed]\x1b[0m\r\n");
-  });
-
-  ws.addEventListener("error", () => {
-    term.write("\r\n\x1b[31m[Connection error]\x1b[0m\r\n");
-  });
+  const inst: TerminalInstance = {
+    term,
+    fitAddon,
+    ws: null,
+    wsPath,
+    reconnectTimer: null,
+    reconnectDelay: RECONNECT_BASE_DELAY,
+    intentionallyClosed: false,
+  };
 
   // Terminal input → WebSocket
   term.onData((data) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(data);
+    if (inst.ws && inst.ws.readyState === WebSocket.OPEN) {
+      inst.ws.send(data);
     }
   });
 
   // Handle resize
   term.onResize(({ cols, rows }) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: "resize", cols, rows }));
+    if (inst.ws && inst.ws.readyState === WebSocket.OPEN) {
+      inst.ws.send(JSON.stringify({ type: "resize", cols, rows }));
     }
   });
 
-  terminals[id] = { term, fitAddon, ws };
+  terminals[id] = inst;
+
+  // Start connection
+  connectWebSocket(inst);
 }
 
 // Tab switching
@@ -124,6 +164,20 @@ window.addEventListener("resize", () => {
     const wrapper = document.getElementById(`terminal-${id}`);
     if (wrapper?.classList.contains("active")) {
       inst.fitAddon.fit();
+    }
+  }
+});
+
+// Reconnect when browser tab regains focus (catches laptop sleep/wake)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    for (const inst of Object.values(terminals)) {
+      if (!inst.ws || inst.ws.readyState !== WebSocket.OPEN) {
+        if (!inst.intentionallyClosed && !inst.reconnectTimer) {
+          inst.reconnectDelay = RECONNECT_BASE_DELAY;
+          connectWebSocket(inst);
+        }
+      }
     }
   }
 });

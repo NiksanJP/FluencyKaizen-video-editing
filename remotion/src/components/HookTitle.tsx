@@ -7,6 +7,7 @@ interface HookTitleProps {
 }
 
 export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
+  if (!title) return null;
   const s = styleConfig.hookTitle;
 
   return (

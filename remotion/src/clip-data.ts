@@ -3,8 +3,8 @@ import type { ClipData } from "../../pipeline/types";
 const clipData: ClipData = {
   "videoFile": "clip_trimmed_web.mp4",
   "hookTitle": {
-    "ja": "📊進捗報告",
-    "en": "📊 Progress Report English"
+    "en": "Master Business English | FluencyKaizen",
+    "ja": "ビジネス英語をマスター | FluencyKaizen"
   },
   "clip": {
     "startTime": 0,

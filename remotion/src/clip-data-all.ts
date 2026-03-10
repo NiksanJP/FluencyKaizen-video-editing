@@ -4,8 +4,8 @@ const allClips: Record<string, ClipData> = {
   "001": {
   "videoFile": "001/clip_trimmed_web.mp4",
   "hookTitle": {
-    "ja": "📊進捗報告",
-    "en": "📊 Progress Report English"
+    "en": "Master Business English | FluencyKaizen",
+    "ja": "ビジネス英語をマスター | FluencyKaizen"
   },
   "clip": {
     "startTime": 0,
