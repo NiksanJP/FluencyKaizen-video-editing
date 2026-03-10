@@ -4,79 +4,69 @@ const allClips: Record<string, ClipData> = {
   "001": {
   "videoFile": "clip_trimmed.mp4",
   "hookTitle": {
-    "ja": "報告のコツ",
-    "en": "Concise Business Reports"
+    "ja": "進捗報告",
+    "en": "Business Update Basics"
   },
   "clip": {
     "startTime": 0,
-    "endTime": 10.34000000000001
+    "endTime": 13.29
   },
   "subtitles": [
     {
-      "startTime": 0.1000000000000032,
-      "endTime": 1.780000000000003,
+      "startTime": 0,
+      "endTime": 1.6799999999999997,
       "en": "Good morning, Nick.",
-      "ja": "おはよう、ニック。",
+      "ja": "おはようございます、ニック。",
       "highlights": [
-        "おはよう"
+        "おはようございます"
       ],
       "enHighlights": [
         "Good morning"
       ]
     },
     {
-      "startTime": 1.9600000000000026,
-      "endTime": 3.1800000000000033,
+      "startTime": 1.8599999999999994,
+      "endTime": 3.08,
       "en": "We're here today to...",
-      "ja": "今日は話し合うために",
+      "ja": "本日は議論するために",
       "highlights": [
-        "話し合う"
+        "議論するために"
       ],
       "enHighlights": [
-        "discuss"
+        "to discuss"
       ]
     },
     {
-      "startTime": 3.240000000000002,
-      "endTime": 3.780000000000001,
-      "en": "your progress",
-      "ja": "あなたの進捗状況を",
+      "startTime": 3.1599999999999984,
+      "endTime": 4.4399999999999995,
+      "en": "your progress on the",
+      "ja": "あなたの進捗について",
       "highlights": [
-        "進捗状況"
+        "進捗"
       ],
       "enHighlights": [
         "progress"
       ]
     },
     {
-      "startTime": 3.9400000000000013,
-      "endTime": 5.0000000000000036,
-      "en": "on the market research",
-      "ja": "市場調査について",
+      "startTime": 4.299999999999999,
+      "endTime": 5.26,
+      "en": "market research analysis",
+      "ja": "市場調査の分析",
       "highlights": [
-        "市場調査"
-      ],
-      "enHighlights": [
-        "market research"
-      ]
-    },
-    {
-      "startTime": 5.060000000000002,
-      "endTime": 5.360000000000003,
-      "en": "analysis",
-      "ja": "分析です",
-      "highlights": [
+        "市場調査",
         "分析"
       ],
       "enHighlights": [
+        "market research",
         "analysis"
       ]
     },
     {
-      "startTime": 5.600000000000001,
-      "endTime": 6.460000000000004,
+      "startTime": 5.499999999999998,
+      "endTime": 6.360000000000001,
       "en": "for Project X.",
-      "ja": "プロジェクトXの",
+      "ja": "プロジェクトXについてです。",
       "highlights": [
         "プロジェクトX"
       ],
@@ -85,32 +75,22 @@ const allClips: Record<string, ClipData> = {
       ]
     },
     {
-      "startTime": 6.720000000000006,
-      "endTime": 7.760000000000005,
-      "en": "Please provide a concise",
-      "ja": "簡潔に提供してください",
+      "startTime": 6.9399999999999995,
+      "endTime": 8.339999999999998,
+      "en": "Please provide a...",
+      "ja": "簡潔な進捗報告をお願いします。",
       "highlights": [
-        "簡潔に"
+        "簡潔な",
+        "進捗報告"
       ],
       "enHighlights": [
-        "concise"
-      ]
-    },
-    {
-      "startTime": 7.820000000000007,
-      "endTime": 8.120000000000005,
-      "en": "update.",
-      "ja": "更新を",
-      "highlights": [
-        "更新"
-      ],
-      "enHighlights": [
+        "concise",
         "update"
       ]
     },
     {
-      "startTime": 8.580000000000009,
-      "endTime": 9.620000000000008,
+      "startTime": 9.22,
+      "endTime": 10.26,
       "en": "Good morning, Mr. Tanaka.",
       "ja": "田中さん、おはようございます。",
       "highlights": [
@@ -121,73 +101,74 @@ const allClips: Record<string, ClipData> = {
       ]
     },
     {
-      "startTime": 9.740000000000009,
-      "endTime": 10.300000000000008,
+      "startTime": 10.38,
+      "endTime": 10.94,
       "en": "How are you?",
       "ja": "お元気ですか？",
       "highlights": [
         "お元気ですか"
       ],
       "enHighlights": [
-        "How are you"
+        "How are you?"
+      ]
+    },
+    {
+      "startTime": 11.140000000000002,
+      "endTime": 12.140000000000002,
+      "en": "I'm well. Thank you.",
+      "ja": "ええ、元気です。ありがとう。",
+      "highlights": [
+        "元気です"
+      ],
+      "enHighlights": [
+        "well"
+      ]
+    },
+    {
+      "startTime": 12.660000000000005,
+      "endTime": 13.280000000000001,
+      "en": "Let's proceed.",
+      "ja": "では、始めましょう。",
+      "highlights": [
+        "始めましょう"
+      ],
+      "enHighlights": [
+        "proceed"
       ]
     }
   ],
   "vocabCards": [
     {
-      "triggerTime": 2.8800000000000026,
+      "triggerTime": 7.4399999999999995,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "discuss",
-      "literal": "議論する、話し合う",
-      "nuance": "特定の議題や問題について意見を交換したり、解決策を探ったりする行為。会議や打ち合わせでよく使われる基本的なビジネス動詞です。"
+      "phrase": "concise update",
+      "literal": "簡潔な最新情報",
+      "nuance": "ビジネスでは、無駄なく要点をまとめた最新の状況報告を指します。上司やクライアントへの報告時に「簡潔な報告」という意味でよく使われます。"
     },
     {
-      "triggerTime": 3.480000000000004,
+      "triggerTime": 11.040000000000001,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "progress",
-      "literal": "進捗、前進",
-      "nuance": "ビジネスにおけるプロジェクトやタスクの進行状況や達成度を指します。上司への報告やチーム内での共有によく使われます。"
+      "phrase": "proceed",
+      "literal": "進む、続行する",
+      "nuance": "会議や作業を「進める」「始める」といった意味で使われる、ビジネスで非常に一般的な動詞です。許可を得て次のステップに進む際によく使われます。"
     },
     {
-      "triggerTime": 4.400000000000002,
+      "triggerTime": 4.299999999999999,
       "duration": 3.5,
       "category": "ビジネス英語",
       "phrase": "market research analysis",
       "literal": "市場調査分析",
-      "nuance": "特定の市場に関する情報を収集・分析し、ビジネス戦略に役立てること。新製品開発やマーケティング戦略立案の基礎となります。"
-    },
-    {
-      "triggerTime": 7.460000000000004,
-      "duration": 3.5,
-      "category": "ビジネス英語",
-      "phrase": "concise",
-      "literal": "簡潔な、要約された",
-      "nuance": "長々と説明せず、要点を短くまとめること。ビジネスシーンでは、会議での発言やメール、報告書などで「簡潔に」伝える能力が重視されます。"
+      "nuance": "顧客や市場の動向を理解するために行う調査（市場調査）とその結果を解釈する過程（分析）を合わせた表現です。ビジネスの戦略立案において非常に重要です。"
     }
   ],
-  "videoDuration": 10.34000000000001,
+  "videoDuration": 13.29,
   "silenceGaps": [
     {
-      "originalStart": 0,
-      "originalEnd": 13.299999999999997,
-      "duration": 13.299999999999997
-    },
-    {
-      "originalStart": 19.92,
-      "originalEnd": 20.24,
-      "duration": 0.31999999999999673
-    },
-    {
-      "originalStart": 22.1,
-      "originalEnd": 22.52,
-      "duration": 0.41999999999999815
-    },
-    {
-      "originalStart": 24.380000000000003,
-      "originalEnd": 40,
-      "duration": 15.619999999999997
+      "originalStart": 24.44,
+      "originalEnd": 27.639999999999997,
+      "duration": 3.1999999999999957
     }
   ]
 } as unknown as ClipData

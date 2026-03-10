@@ -95,14 +95,14 @@ export async function analyzeWithGemini(
   const prompt = `You are a professional video editor specializing in Business English educational content for Japanese learners.
 
 ## Task
-Analyze this bilingual (English/Japanese mixed) video transcript and produce a JSON output for a 30-60 second short-form video clip.
+Analyze this bilingual (English/Japanese mixed) video transcript and produce a JSON output for a short-form video clip.
 
 ## Transcript
 ${transcriptText}
 
 ## Instructions
 
-1. **Select Clip**: Choose the best 30-60 second segment that:
+1. **Select Clip**: Choose the best segment that:
    - Contains clear, useful business English phrases
    - Has good bilingual balance (EN + JP)
    - Would engage viewers on TikTok/YouTube Shorts
@@ -184,7 +184,6 @@ ${hasWordTimestamps ? `
 \`\`\`
 
 ## Requirements
-- Ensure clip duration is 30-60 seconds
 - Subtitles must cover the entire clip with no gaps
 - Each subtitle segment should be 2-4 seconds
 - \`highlights\` words must actually appear in the Japanese text; \`enHighlights\` words must actually appear in the English text
@@ -368,13 +367,6 @@ function validateClipData(data: unknown): asserts data is ClipData {
   if (!Array.isArray(clip.vocabCards))
     throw new Error("vocabCards must be an array");
 
-  // Validate clip duration
-  const duration = clip.clip.endTime - clip.clip.startTime;
-  if (duration < 30 || duration > 60) {
-    throw new Error(
-      `Clip duration ${duration}s is outside 30-60s range. Ask Gemini to adjust.`
-    );
-  }
 
   // Validate subtitles structure
   for (const sub of clip.subtitles) {

@@ -6,7 +6,7 @@
  */
 
 import { execFileSync } from "child_process";
-import { existsSync, statSync } from "fs";
+import { existsSync } from "fs";
 import { join } from "path";
 import type { ClipData, SilenceGap, WhisperResult } from "./types.js";
 
@@ -207,7 +207,7 @@ export function remapTimestamp(
 // ---------------------------------------------------------------------------
 
 export interface RemoveSilenceOptions {
-  threshold?: number; // default 0.5s
+  threshold?: number; // default 0.8s
   padding?: number;   // default 0.1s
 }
 
@@ -223,7 +223,7 @@ export async function removeSilence(
   outputDir: string,
   options: RemoveSilenceOptions = {}
 ): Promise<SilenceRemovalResult | null> {
-  const { threshold = 0.5, padding = 0.1 } = options;
+  const { threshold = 0.8, padding = 0.1 } = options;
   const { startTime: clipStart, endTime: clipEnd } = clipData.clip;
 
   // Collect word-level timestamps from all segments
@@ -268,14 +268,7 @@ export async function removeSilence(
 
   const outputPath = join(outputDir, "clip_trimmed.mp4");
 
-  // Cache check: skip ffmpeg if clip_trimmed.mp4 is newer than source
-  const alreadyTrimmed =
-    existsSync(outputPath) &&
-    statSync(outputPath).mtimeMs > statSync(sourceVideoPath).mtimeMs;
-
-  if (alreadyTrimmed) {
-    console.log(`✅ Using existing clip_trimmed.mp4 (skipping ffmpeg)`);
-  } else {
+  {
     const segments = gapsToSpeechSegments(gaps, clipStart, clipEnd);
     console.log(
       `   Cutting ${segments.length} segment(s) from ${originalDuration.toFixed(1)}s → ${compressedDuration.toFixed(1)}s`
@@ -286,6 +279,21 @@ export async function removeSilence(
       console.warn(`⚠️  ffmpeg failed:`, err);
       return null;
     }
+  }
+
+
+  // Get actual output duration from ffprobe (ffmpeg output may differ slightly from calculated)
+  let actualDuration = compressedDuration;
+  try {
+    const probe = execFileSync("ffprobe", [
+      "-v", "quiet",
+      "-print_format", "json",
+      "-show_format",
+      outputPath,
+    ], { encoding: "utf-8" });
+    actualDuration = parseFloat(JSON.parse(probe).format.duration);
+  } catch {
+    // fallback to calculated value
   }
 
   // Remap all timestamps in clipData
@@ -302,9 +310,9 @@ export async function removeSilence(
 
   // Update clip boundaries and video reference
   clipData.videoFile = "clip_trimmed.mp4";
-  clipData.videoDuration = compressedDuration;
-  clipData.clip = { startTime: 0, endTime: compressedDuration };
+  clipData.videoDuration = actualDuration;
+  clipData.clip = { startTime: 0, endTime: actualDuration };
   clipData.silenceGaps = gaps;
 
-  return { gaps, compressedDuration };
+  return { gaps, compressedDuration: actualDuration };
 }
