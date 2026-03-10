@@ -20,13 +20,11 @@
 
     <!-- Right: AI Terminals -->
     <div class="terminal-panel" id="terminalPanel">
-      <div class="tab-bar">
-        <div class="tab claude active" data-target="claude" onclick="switchTab('claude')">Claude</div>
-        <div class="tab gemini" data-target="gemini" onclick="switchTab('gemini')">Gemini</div>
+      <div class="tab-bar" id="tabBar">
+        <!-- Tabs are created dynamically per composition -->
       </div>
-      <div class="terminal-container">
-        <div class="terminal-wrapper active" id="terminal-claude"></div>
-        <div class="terminal-wrapper" id="terminal-gemini"></div>
+      <div class="terminal-container" id="terminalContainer">
+        <!-- Terminal wrappers are created dynamically -->
       </div>
       <div class="status-bar">
         <span>FluencyKaizen Studio</span>
@@ -42,6 +40,66 @@
     const overlay = document.getElementById('loadingOverlay');
     frame.addEventListener('load', () => overlay.classList.add('hidden'));
 
+    // Poll iframe URL for composition changes
+    let lastCompId = null;
+    setInterval(() => {
+      try {
+        const href = frame.contentWindow.location.href;
+        const m = href.match(/\/compositions\/([^/?#]+)/);
+        if (m && m[1] !== lastCompId) {
+          lastCompId = m[1];
+          if (window.activateCompositionTabs) {
+            window.activateCompositionTabs(m[1]);
+          }
+        }
+      } catch(e) {
+        // cross-origin or not loaded yet
+      }
+    }, 500);
+
+    // Auto-reload composition when clip-data-all.ts changes
+    (function() {
+      let reloadInFlight = false;
+
+      function connectEventsWs() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${location.host}/ws/events`);
+
+        ws.addEventListener('message', (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type !== 'clip-data-updated' || reloadInFlight) return;
+
+            let compositionPath = null;
+            try {
+              const href = frame.contentWindow.location.href;
+              const url = new URL(href);
+              compositionPath = url.pathname + url.search + url.hash;
+            } catch { return; }
+
+            if (!compositionPath || !compositionPath.includes('/compositions/')) return;
+
+            reloadInFlight = true;
+            setTimeout(() => {
+              try {
+                frame.contentWindow.location.href = compositionPath;
+              } catch {
+                frame.src = frame.src;
+              }
+              setTimeout(() => { reloadInFlight = false; }, 2000);
+            }, 300);
+          } catch {}
+        });
+
+        ws.addEventListener('close', () => {
+          setTimeout(connectEventsWs, 2000);
+        });
+        ws.addEventListener('error', () => {});
+      }
+
+      connectEventsWs();
+    })();
+
     // Draggable splitter
     const splitter = document.getElementById('splitter');
     const previewPanel = document.getElementById('previewPanel');
@@ -52,7 +110,6 @@
       isDragging = true;
       splitter.classList.add('dragging');
       document.body.style.cursor = 'col-resize';
-      // Prevent iframe from capturing mouse events while dragging
       frame.style.pointerEvents = 'none';
       e.preventDefault();
     });
@@ -62,7 +119,6 @@
       const pct = (e.clientX / container.offsetWidth) * 100;
       const clamped = Math.max(30, Math.min(80, pct));
       previewPanel.style.flex = `0 0 ${clamped}%`;
-      // Trigger terminal resize
       window.dispatchEvent(new Event('resize'));
     });
 

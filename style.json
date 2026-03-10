@@ -2,7 +2,7 @@
   "hookTitle": {
     "maxCount": 10,
     "fontFamily": "sans-serif",
-    "fontSize": 120,
+    "fontSize": 72,
     "fontWeight": "900",
     "color": "#FFD700",
     "lineHeight": 1.2,

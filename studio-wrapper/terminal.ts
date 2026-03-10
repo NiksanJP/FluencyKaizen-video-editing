@@ -13,6 +13,7 @@ interface TerminalInstance {
 }
 
 const terminals: Record<string, TerminalInstance> = {};
+let activeTabId: string | null = null;
 
 const RECONNECT_BASE_DELAY = 1000;   // 1s initial
 const RECONNECT_MAX_DELAY = 15000;   // 15s cap
@@ -49,9 +50,7 @@ function connectWebSocket(inst: TerminalInstance) {
   inst.ws = ws;
 
   ws.addEventListener("open", () => {
-    // Reset backoff on successful connection
     inst.reconnectDelay = RECONNECT_BASE_DELAY;
-    // Send initial size
     const dims = { type: "resize", cols: term.cols, rows: term.rows };
     ws.send(JSON.stringify(dims));
   });
@@ -77,14 +76,13 @@ function connectWebSocket(inst: TerminalInstance) {
 }
 
 function scheduleReconnect(inst: TerminalInstance) {
-  if (inst.reconnectTimer) return; // already scheduled
+  if (inst.reconnectTimer) return;
   if (inst.intentionallyClosed) return;
 
   inst.reconnectTimer = setTimeout(() => {
     inst.reconnectTimer = null;
     inst.term.write(`\x1b[90m[Reconnecting...]\x1b[0m\r\n`);
     connectWebSocket(inst);
-    // Exponential backoff
     inst.reconnectDelay = Math.min(inst.reconnectDelay * 1.5, RECONNECT_MAX_DELAY);
   }, inst.reconnectDelay);
 }
@@ -139,8 +137,33 @@ function createTerminal(id: string, wsPath: string) {
   connectWebSocket(inst);
 }
 
-// Tab switching
-(window as any).switchTab = function switchTab(id: string) {
+// --- Dynamic tab + terminal creation ---
+
+function createTabAndTerminal(id: string, label: string, wsPath: string, type: "claude" | "gemini") {
+  const tabBar = document.getElementById("tabBar")!;
+  const termContainer = document.getElementById("terminalContainer")!;
+
+  // Create tab element
+  const tab = document.createElement("div");
+  tab.className = `tab ${type}`;
+  tab.setAttribute("data-target", id);
+  tab.textContent = label;
+  tab.addEventListener("click", () => switchTab(id));
+  tabBar.appendChild(tab);
+
+  // Create terminal wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "terminal-wrapper";
+  wrapper.id = `terminal-${id}`;
+  termContainer.appendChild(wrapper);
+
+  // Create terminal + WS connection
+  createTerminal(id, wsPath);
+}
+
+function switchTab(id: string) {
+  activeTabId = id;
+
   // Update tab active state
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.classList.toggle("active", tab.getAttribute("data-target") === id);
@@ -156,7 +179,28 @@ function createTerminal(id: string, wsPath: string) {
   if (inst) {
     setTimeout(() => inst.fitAddon.fit(), 50);
   }
+}
+
+// Activate (or create) Claude + Gemini tabs for a composition
+(window as any).activateCompositionTabs = function(compId: string) {
+  const claudeId = `comp-${compId}-claude`;
+  const geminiId = `comp-${compId}-gemini`;
+
+  // Create tabs lazily on first selection
+  if (!terminals[claudeId]) {
+    createTabAndTerminal(claudeId, `${compId}\u00B7C`, `/ws/claude/${compId}`, "claude");
+    createTabAndTerminal(geminiId, `${compId}\u00B7G`, `/ws/gemini/${compId}`, "gemini");
+  }
+
+  // Switch to Claude tab for this composition
+  switchTab(claudeId);
+
+  // Update status bar
+  const el = document.getElementById("clipName");
+  if (el) el.textContent = `Composition: ${compId}`;
 };
+
+(window as any).switchTab = switchTab;
 
 // Resize all visible terminals on window resize
 window.addEventListener("resize", () => {
@@ -168,7 +212,7 @@ window.addEventListener("resize", () => {
   }
 });
 
-// Reconnect when browser tab regains focus (catches laptop sleep/wake)
+// Reconnect when browser tab regains focus
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     for (const inst of Object.values(terminals)) {
@@ -182,15 +226,15 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// Fetch clip name from server and display it
-fetch("/api/clip-name")
-  .then((r) => r.text())
-  .then((name) => {
+// Fetch available clips and auto-activate the first one
+fetch("/api/clips")
+  .then((r) => r.json())
+  .then((clips: string[]) => {
     const el = document.getElementById("clipName");
-    if (el) el.textContent = `Clip: ${name}`;
+    if (el) el.textContent = `${clips.length} clip(s) available`;
+    // Auto-activate the first composition's tabs on load
+    if (clips.length > 0) {
+      (window as any).activateCompositionTabs(clips[0]);
+    }
   })
   .catch(() => {});
-
-// Initialize terminals
-createTerminal("claude", "/ws/claude");
-createTerminal("gemini", "/ws/gemini");

@@ -14,7 +14,6 @@ import { $ } from "bun";
 const projectRoot = resolve(dirname(import.meta.dir));
 const outputDir = resolve(projectRoot, "output");
 const wrapperDir = resolve(projectRoot, "studio-wrapper");
-const contextPromptPath = resolve(wrapperDir, ".context-prompt.txt");
 
 // --- Determine clip name ---
 
@@ -86,12 +85,12 @@ async function generateAllClipsFileLocal(clips: Array<{ name: string; data: any;
   console.log(`  Generated clip-data-all.ts with ${clips.length} clip(s)`);
 }
 
-// --- Generate context prompt ---
+// --- Generate per-composition context prompts ---
 
-async function generateContextPrompt() {
+async function generateContextPrompt(clip: { name: string; data: any }) {
   let transcriptText = "";
   try {
-    const audioRaw = await readFile(resolve(outputDir, clipName, "audio.json"), "utf-8");
+    const audioRaw = await readFile(resolve(outputDir, clip.name, "audio.json"), "utf-8");
     const audioData = JSON.parse(audioRaw);
     // Extract text from Whisper output (segments or full text)
     if (audioData.text) {
@@ -105,7 +104,7 @@ async function generateContextPrompt() {
 
   let clipJson = "";
   try {
-    clipJson = await readFile(resolve(outputDir, clipName, "clip.json"), "utf-8");
+    clipJson = await readFile(resolve(outputDir, clip.name, "clip.json"), "utf-8");
   } catch {
     clipJson = "(clip.json not found)";
   }
@@ -119,14 +118,21 @@ ${transcriptText}
 ${clipJson}
 
 ## Workflow
-- Edit output/${clipName}/clip.json to modify subtitles, vocab cards, timing, etc.
+- Edit output/${clip.name}/clip.json to modify subtitles, vocab cards, timing, etc.
 - Changes auto-refresh in the Remotion preview on the left.
 - Timestamps are in seconds (float).
 - Refer to the transcript for accurate timing and content.
 `;
 
-  await writeFile(contextPromptPath, prompt);
-  console.log("  Generated context prompt for AI terminals");
+  const promptPath = resolve(outputDir, clip.name, ".context-prompt.txt");
+  await writeFile(promptPath, prompt);
+}
+
+async function generateAllContextPrompts(clips: Array<{ name: string; data: any }>) {
+  for (const clip of clips) {
+    await generateContextPrompt(clip);
+  }
+  console.log(`  Generated context prompts for ${clips.length} clip(s)`);
 }
 
 // --- Setup ---
@@ -141,7 +147,7 @@ console.log(`Found ${clips.length} clip(s): ${clips.map((c) => c.name).join(", "
 console.log("Setting up...");
 await ensureVideoSymlinksLocal(clips);
 await generateAllClipsFileLocal(clips);
-await generateContextPrompt();
+await generateAllContextPrompts(clips);
 
 // --- Install dependencies if needed ---
 
@@ -226,7 +232,6 @@ const wrapper = Bun.spawn(["bun", resolve(wrapperDir, "server.ts")], {
   stdio: ["ignore", "inherit", "inherit"],
   env: {
     ...process.env,
-    STUDIO_CLIP_NAME: clipName,
     STUDIO_PORT: String(wrapperPort),
     REMOTION_PORT: String(remotionPort),
   },
@@ -253,9 +258,14 @@ function cleanup() {
   for (const child of children) {
     try { child.kill(); } catch {}
   }
-  // Clean up context prompt
-  import("fs/promises").then(({ unlink }) => {
-    unlink(contextPromptPath).catch(() => {});
+  // Clean up per-composition context prompts
+  import("fs/promises").then(async ({ unlink, readdir: rd }) => {
+    try {
+      const dirs = await rd(outputDir);
+      for (const dir of dirs) {
+        unlink(resolve(outputDir, dir, ".context-prompt.txt")).catch(() => {});
+      }
+    } catch {}
   });
   process.exit(0);
 }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
-import { HookTitle } from "./components/HookTitle";
 import { BilingualCaption } from "./components/BilingualCaption";
 import { VocabCard } from "./components/VocabCard";
 import styleConfig from "../../style.json";
@@ -97,11 +96,6 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
           objectFit: "contain",
         }}
       />
-
-      {/* Hook title — visible during clip segment */}
-      <Sequence from={0} durationInFrames={durationInFrames}>
-        <HookTitle title={clipData.hookTitle} />
-      </Sequence>
 
       {/* Bilingual captions — positioned at absolute timestamps */}
       <Sequence from={0} durationInFrames={durationInFrames}>

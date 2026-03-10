@@ -47,8 +47,9 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             fontWeight: s.fontWeight,
             textAlign: "center",
             lineHeight: s.lineHeight,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {title.ja}

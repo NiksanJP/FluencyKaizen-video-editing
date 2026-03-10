@@ -10,13 +10,14 @@
  *   GET /styles.css    → styles.css
  *   GET /terminal.js   → bundled terminal.ts
  *   GET /node_modules/ → static node_modules assets (xterm CSS)
- *   GET /api/clip-name → current clip name
- *   WS  /ws/claude     → PTY: claude
- *   WS  /ws/gemini     → PTY: aider
+ *   GET /api/clips     → list of available clip IDs
+ *   WS  /ws/claude/:compId  → per-composition Claude (Haiku)
+ *   WS  /ws/gemini/:compId  → per-composition Gemini (aider)
  */
 
 import { resolve, dirname, extname } from "path";
-import { readFile } from "fs/promises";
+import { readFile, readdir } from "fs/promises";
+import { watch } from "fs";
 import { execFileSync } from "child_process";
 
 /** Check if a command exists on the system PATH */
@@ -32,8 +33,8 @@ function commandExists(cmd: string): boolean {
 const __dir = dirname(import.meta.path);
 const projectRoot = resolve(__dir, "..");
 const ptyBridge = resolve(__dir, "pty-bridge.py");
-const clipName = process.env.STUDIO_CLIP_NAME || "unknown";
 const remotionPort = process.env.REMOTION_PORT || "3000";
+const outputDir = resolve(projectRoot, "output");
 
 // MIME types for static files
 const MIME: Record<string, string> = {
@@ -59,32 +60,59 @@ if (!bundleResult.success) {
   process.exit(1);
 }
 
-// Pre-read context prompt so it's available in WebSocket open handler
-const contextPromptPath = resolve(__dir, ".context-prompt.txt");
-let contextPrompt = "";
+// Watch clip-data-all.ts — broadcast reload signal when it changes
+const clipDataAllPath = resolve(projectRoot, "remotion/src/clip-data-all.ts");
+let clipDataDebounce: ReturnType<typeof setTimeout> | null = null;
 try {
-  contextPrompt = await readFile(contextPromptPath, "utf-8");
-} catch {
-  console.warn("No .context-prompt.txt found — AI terminals will start without context");
-}
+  watch(clipDataAllPath, () => {
+    if (clipDataDebounce) clearTimeout(clipDataDebounce);
+    clipDataDebounce = setTimeout(() => {
+      const msg = JSON.stringify({ type: "clip-data-updated" });
+      for (const client of eventClients) {
+        if (client.readyState === 1) {
+          try { client.send(msg); } catch {}
+        }
+      }
+    }, 400);
+  });
+} catch {}
 
-// Track active processes for cleanup
+// --- Per-composition session management ---
+
 interface PtyHandle {
   proc: ReturnType<typeof Bun.spawn>;
   write: (data: string | Uint8Array) => void;
   kill: () => void;
 }
 
+interface CompositionSession {
+  handle: PtyHandle;
+  buffer: Uint8Array[];
+  bufferTotalSize: number;
+  ws: { send: (data: any) => void; readyState: number; close: () => void } | null;
+}
+
+const MAX_BUFFER = 50_000; // ~50KB ring buffer for replay
+const claudeSessions = new Map<string, CompositionSession>();
+const geminiSessions = new Map<string, CompositionSession>();
 const activePTYs: Set<PtyHandle> = new Set();
+const eventClients = new Set<{ send: (data: string) => void; readyState: number }>();
+
+function addToBuffer(session: CompositionSession, data: Uint8Array) {
+  session.buffer.push(data);
+  session.bufferTotalSize += data.byteLength;
+  // Trim oldest entries if over limit
+  while (session.bufferTotalSize > MAX_BUFFER && session.buffer.length > 1) {
+    const removed = session.buffer.shift()!;
+    session.bufferTotalSize -= removed.byteLength;
+  }
+}
 
 function spawnWithPTY(
   command: string[],
-  ws: { send: (data: string | Uint8Array) => void; readyState: number; close: () => void },
+  session: CompositionSession,
   env?: Record<string, string>,
 ): PtyHandle {
-  // Use pty-bridge.py to allocate a real PTY for the child process.
-  // Python's pty.spawn() creates a pseudo-terminal and copies I/O
-  // between the PTY master fd and stdin/stdout, which are Bun pipes.
   const proc = Bun.spawn(["python3", ptyBridge, ...command], {
     cwd: projectRoot,
     env: {
@@ -119,51 +147,121 @@ function spawnWithPTY(
 
   activePTYs.add(handle);
 
-  // stdout → WebSocket
+  // stdout → buffer + WS
   (async () => {
     const reader = proc.stdout.getReader();
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        if (ws.readyState === 1) {
-          ws.send(value);
+        addToBuffer(session, value);
+        if (session.ws && session.ws.readyState === 1) {
+          session.ws.send(value);
         }
       }
     } catch {}
   })();
 
-  // stderr → WebSocket (PTY merges stderr into stdout, but just in case)
+  // stderr → buffer + WS
   (async () => {
     const reader = proc.stderr.getReader();
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        if (ws.readyState === 1) {
-          ws.send(value);
+        addToBuffer(session, value);
+        if (session.ws && session.ws.readyState === 1) {
+          session.ws.send(value);
         }
       }
     } catch {}
   })();
 
-  // Clean up on process exit — close the WebSocket so the client can reconnect
+  // On process exit — notify WS but don't kill session
   proc.exited.then((exitCode) => {
     activePTYs.delete(handle);
-    if (ws.readyState === 1) {
-      ws.send(
-        new TextEncoder().encode(
-          `\r\n\x1b[33m[Process exited with code ${exitCode}]\x1b[0m\r\n`,
-        ),
-      );
-      // Give the client a moment to receive the message before closing
-      setTimeout(() => {
-        try { ws.close(); } catch {}
-      }, 500);
+    const msg = new TextEncoder().encode(
+      `\r\n\x1b[33m[Process exited with code ${exitCode}]\x1b[0m\r\n`,
+    );
+    addToBuffer(session, msg);
+    if (session.ws && session.ws.readyState === 1) {
+      session.ws.send(msg);
     }
   });
 
   return handle;
+}
+
+async function getOrCreateSession(
+  sessions: Map<string, CompositionSession>,
+  compId: string,
+  type: "claude" | "gemini",
+  ws: { send: (data: any) => void; readyState: number; close: () => void },
+): Promise<CompositionSession> {
+  let session = sessions.get(compId);
+  if (session) {
+    // Replay buffer to new WS
+    for (const chunk of session.buffer) {
+      ws.send(chunk);
+    }
+    session.ws = ws;
+    return session;
+  }
+
+  // New session
+  session = {
+    handle: null as any,
+    buffer: [],
+    bufferTotalSize: 0,
+    ws,
+  };
+  sessions.set(compId, session);
+
+  // Read context prompt for this composition
+  const contextPromptPath = resolve(outputDir, compId, ".context-prompt.txt");
+  let contextPrompt = "";
+  try {
+    contextPrompt = await readFile(contextPromptPath, "utf-8");
+  } catch {}
+
+  if (type === "claude") {
+    if (!commandExists("claude")) {
+      ws.send(
+        new TextEncoder().encode(
+          "\x1b[31mError: 'claude' CLI not found.\r\nInstall it with: npm install -g @anthropic-ai/claude-code\x1b[0m\r\n",
+        ),
+      );
+      ws.close();
+      sessions.delete(compId);
+      return session;
+    }
+    const args = ["claude", "--dangerously-skip-permissions", "--model", "claude-haiku-4-5-20251001"];
+    if (contextPrompt) {
+      args.push("--append-system-prompt", contextPrompt);
+    }
+    session.handle = spawnWithPTY(args, session);
+  } else {
+    if (!commandExists("aider")) {
+      ws.send(
+        new TextEncoder().encode(
+          "\x1b[31mError: 'aider' CLI not found.\r\nInstall it with: pip3 install aider-chat\x1b[0m\r\n",
+        ),
+      );
+      ws.close();
+      sessions.delete(compId);
+      return session;
+    }
+    const args = [
+      "aider",
+      "--model", "gemini/gemini-2.5-flash",
+      "--message-file", contextPromptPath,
+      "--file", resolve(outputDir, compId, "clip.json"),
+      "--file", resolve(outputDir, compId, "audio.json"),
+    ];
+    session.handle = spawnWithPTY(args, session);
+  }
+
+  return session;
 }
 
 const server = Bun.serve({
@@ -173,16 +271,43 @@ const server = Bun.serve({
     const url = new URL(req.url);
     const path = url.pathname;
 
-    // WebSocket upgrade
-    if (path === "/ws/claude" || path === "/ws/gemini") {
-      const upgraded = server.upgrade(req, { data: { endpoint: path } });
+    // WebSocket upgrade for per-composition terminals
+    const claudeMatch = path.match(/^\/ws\/claude\/(.+)$/);
+    const geminiMatch = path.match(/^\/ws\/gemini\/(.+)$/);
+    if (claudeMatch || geminiMatch) {
+      const compId = (claudeMatch || geminiMatch)![1];
+      const type = claudeMatch ? "claude" : "gemini";
+      const upgraded = server.upgrade(req, { data: { endpoint: path, compId, type } });
       if (upgraded) return undefined;
       return new Response("WebSocket upgrade failed", { status: 500 });
     }
 
-    // API: clip name
-    if (path === "/api/clip-name") {
-      return new Response(clipName);
+    // WebSocket for clip-data reload notifications
+    if (path === "/ws/events") {
+      const upgraded = server.upgrade(req, { data: { endpoint: "events" } });
+      if (upgraded) return undefined;
+      return new Response("WebSocket upgrade failed", { status: 500 });
+    }
+
+    // API: list available clips
+    if (path === "/api/clips") {
+      try {
+        const dirs = (await readdir(outputDir)).sort();
+        const clips: string[] = [];
+        for (const dir of dirs) {
+          try {
+            await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
+            clips.push(dir);
+          } catch {}
+        }
+        return new Response(JSON.stringify(clips), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch {
+        return new Response("[]", {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Serve bundled terminal.js
@@ -194,12 +319,11 @@ const server = Bun.serve({
     }
 
     // Serve node_modules assets (xterm CSS, etc.)
-    // Check both local and root node_modules (Bun workspaces hoist deps)
     if (path.startsWith("/node_modules/")) {
-      const relative = path.slice(1); // "node_modules/..."
+      const relative = path.slice(1);
       const candidates = [
-        resolve(__dir, relative),          // studio-wrapper/node_modules/...
-        resolve(projectRoot, relative),    // root node_modules/...
+        resolve(__dir, relative),
+        resolve(projectRoot, relative),
       ];
       for (const filePath of candidates) {
         try {
@@ -229,8 +353,6 @@ const server = Bun.serve({
     }
 
     // Fallback: reverse-proxy everything else to Remotion Studio
-    // This lets the iframe at /remotion-studio load, and all its sub-requests
-    // (JS bundles, CSS, HMR websockets, API calls) resolve naturally.
     const remotionPath = path === "/remotion-studio" ? "/" : path;
     const remotionUrl = `http://localhost:${remotionPort}${remotionPath}${url.search}`;
 
@@ -262,11 +384,17 @@ const server = Bun.serve({
     }
   },
   websocket: {
-    idleTimeout: 0,       // Disable idle timeout — AI sessions can be quiet for long periods
-    sendPings: true,      // Keep connections alive with automatic pings
-    maxPayloadLength: 16 * 1024 * 1024, // 16 MB — large AI responses
+    idleTimeout: 0,
+    sendPings: true,
+    maxPayloadLength: 16 * 1024 * 1024,
     open(ws) {
       const data = ws.data as any;
+
+      // Event stream for clip-data reload notifications
+      if (data.endpoint === "events") {
+        eventClients.add(ws);
+        return;
+      }
 
       // Proxy WebSocket for Remotion HMR
       if (data.proxy) {
@@ -283,7 +411,6 @@ const server = Bun.serve({
             }
           });
           us.addEventListener("close", () => {
-            // Reconnect to upstream Remotion instead of closing the client
             if (ws.readyState === 1) {
               setTimeout(() => {
                 try {
@@ -293,10 +420,8 @@ const server = Bun.serve({
                     attachUpstreamListeners(newUpstream);
                   });
                   newUpstream.addEventListener("error", () => {
-                    // If reconnect fails, schedule another attempt
                     setTimeout(() => {
                       if (ws.readyState === 1) {
-                        // Give up after upstream is truly gone — client will handle it
                         try { ws.close(); } catch {}
                       }
                     }, 5000);
@@ -307,67 +432,34 @@ const server = Bun.serve({
               }, 1000);
             }
           });
-          us.addEventListener("error", () => {
-            // error is followed by close, which triggers reconnect above
-          });
+          us.addEventListener("error", () => {});
         }
 
         attachUpstreamListeners(upstream);
         return;
       }
 
-      const endpoint = data.endpoint as string;
-      console.log(`WebSocket connected: ${endpoint}`);
+      // Per-composition terminal session
+      const compId = data.compId as string;
+      const type = data.type as "claude" | "gemini";
+      console.log(`WebSocket connected: ${type}/${compId}`);
 
-      let handle: PtyHandle | undefined;
+      // Queue messages until session is ready
+      const pendingMessages: (string | ArrayBuffer)[] = [];
+      (ws.data as any).pendingMessages = pendingMessages;
 
-      if (endpoint === "/ws/claude") {
-        if (!commandExists("claude")) {
-          ws.send(
-            new TextEncoder().encode(
-              "\x1b[31mError: 'claude' CLI not found.\r\nInstall it with: npm install -g @anthropic-ai/claude-code\x1b[0m\r\n",
-            ),
-          );
-          ws.close();
-          return;
+      const sessions = type === "claude" ? claudeSessions : geminiSessions;
+      getOrCreateSession(sessions, compId, type, ws).then((session) => {
+        (ws.data as any).session = session;
+        // Flush any messages that arrived while session was being created
+        for (const msg of pendingMessages) {
+          if (session.handle) {
+            const input = typeof msg === "string" ? msg : new TextDecoder().decode(msg as ArrayBuffer);
+            session.handle.write(input);
+          }
         }
-        const args = ["claude", "--dangerously-skip-permissions"];
-        if (contextPrompt) {
-          args.push("--append-system-prompt", contextPrompt);
-        }
-        handle = spawnWithPTY(args, ws);
-      } else if (endpoint === "/ws/gemini") {
-        if (!commandExists("aider")) {
-          ws.send(
-            new TextEncoder().encode(
-              "\x1b[31mError: 'aider' CLI not found.\r\nInstall it with: pip3 install aider-chat\x1b[0m\r\n",
-            ),
-          );
-          ws.close();
-          return;
-        }
-        handle = spawnWithPTY(
-          [
-            "aider",
-            "--model",
-            "gemini/gemini-2.5-flash",
-            "--message-file",
-            contextPromptPath,
-            "--file",
-            resolve(projectRoot, `output/${clipName}/clip.json`),
-            "--file",
-            resolve(projectRoot, `output/${clipName}/audio.json`),
-          ],
-          ws,
-        );
-      } else {
-        ws.close();
-        return;
-      }
-
-      if (handle) {
-        (ws.data as any).pty = handle;
-      }
+        pendingMessages.length = 0;
+      });
     },
     message(ws, message) {
       const data = ws.data as any;
@@ -385,16 +477,11 @@ const server = Bun.serve({
         return;
       }
 
-      const handle = data.pty as PtyHandle | undefined;
-      if (!handle) return;
-
       // Check if it's a resize message (JSON)
       if (typeof message === "string") {
         try {
           const parsed = JSON.parse(message);
           if (parsed.type === "resize") {
-            // Python pty.spawn doesn't support dynamic resize.
-            // COLUMNS/LINES env vars are set at spawn time.
             return;
           }
         } catch {
@@ -402,15 +489,31 @@ const server = Bun.serve({
         }
       }
 
+      const session = data.session as CompositionSession | undefined;
+      if (!session || !session.handle) {
+        // Session still being created — queue the message
+        const pending = data.pendingMessages as (string | ArrayBuffer)[] | undefined;
+        if (pending) {
+          pending.push(typeof message === "string" ? message : message);
+        }
+        return;
+      }
+
       // Write input to PTY
       const input =
         typeof message === "string"
           ? message
           : new TextDecoder().decode(message as ArrayBuffer);
-      handle.write(input);
+      session.handle.write(input);
     },
     close(ws) {
       const data = ws.data as any;
+
+      // Event stream client disconnected
+      if (data.endpoint === "events") {
+        eventClients.delete(ws);
+        return;
+      }
 
       // Proxy WebSocket: close upstream
       if (data.proxy) {
@@ -419,10 +522,10 @@ const server = Bun.serve({
         return;
       }
 
-      const handle = data.pty as PtyHandle | undefined;
-      if (handle) {
-        handle.kill();
-        activePTYs.delete(handle);
+      // Detach WS from session but keep PTY alive
+      const session = data.session as CompositionSession | undefined;
+      if (session) {
+        session.ws = null;
       }
     },
   },
@@ -430,7 +533,7 @@ const server = Bun.serve({
 
 console.log(`Studio wrapper running at http://localhost:${server.port}`);
 
-// Cleanup on exit
+// Cleanup on exit — kill all PTYs
 function cleanup() {
   for (const handle of activePTYs) {
     handle.kill();
