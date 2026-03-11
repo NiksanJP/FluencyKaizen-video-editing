@@ -1,7 +1,7 @@
-const { app, BrowserWindow, shell, ipcMain } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, dialog } = require("electron");
 const { spawn } = require("child_process");
-const { resolve } = require("path");
-const { readdir, readFile } = require("fs/promises");
+const { resolve, basename, extname } = require("path");
+const { readdir, readFile, copyFile, mkdir } = require("fs/promises");
 const http = require("http");
 
 const projectRoot = resolve(__dirname, "..");
@@ -42,19 +42,127 @@ ipcMain.handle("open-composition", async (_event, compId) => {
     await waitForServer(studioPort, 30);
   }
 
-  mainWindow.loadURL(`http://localhost:${studioPort}/app#${encodeURIComponent(compId)}`);
+  mainWindow.loadURL(`http://localhost:${studioPort}/app/studio#${encodeURIComponent(compId)}`);
 
-  mainWindow.webContents.on("did-finish-load", function injectPadding() {
+  mainWindow.webContents.on("did-finish-load", function injectStyles() {
     mainWindow.webContents.insertCSS(`
       body { padding-top: 38px; box-sizing: border-box; }
       .container { height: calc(100vh - 38px) !important; }
     `);
-    mainWindow.webContents.removeListener("did-finish-load", injectPadding);
+
+    // Hide Compositions tab in Remotion Studio iframe, keep only Assets
+    mainWindow.webContents.executeJavaScript(`
+      (function() {
+        const frame = document.getElementById('studioFrame');
+        if (!frame) return;
+        function hideCompTab() {
+          try {
+            const doc = frame.contentDocument;
+            if (!doc) return;
+            const style = doc.createElement('style');
+            style.textContent = '[role="tab"]:first-child { display: none !important; }';
+            doc.head.appendChild(style);
+            const tabs = doc.querySelectorAll('[role="tab"]');
+            for (const tab of tabs) {
+              if (tab.textContent.trim().toLowerCase().includes('asset')) {
+                tab.click();
+                return true;
+              }
+            }
+            return false;
+          } catch(e) { return false; }
+        }
+        let attempts = 0;
+        const iv = setInterval(() => {
+          if (hideCompTab() || ++attempts > 20) clearInterval(iv);
+        }, 500);
+      })();
+    `).catch(() => {});
+
+    mainWindow.webContents.removeListener("did-finish-load", injectStyles);
   });
 });
 
 ipcMain.handle("go-back-to-projects", () => {
   mainWindow.loadFile(resolve(__dirname, "project.html"));
+});
+
+// --- IPC: import video and run pipeline ---
+
+let pipelineProcess = null;
+
+ipcMain.handle("import-video", async () => {
+  if (pipelineProcess) {
+    return { error: "A pipeline is already running" };
+  }
+
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: "Import Video",
+    filters: [
+      { name: "Video Files", extensions: ["mp4", "mov", "avi", "mkv", "webm"] },
+    ],
+    properties: ["openFile"],
+  });
+
+  if (result.canceled || result.filePaths.length === 0) {
+    return { canceled: true };
+  }
+
+  const videoPath = result.filePaths[0];
+  const fileName = basename(videoPath);
+  const inputDir = resolve(projectRoot, "input");
+
+  // Copy video to input/ directory
+  await mkdir(inputDir, { recursive: true });
+  const destPath = resolve(inputDir, fileName);
+  await copyFile(videoPath, destPath);
+
+  const send = (data) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("pipeline-progress", data);
+    }
+  };
+
+  send({ type: "start", fileName });
+
+  return new Promise((resolvePromise) => {
+    pipelineProcess = spawn("bun", ["pipeline/index.ts", destPath], {
+      cwd: projectRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env },
+    });
+
+    pipelineProcess.stdout.on("data", (chunk) => {
+      const text = chunk.toString();
+      process.stdout.write(text);
+      send({ type: "log", text });
+    });
+
+    pipelineProcess.stderr.on("data", (chunk) => {
+      const text = chunk.toString();
+      process.stderr.write(text);
+      send({ type: "log", text });
+    });
+
+    pipelineProcess.on("close", (code) => {
+      pipelineProcess = null;
+      // Derive composition ID (pipeline uses filename without extension as output dir name)
+      const compId = fileName.replace(/\.[^.]+$/, "");
+      if (code === 0) {
+        send({ type: "done", fileName, compId });
+        resolvePromise({ success: true, fileName, compId });
+      } else {
+        send({ type: "error", message: `Pipeline exited with code ${code}` });
+        resolvePromise({ error: `Pipeline exited with code ${code}` });
+      }
+    });
+
+    pipelineProcess.on("error", (err) => {
+      pipelineProcess = null;
+      send({ type: "error", message: err.message });
+      resolvePromise({ error: err.message });
+    });
+  });
 });
 
 // --- Server readiness check ---

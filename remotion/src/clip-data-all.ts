@@ -1037,6 +1037,625 @@ const allClips: Record<string, ClipData> = {
   "vocabCards": [],
   "targetLanguage": "zh",
   "videoDuration": 81.823333
+} as unknown as ClipData,
+  "CleanShot 2026-03-10 at 17.30.41": {
+  "videoFile": "CleanShot 2026-03-10 at 17.30.41/clip_trimmed.mp4",
+  "hookTitle": {
+    "ja": "💼ビジネス英語でParkの使い方",
+    "en": "To Park Something 🤔",
+    "highlights": [
+      "Park"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 55.549
+  },
+  "subtitles": [
+    {
+      "startTime": 0,
+      "endTime": 1.14,
+      "en": "For ease and address",
+      "ja": "容易にするため、対応のために。",
+      "highlights": [
+        "容易にする",
+        "対応"
+      ],
+      "enHighlights": [
+        "ease",
+        "address"
+      ]
+    },
+    {
+      "startTime": 2.539999999999999,
+      "endTime": 3.719999999999999,
+      "en": "Nick, welcome.",
+      "ja": "ニックさん、ようこそ。",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 3.74,
+      "endTime": 4.32,
+      "en": "For the meeting.",
+      "ja": "ミーティングのために。",
+      "highlights": [
+        "ミーティング"
+      ],
+      "enHighlights": [
+        "meeting"
+      ]
+    },
+    {
+      "startTime": 4.779999999999999,
+      "endTime": 6.1,
+      "en": "This is a brief check-in",
+      "ja": "これは簡単な確認です。",
+      "highlights": [
+        "確認"
+      ],
+      "enHighlights": [
+        "check-in"
+      ]
+    },
+    {
+      "startTime": 6.02,
+      "endTime": 6.599999999999998,
+      "en": "on your current",
+      "ja": "あなたの現在の",
+      "highlights": [
+        "現在"
+      ],
+      "enHighlights": [
+        "current"
+      ]
+    },
+    {
+      "startTime": 6.66,
+      "endTime": 6.960000000000001,
+      "en": "priorities.",
+      "ja": "優先事項について。",
+      "highlights": [
+        "優先事項"
+      ],
+      "enHighlights": [
+        "priorities"
+      ]
+    },
+    {
+      "startTime": 7.739999999999998,
+      "endTime": 8.620000000000001,
+      "en": "How is progress looking?",
+      "ja": "進捗状況はどうですか？",
+      "highlights": [
+        "進捗状況"
+      ],
+      "enHighlights": [
+        "progress"
+      ]
+    },
+    {
+      "startTime": 8.860000000000003,
+      "endTime": 10.060000000000002,
+      "en": "Good morning, Nick.",
+      "ja": "おはようございます、ニックさん。",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 10.360000000000003,
+      "endTime": 11.400000000000002,
+      "en": "I trust everything is",
+      "ja": "全てが",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 11.32,
+      "endTime": 11.720000000000002,
+      "en": "on track.",
+      "ja": "順調だと信じています。",
+      "highlights": [
+        "順調"
+      ],
+      "enHighlights": [
+        "on track"
+      ]
+    },
+    {
+      "startTime": 11.840000000000003,
+      "endTime": 13.500000000000007,
+      "en": "I understand that",
+      "ja": "承知しています。",
+      "highlights": [
+        "承知"
+      ],
+      "enHighlights": [
+        "understand"
+      ]
+    },
+    {
+      "startTime": 13.520000000000003,
+      "endTime": 14.820000000000007,
+      "en": "priorities can shift.",
+      "ja": "優先順位は変わります。",
+      "highlights": [
+        "優先順位"
+      ],
+      "enHighlights": [
+        "priorities can shift"
+      ]
+    },
+    {
+      "startTime": 15.600000000000001,
+      "endTime": 16.720000000000006,
+      "en": "However, the market",
+      "ja": "しかし、市場調査分析は",
+      "highlights": [
+        "市場調査分析"
+      ],
+      "enHighlights": [
+        "market"
+      ]
+    },
+    {
+      "startTime": 16.860000000000007,
+      "endTime": 18.220000000000006,
+      "en": "research analysis for",
+      "ja": "プロジェクトXの",
+      "highlights": [
+        "プロジェクトX"
+      ],
+      "enHighlights": [
+        "Project X"
+      ]
+    },
+    {
+      "startTime": 18.180000000000007,
+      "endTime": 19.720000000000006,
+      "en": "Project X was a critical",
+      "ja": "重要な成果物でした。",
+      "highlights": [
+        "重要な",
+        "成果物"
+      ],
+      "enHighlights": [
+        "critical",
+        "deliverable"
+      ]
+    },
+    {
+      "startTime": 19.980000000000004,
+      "endTime": 20.28,
+      "en": "deliverable.",
+      "ja": "達成すべきものでした。",
+      "highlights": [
+        "達成すべきもの"
+      ],
+      "enHighlights": [
+        "deliverable"
+      ]
+    },
+    {
+      "startTime": 20.900000000000006,
+      "endTime": 21.96,
+      "en": "What is the current",
+      "ja": "プロジェクトの現在の",
+      "highlights": [
+        "プロジェクト",
+        "現在"
+      ],
+      "enHighlights": [
+        "current"
+      ]
+    },
+    {
+      "startTime": 22.020000000000003,
+      "endTime": 22.760000000000005,
+      "en": "status of the project?",
+      "ja": "状況はどうなっていますか？",
+      "highlights": [
+        "状況"
+      ],
+      "enHighlights": [
+        "status",
+        "project"
+      ]
+    },
+    {
+      "startTime": 22.46,
+      "endTime": 24.060000000000002,
+      "en": "And what corporate",
+      "ja": "そして、どのような企業的な",
+      "highlights": [
+        "企業的"
+      ],
+      "enHighlights": [
+        "corporate"
+      ]
+    },
+    {
+      "startTime": 24.200000000000003,
+      "endTime": 25.300000000000004,
+      "en": "phrasing are we using",
+      "ja": "言い回しを使って、",
+      "highlights": [
+        "言い回し"
+      ],
+      "enHighlights": [
+        "phrasing"
+      ]
+    },
+    {
+      "startTime": 25.28,
+      "endTime": 26.320000000000007,
+      "en": "to describe the change?",
+      "ja": "その変更を説明しますか？",
+      "highlights": [
+        "変更"
+      ],
+      "enHighlights": [
+        "change"
+      ]
+    },
+    {
+      "startTime": 26.54,
+      "endTime": 28.21999999999999,
+      "en": "A dependency is",
+      "ja": "依存関係は",
+      "highlights": [
+        "依存関係"
+      ],
+      "enHighlights": [
+        "dependency"
+      ]
+    },
+    {
+      "startTime": 28.479999999999997,
+      "endTime": 28.779999999999994,
+      "en": "understandable.",
+      "ja": "理解できます。",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 29.660000000000004,
+      "endTime": 31.07999999999999,
+      "en": "but it's important that",
+      "ja": "しかし、私たちが",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 31.020000000000003,
+      "endTime": 32.02,
+      "en": "we formally communicate",
+      "ja": "公式に伝えることが",
+      "highlights": [
+        "公式に伝える"
+      ],
+      "enHighlights": [
+        "formally communicate"
+      ]
+    },
+    {
+      "startTime": 32.199999999999996,
+      "endTime": 32.919999999999995,
+      "en": "this shift.",
+      "ja": "この変更を。",
+      "highlights": [
+        "変更"
+      ],
+      "enHighlights": [
+        "shift"
+      ]
+    },
+    {
+      "startTime": 33.43999999999999,
+      "endTime": 34.779999999999994,
+      "en": "So we are deciding",
+      "ja": "ですから、私たちは",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 34.919999999999995,
+      "endTime": 36.339999999999996,
+      "en": "to park the market",
+      "ja": "市場調査分析を",
+      "highlights": [
+        "市場調査分析"
+      ],
+      "enHighlights": [
+        "market research"
+      ]
+    },
+    {
+      "startTime": 36.32,
+      "endTime": 37.48,
+      "en": "research analysis for",
+      "ja": "一時的に保留します。",
+      "highlights": [
+        "一時的に保留"
+      ],
+      "enHighlights": [
+        "park",
+        "analysis"
+      ]
+    },
+    {
+      "startTime": 37.49999999999999,
+      "endTime": 38.199999999999996,
+      "en": "the time being.",
+      "ja": "当面の間。",
+      "highlights": [
+        "当面の間"
+      ],
+      "enHighlights": [
+        "for the time being"
+      ]
+    },
+    {
+      "startTime": 38.399999999999984,
+      "endTime": 38.69999999999998,
+      "en": "Understood.",
+      "ja": "承知いたしました。",
+      "highlights": [
+        "承知"
+      ],
+      "enHighlights": [
+        "Understood"
+      ]
+    },
+    {
+      "startTime": 38.95999999999997,
+      "endTime": 40.239999999999974,
+      "en": "Just ensure the relevant",
+      "ja": "関係者に必ず適切な",
+      "highlights": [
+        "関係者",
+        "適切な"
+      ],
+      "enHighlights": [
+        "relevant"
+      ]
+    },
+    {
+      "startTime": 40.439999999999976,
+      "endTime": 41.69999999999997,
+      "en": "stakeholders are informed",
+      "ja": "利害関係者が確実に通知されるよう",
+      "highlights": [
+        "利害関係者",
+        "通知される"
+      ],
+      "enHighlights": [
+        "stakeholders",
+        "informed"
+      ]
+    },
+    {
+      "startTime": 41.81999999999997,
+      "endTime": 42.71999999999998,
+      "en": "of this reprioritization.",
+      "ja": "この再優先順位付けについて。",
+      "highlights": [
+        "再優先順位付け"
+      ],
+      "enHighlights": [
+        "reprioritization"
+      ]
+    },
+    {
+      "startTime": 42.97999999999997,
+      "endTime": 44.17999999999997,
+      "en": "As it is on the",
+      "ja": "それは",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 43.97999999999997,
+      "endTime": 44.639999999999965,
+      "en": "critical path,",
+      "ja": "クリティカルパスなので、",
+      "highlights": [
+        "クリティカルパス"
+      ],
+      "enHighlights": [
+        "critical path"
+      ]
+    },
+    {
+      "startTime": 45.19999999999997,
+      "endTime": 46.359999999999964,
+      "en": "please provide a clear",
+      "ja": "明確なタイムラインを",
+      "highlights": [
+        "明確な",
+        "タイムライン"
+      ],
+      "enHighlights": [
+        "clear timeline"
+      ]
+    },
+    {
+      "startTime": 46.39999999999997,
+      "endTime": 47.499999999999964,
+      "en": "timeline for when",
+      "ja": "プロジェクトXがいつ",
+      "highlights": [
+        "プロジェクトX"
+      ],
+      "enHighlights": [
+        "Project X"
+      ]
+    },
+    {
+      "startTime": 47.39999999999997,
+      "endTime": 48.95999999999997,
+      "en": "Project X will be...",
+      "ja": "再開されるのか、提示してください。",
+      "highlights": [
+        "再開されるのか"
+      ],
+      "enHighlights": [
+        "resumed"
+      ]
+    },
+    {
+      "startTime": 49.27999999999994,
+      "endTime": 50.519999999999946,
+      "en": "Thank you, Nick.",
+      "ja": "ニックさん、ありがとうございます。",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 50.77999999999994,
+      "endTime": 51.519999999999946,
+      "en": "Proactive communication",
+      "ja": "プロアクティブなコミュニケーションは",
+      "highlights": [
+        "プロアクティブ",
+        "コミュニケーション"
+      ],
+      "enHighlights": [
+        "Proactive communication"
+      ]
+    },
+    {
+      "startTime": 51.61999999999994,
+      "endTime": 52.55999999999994,
+      "en": "is essential.",
+      "ja": "不可欠です。",
+      "highlights": [
+        "不可欠"
+      ],
+      "enHighlights": [
+        "essential"
+      ]
+    },
+    {
+      "startTime": 53.21999999999995,
+      "endTime": 54.25999999999994,
+      "en": "We can conclude this",
+      "ja": "これでこの",
+      "highlights": [],
+      "enHighlights": []
+    },
+    {
+      "startTime": 54.19999999999994,
+      "endTime": 54.599999999999945,
+      "en": "check-in.",
+      "ja": "確認を終了します。",
+      "highlights": [
+        "確認",
+        "終了"
+      ],
+      "enHighlights": [
+        "check-in"
+      ]
+    },
+    {
+      "startTime": 54.699999999999946,
+      "endTime": 55.51999999999994,
+      "en": "Thank you very much.",
+      "ja": "どうもありがとうございました。",
+      "highlights": [],
+      "enHighlights": []
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 5.5,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "check-in",
+      "literal": "確認",
+      "nuance": "定期的な状況確認や進捗報告のための短い会議や連絡。カジュアルな意味合いも含む。"
+    },
+    {
+      "triggerTime": 11.32,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "on track",
+      "literal": "軌道に乗って",
+      "nuance": "計画通りに、順調に進んでいる状態を表す。目標達成に向けて良い状態であることを示す。"
+    },
+    {
+      "triggerTime": 35.26,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "park this",
+      "literal": "これを駐車する",
+      "nuance": "議論や作業を一時的に中断し、後回しにする、または保留にするという意味。ビジネス会議などで使われる。"
+    },
+    {
+      "triggerTime": 43.97999999999997,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "critical path",
+      "literal": "重要経路",
+      "nuance": "プロジェクト管理において、プロジェクト全体の完了に最も長い時間がかかる一連のタスク。このタスクが遅れるとプロジェクト全体が遅延する。"
+    },
+    {
+      "triggerTime": 50.77999999999994,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "proactive communication",
+      "literal": "積極的なコミュニケーション",
+      "nuance": "問題が発生する前に、または要求される前に、自ら積極的に情報を共有したり、連絡を取ったりすること。トラブル回避や円滑な進行に重要。"
+    }
+  ],
+  "videoDuration": 55.549,
+  "silenceGaps": [
+    {
+      "originalStart": 2.44,
+      "originalEnd": 12.08,
+      "duration": 9.64
+    },
+    {
+      "originalStart": 18.400000000000002,
+      "originalEnd": 24.02,
+      "duration": 5.619999999999997
+    },
+    {
+      "originalStart": 27,
+      "originalEnd": 49.26,
+      "duration": 22.259999999999998
+    },
+    {
+      "originalStart": 63.96,
+      "originalEnd": 74.96000000000001,
+      "duration": 11.000000000000007
+    },
+    {
+      "originalStart": 86.82,
+      "originalEnd": 94.84,
+      "duration": 8.02000000000001
+    },
+    {
+      "originalStart": 95.39999999999999,
+      "originalEnd": 96.12,
+      "duration": 0.7200000000000131
+    },
+    {
+      "originalStart": 100.14,
+      "originalEnd": 101.04,
+      "duration": 0.9000000000000057
+    },
+    {
+      "originalStart": 107.33999999999999,
+      "originalEnd": 111.86000000000001,
+      "duration": 4.520000000000024
+    },
+    {
+      "originalStart": 117.28,
+      "originalEnd": 119.88000000000001,
+      "duration": 2.6000000000000085
+    }
+  ]
 } as unknown as ClipData
 };
 

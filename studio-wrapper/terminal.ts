@@ -229,13 +229,16 @@ document.addEventListener("visibilitychange", () => {
 // Fetch available clips and activate the selected composition (from URL hash) or first one
 fetch("/api/clips")
   .then((r) => r.json())
-  .then((clips: string[]) => {
+  .then((clips: Array<{ id: string } | string>) => {
+    // Normalize: /api/clips returns objects with { id, hookTitle, ... }
+    const clipIds = clips.map((c) => (typeof c === "string" ? c : c.id));
+
     const el = document.getElementById("clipName");
-    if (el) el.textContent = `${clips.length} clip(s) available`;
+    if (el) el.textContent = `${clipIds.length} clip(s) available`;
 
     // Check URL hash for a specific composition (set by Electron project page)
     const hashComp = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-    const targetComp = hashComp && clips.includes(hashComp) ? hashComp : clips[0];
+    const targetComp = hashComp && clipIds.includes(hashComp) ? hashComp : clipIds[0];
 
     if (targetComp) {
       (window as any).activateCompositionTabs(targetComp);

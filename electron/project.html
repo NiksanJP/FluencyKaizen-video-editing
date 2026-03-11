@@ -133,17 +133,219 @@
       color: #444;
       font-size: 14px;
     }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .header-row .header {
+      margin-bottom: 0;
+    }
+
+    .import-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-app-region: no-drag;
+    }
+
+    .import-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .import-btn:active {
+      transform: scale(0.97);
+    }
+
+    .import-btn:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .import-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Pipeline progress overlay */
+    .pipeline-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .pipeline-overlay.active {
+      display: flex;
+    }
+
+    .pipeline-modal {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 640px;
+      overflow: hidden;
+    }
+
+    .pipeline-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pipeline-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .pipeline-filename {
+      font-size: 12px;
+      color: #666;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #333;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .pipeline-log {
+      height: 300px;
+      overflow-y: auto;
+      padding: 16px;
+      font-family: "SF Mono", Monaco, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #999;
+      background: #0a0a0a;
+    }
+
+    .pipeline-log .log-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .pipeline-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .pipeline-footer button {
+      display: none;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .pipeline-footer .close-btn {
+      background: #222;
+      color: #e0e0e0;
+      border: 1px solid #333;
+    }
+
+    .pipeline-footer .close-btn:hover {
+      background: #2a2a2a;
+    }
+
+    .pipeline-footer .open-btn {
+      background: #fff;
+      color: #0a0a0a;
+      font-weight: 600;
+    }
+
+    .pipeline-footer .open-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .pipeline-status {
+      font-size: 13px;
+      color: #666;
+      padding: 0 24px 16px;
+    }
+
+    .pipeline-status.success {
+      color: #4ade80;
+    }
+
+    .pipeline-status.error {
+      color: #f87171;
+    }
   </style>
 </head>
 <body>
   <div class="titlebar"></div>
   <div class="page">
-    <div class="header">
-      <h1>Compositions</h1>
-      <p>Select a composition to open in the studio</p>
+    <div class="header-row">
+      <div class="header">
+        <h1>Compositions</h1>
+        <p>Select a composition to open in the studio</p>
+      </div>
+      <button class="import-btn" id="import-btn" onclick="importVideo()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Import Video
+      </button>
     </div>
     <div id="content">
       <div class="loading">Loading compositions...</div>
+    </div>
+  </div>
+
+  <!-- Pipeline progress overlay -->
+  <div class="pipeline-overlay" id="pipeline-overlay">
+    <div class="pipeline-modal">
+      <div class="pipeline-header">
+        <div class="spinner" id="pipeline-spinner"></div>
+        <div>
+          <h2>Processing Video</h2>
+          <div class="pipeline-filename" id="pipeline-filename"></div>
+        </div>
+      </div>
+      <div class="pipeline-log" id="pipeline-log"></div>
+      <div class="pipeline-status" id="pipeline-status"></div>
+      <div class="pipeline-footer" style="gap: 8px;">
+        <button class="close-btn" id="pipeline-close" onclick="closePipeline()">Close</button>
+        <button class="open-btn" id="pipeline-open" onclick="openNewComposition()">Open in Studio</button>
+      </div>
     </div>
   </div>
 
@@ -175,7 +377,7 @@
       if (compositions.length === 0) {
         const empty = el("div", { className: "empty-state" }, [
           el("h2", { textContent: "No compositions found" }),
-          el("p", { textContent: "Run /process-video to generate your first clip." }),
+          el("p", { textContent: "Import a video to generate your first clip." }),
         ]);
         content.appendChild(empty);
         return;
@@ -203,6 +405,101 @@
       }
 
       content.appendChild(grid);
+    }
+
+    // --- Import Video ---
+
+    let pipelineRunning = false;
+
+    async function importVideo() {
+      if (pipelineRunning) return;
+
+      const btn = document.getElementById("import-btn");
+      btn.disabled = true;
+      pipelineRunning = true;
+
+      const result = await window.studio.importVideo();
+
+      if (result.canceled) {
+        btn.disabled = false;
+        pipelineRunning = false;
+        return;
+      }
+
+      if (result.error) {
+        btn.disabled = false;
+        pipelineRunning = false;
+        alert(result.error);
+        return;
+      }
+
+      // Pipeline completed successfully — refresh the list
+      btn.disabled = false;
+      pipelineRunning = false;
+      load();
+    }
+
+    // --- Pipeline progress UI ---
+
+    const logEl = document.getElementById("pipeline-log");
+    const overlay = document.getElementById("pipeline-overlay");
+    const statusEl = document.getElementById("pipeline-status");
+    const spinnerEl = document.getElementById("pipeline-spinner");
+    const closeBtn = document.getElementById("pipeline-close");
+    const openBtn = document.getElementById("pipeline-open");
+    const filenameEl = document.getElementById("pipeline-filename");
+
+    let completedCompId = null;
+
+    window.studio.onPipelineProgress((data) => {
+      if (data.type === "start") {
+        overlay.classList.add("active");
+        logEl.textContent = "";
+        statusEl.textContent = "";
+        statusEl.className = "pipeline-status";
+        spinnerEl.style.display = "";
+        closeBtn.style.display = "none";
+        openBtn.style.display = "none";
+        filenameEl.textContent = data.fileName;
+        completedCompId = null;
+      }
+
+      if (data.type === "log") {
+        const line = document.createElement("div");
+        line.className = "log-line";
+        line.textContent = data.text;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      if (data.type === "done") {
+        spinnerEl.style.display = "none";
+        statusEl.textContent = "Pipeline completed successfully";
+        statusEl.className = "pipeline-status success";
+        closeBtn.style.display = "";
+        openBtn.style.display = "";
+        completedCompId = data.compId;
+      }
+
+      if (data.type === "error") {
+        spinnerEl.style.display = "none";
+        statusEl.textContent = "Error: " + data.message;
+        statusEl.className = "pipeline-status error";
+        closeBtn.style.display = "";
+        openBtn.style.display = "none";
+      }
+    });
+
+    function closePipeline() {
+      overlay.classList.remove("active");
+      load(); // refresh the composition list
+    }
+
+    function openNewComposition() {
+      if (completedCompId) {
+        overlay.classList.remove("active");
+        window.studio.openComposition(completedCompId);
+      }
     }
 
     load();

@@ -7,7 +7,9 @@
   "scripts": {
     "process": "bun run pipeline/index.ts",
     "preview-all": "bun remotion/preview-all.ts",
-    "studio": "bun studio-wrapper/launch.ts"
+    "studio": "bun studio-wrapper/launch.ts",
+    "studio:web": "bun studio-wrapper/launch.ts",
+    "studio:electron": "cd electron && npx electron ."
   },
   "devDependencies": {
     "@google/generative-ai": "^0.19.0",

@@ -35,16 +35,20 @@ const projectRoot = resolve(__dir, "..");
 const ptyBridge = resolve(__dir, "pty-bridge.py");
 const remotionPort = process.env.REMOTION_PORT || "3000";
 
-// Resolve python3 path — check common locations if not on PATH
+// Resolve python3 path — check common locations if not on PATH (Electron strips PATH)
 function findPython3(): string {
-  const candidates = ["python3", "/usr/bin/python3", "/usr/local/bin/python3", "/opt/homebrew/bin/python3"];
-  for (const cmd of candidates) {
-    try {
-      execFileSync(cmd, ["--version"], { stdio: "ignore" });
-      return cmd;
-    } catch {}
+  const { existsSync } = require("fs");
+  // Check absolute paths first (Electron GUI apps don't inherit shell PATH)
+  const absoluteCandidates = ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/usr/bin/python3"];
+  for (const p of absoluteCandidates) {
+    if (existsSync(p)) return p;
   }
-  return "python3"; // fallback, will error at spawn time
+  // Fall back to PATH-based lookup
+  try {
+    execFileSync("which", ["python3"], { stdio: "pipe" });
+    return "python3";
+  } catch {}
+  return "python3";
 }
 const python3Path = findPython3();
 const outputDir = resolve(projectRoot, "output");
@@ -315,15 +319,30 @@ const server = Bun.serve({
       return new Response("WebSocket upgrade failed", { status: 500 });
     }
 
-    // API: list available clips
+    // API: list available clips (with metadata)
     if (path === "/api/clips") {
       try {
         const dirs = (await readdir(outputDir)).sort();
-        const clips: string[] = [];
+        const clips: Array<{
+          id: string;
+          hookTitle: { ja: string; en: string };
+          duration: string | null;
+          subtitleCount: number;
+          vocabCount: number;
+        }> = [];
         for (const dir of dirs) {
           try {
-            await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
-            clips.push(dir);
+            const raw = await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
+            const data = JSON.parse(raw);
+            clips.push({
+              id: dir,
+              hookTitle: data.hookTitle || { ja: dir, en: dir },
+              duration: data.clip
+                ? (data.clip.endTime - data.clip.startTime).toFixed(1)
+                : null,
+              subtitleCount: data.subtitles?.length || 0,
+              vocabCount: data.vocabCards?.length || 0,
+            });
           } catch {}
         }
         return new Response(JSON.stringify(clips), {
@@ -365,10 +384,18 @@ const server = Bun.serve({
       return new Response("Not found", { status: 404 });
     }
 
-    // Serve wrapper's own static files under /app (so / goes to Remotion proxy)
-    // Also serve /app/styles.css, /app/terminal.js etc.
+    // Serve wrapper's own static files under /app
+    // /app → project picker (browser landing page)
+    // /app/studio → studio split-pane view
     if (path === "/app" || path.startsWith("/app/")) {
-      const relative = path === "/app" ? "index.html" : path.slice("/app/".length);
+      let relative: string;
+      if (path === "/app" || path === "/app/") {
+        relative = "project.html";
+      } else if (path === "/app/studio" || path === "/app/studio/") {
+        relative = "index.html";
+      } else {
+        relative = path.slice("/app/".length);
+      }
       try {
         const filePath = resolve(__dir, relative);
         const content = await readFile(filePath);
@@ -417,20 +444,90 @@ const server = Bun.serve({
       const contentType = proxyRes.headers.get("content-type") || "";
       if (contentType.includes("text/html")) {
         let html = await proxyRes.text();
-        const injection = `<script>
+        const injection = `<style>
+          #fk-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            margin-right: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            color: #ccc;
+            font-size: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+          #fk-back-home:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+          }
+          #fk-back-home svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+          }
+        </style>
+        <script>
           // Force assets tab in sidebar
           localStorage.setItem('remotion.sidebarPanel', 'assets');
 
-          // Hide the "Compositions" tab button once React renders
-          new MutationObserver(function(_, obs) {
-            // Find all role="button" divs that say "Compositions"
+          // Hide the "Compositions" tab button and inject Back to Home button
+          var backBtnInjected = false;
+          new MutationObserver(function(mutations, obs) {
             var btns = document.querySelectorAll('.css-reset div[role="button"]');
+            var compositionsHidden = false;
             for (var i = 0; i < btns.length; i++) {
               if (btns[i].textContent.trim() === 'Compositions') {
                 btns[i].style.display = 'none';
-                obs.disconnect();
-                return;
+                compositionsHidden = true;
+                break;
               }
+            }
+
+            // Inject "Back to Home" button into the top menubar
+            if (!backBtnInjected) {
+              var menubar = document.querySelector('[role="menubar"]')
+                || document.querySelector('.css-reset > div > div > div');
+              if (!menubar) {
+                var allDivs = document.querySelectorAll('.css-reset div');
+                for (var j = 0; j < allDivs.length; j++) {
+                  var d = allDivs[j];
+                  if (d.querySelector('a[href*="remotion"]') || d.querySelector('img[alt*="Remotion"]')) {
+                    menubar = d.parentElement;
+                    break;
+                  }
+                }
+              }
+              if (menubar) {
+                var btn = document.createElement('button');
+                btn.id = 'fk-back-home';
+                btn.title = 'Back to Home';
+
+                // Create arrow SVG using DOM methods
+                var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z');
+                svg.appendChild(path);
+                btn.appendChild(svg);
+                btn.appendChild(document.createTextNode(' Home'));
+
+                btn.addEventListener('click', function() {
+                  window.parent.postMessage({ type: 'go-home' }, '*');
+                });
+                menubar.insertBefore(btn, menubar.firstChild);
+                backBtnInjected = true;
+              }
+            }
+
+            if (compositionsHidden && backBtnInjected) {
+              obs.disconnect();
             }
           }).observe(document.body, { childList: true, subtree: true });
         </script>`;

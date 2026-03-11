@@ -35,10 +35,59 @@
 
   <script type="module" src="/terminal.js"></script>
   <script>
-    // Hide loading overlay when iframe loads
+    // Hide loading overlay when iframe loads & hide Compositions tab
     const frame = document.getElementById('studioFrame');
     const overlay = document.getElementById('loadingOverlay');
-    frame.addEventListener('load', () => overlay.classList.add('hidden'));
+    frame.addEventListener('load', () => {
+      overlay.classList.add('hidden');
+
+      // Hide the Compositions tab in Remotion Studio sidebar, keep only Assets
+      try {
+        const doc = frame.contentDocument;
+        if (doc) {
+          // Inject CSS to hide the compositions tab button
+          const style = doc.createElement('style');
+          style.textContent = `
+            /* Hide the Compositions tab in the left sidebar */
+            [role="tab"]:first-child {
+              display: none !important;
+            }
+          `;
+          doc.head.appendChild(style);
+
+          // Also try to click the Assets tab so it's active by default
+          const tryClickAssets = () => {
+            const tabs = doc.querySelectorAll('[role="tab"]');
+            for (const tab of tabs) {
+              if (tab.textContent.trim().toLowerCase().includes('asset')) {
+                tab.click();
+                return true;
+              }
+            }
+            return false;
+          };
+
+          // Remotion Studio renders asynchronously, retry a few times
+          let attempts = 0;
+          const interval = setInterval(() => {
+            if (tryClickAssets() || ++attempts > 20) clearInterval(interval);
+          }, 500);
+        }
+      } catch(e) { /* cross-origin fallback */ }
+    });
+
+    // Listen for "go-home" message from Remotion iframe
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'go-home') {
+        if (window.studio && typeof window.studio.goBack === 'function') {
+          // Electron mode: navigate back to project page
+          window.studio.goBack();
+        } else {
+          // Browser mode: navigate to the project picker
+          window.location.href = '/app';
+        }
+      }
+    });
 
     function getCompositionIdFromStudioHref(href) {
       try {
@@ -75,7 +124,9 @@
     const IGNORE_IDS = new Set(['blank', 'assets', 'outputs', 'render', 'bundle']);
     let lastCompId = null;
     let knownClips = null;
-    fetch('/api/clips').then(r => r.json()).then(clips => { knownClips = new Set(clips); }).catch(() => {});
+    fetch('/api/clips').then(r => r.json()).then(clips => {
+      knownClips = new Set(clips.map(c => typeof c === 'string' ? c : c.id));
+    }).catch(() => {});
 
     setInterval(() => {
       try {
