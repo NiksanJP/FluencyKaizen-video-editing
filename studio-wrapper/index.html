@@ -12,7 +12,7 @@
     <!-- Left: Remotion Studio -->
     <div class="preview-panel" id="previewPanel">
       <div class="loading-overlay" id="loadingOverlay">Loading Remotion Studio...</div>
-      <iframe id="studioFrame" src="/remotion-studio"></iframe>
+      <iframe id="studioFrame" src="/"></iframe>
     </div>
 
     <!-- Draggable splitter -->
@@ -61,7 +61,7 @@
           return decodeSafely(segments[segments.length - 1] || '') || null; // Remotion v4 SPA style: /<compositionId>
         };
 
-        const pathRoute = url.pathname.replace(/^\/remotion-studio(?=\/|$)/, '');
+        const pathRoute = url.pathname;
         const queryRoute = url.search.startsWith('?') ? url.search.slice(1) : '';
         const hashRoute = url.hash.startsWith('#') ? url.hash.slice(1) : '';
 
@@ -72,12 +72,18 @@
     }
 
     // Poll iframe URL for composition changes
+    const IGNORE_IDS = new Set(['blank', 'assets', 'outputs', 'render', 'bundle']);
     let lastCompId = null;
+    let knownClips = null;
+    fetch('/api/clips').then(r => r.json()).then(clips => { knownClips = new Set(clips); }).catch(() => {});
+
     setInterval(() => {
       try {
         const href = frame.contentWindow.location.href;
         const compId = getCompositionIdFromStudioHref(href);
-        if (compId && compId !== lastCompId) {
+        if (compId && compId !== lastCompId && !IGNORE_IDS.has(compId)) {
+          // Only activate if it matches a known clip (when list is available)
+          if (knownClips && !knownClips.has(compId)) return;
           lastCompId = compId;
           if (window.activateCompositionTabs) {
             window.activateCompositionTabs(compId);

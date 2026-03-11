@@ -226,15 +226,25 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// Fetch available clips and auto-activate the first one
+// Fetch available clips and activate the selected composition (from URL hash) or first one
 fetch("/api/clips")
   .then((r) => r.json())
   .then((clips: string[]) => {
     const el = document.getElementById("clipName");
     if (el) el.textContent = `${clips.length} clip(s) available`;
-    // Auto-activate the first composition's tabs on load
-    if (clips.length > 0) {
-      (window as any).activateCompositionTabs(clips[0]);
+
+    // Check URL hash for a specific composition (set by Electron project page)
+    const hashComp = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
+    const targetComp = hashComp && clips.includes(hashComp) ? hashComp : clips[0];
+
+    if (targetComp) {
+      (window as any).activateCompositionTabs(targetComp);
+
+      // Also navigate the Remotion iframe to this composition
+      const frame = document.getElementById("studioFrame") as HTMLIFrameElement | null;
+      if (frame) {
+        frame.src = `/${encodeURIComponent(targetComp)}`;
+      }
     }
   })
   .catch(() => {});

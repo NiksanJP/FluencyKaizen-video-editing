@@ -463,12 +463,16 @@ children.push(wrapper);
 // Give wrapper a moment to start
 await Bun.sleep(1000);
 
-// 4. Open browser
-console.log(`\n🚀 Opening browser to http://localhost:${wrapperPort}\n`);
-try {
-  await $`open http://localhost:${wrapperPort}`.quiet();
-} catch {
-  console.log(`  Could not open browser automatically. Navigate to http://localhost:${wrapperPort}`);
+// 4. Open browser (skip if launched from Electron)
+if (process.env.ELECTRON_NO_OPEN !== "1") {
+  console.log(`\n🚀 Opening browser to http://localhost:${wrapperPort}/app\n`);
+  try {
+    await $`open http://localhost:${wrapperPort}/app`.quiet();
+  } catch {
+    console.log(`  Could not open browser automatically. Navigate to http://localhost:${wrapperPort}/app`);
+  }
+} else {
+  console.log(`\n🚀 Studio ready at http://localhost:${wrapperPort}/app\n`);
 }
 
 console.log("Press Ctrl+C to stop all processes.\n");

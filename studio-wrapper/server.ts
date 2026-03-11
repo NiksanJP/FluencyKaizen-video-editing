@@ -34,6 +34,19 @@ const __dir = dirname(import.meta.path);
 const projectRoot = resolve(__dir, "..");
 const ptyBridge = resolve(__dir, "pty-bridge.py");
 const remotionPort = process.env.REMOTION_PORT || "3000";
+
+// Resolve python3 path — check common locations if not on PATH
+function findPython3(): string {
+  const candidates = ["python3", "/usr/bin/python3", "/usr/local/bin/python3", "/opt/homebrew/bin/python3"];
+  for (const cmd of candidates) {
+    try {
+      execFileSync(cmd, ["--version"], { stdio: "ignore" });
+      return cmd;
+    } catch {}
+  }
+  return "python3"; // fallback, will error at spawn time
+}
+const python3Path = findPython3();
 const outputDir = resolve(projectRoot, "output");
 
 // MIME types for static files
@@ -114,7 +127,7 @@ function spawnWithPTY(
   env?: Record<string, string>,
   cwd?: string,
 ): PtyHandle {
-  const proc = Bun.spawn(["python3", ptyBridge, ...command], {
+  const proc = Bun.spawn([python3Path, ptyBridge, ...command], {
     cwd: cwd || projectRoot,
     env: {
       ...process.env,
@@ -267,6 +280,7 @@ async function getOrCreateSession(
     const args = [
       "aider",
       "--model", "gemini/gemini-2.5-flash",
+      "--no-gitignore",
       "--message-file", contextPromptPath,
       ...aiderFiles.flatMap((f) => ["--file", f]),
     ];
@@ -351,21 +365,32 @@ const server = Bun.serve({
       return new Response("Not found", { status: 404 });
     }
 
-    // Serve wrapper's own static files (index.html, styles.css)
-    const fileName = path === "/" ? "index.html" : path.slice(1);
-    try {
-      const filePath = resolve(__dir, fileName);
-      const content = await readFile(filePath);
-      const ext = extname(filePath);
-      return new Response(content, {
-        headers: { "Content-Type": MIME[ext] || "application/octet-stream" },
-      });
-    } catch {
-      // Fall through to Remotion proxy
+    // Serve wrapper's own static files under /app (so / goes to Remotion proxy)
+    // Also serve /app/styles.css, /app/terminal.js etc.
+    if (path === "/app" || path.startsWith("/app/")) {
+      const relative = path === "/app" ? "index.html" : path.slice("/app/".length);
+      try {
+        const filePath = resolve(__dir, relative);
+        const content = await readFile(filePath);
+        const ext = extname(filePath);
+        return new Response(content, {
+          headers: { "Content-Type": MIME[ext] || "application/octet-stream" },
+        });
+      } catch {}
     }
 
-    // Fallback: reverse-proxy everything else to Remotion Studio
-    const remotionPath = path === "/remotion-studio" ? "/" : path;
+    // Serve wrapper's styles.css at root (referenced by index.html)
+    if (path === "/styles.css") {
+      try {
+        const content = await readFile(resolve(__dir, "styles.css"));
+        return new Response(content, {
+          headers: { "Content-Type": "text/css" },
+        });
+      } catch {}
+    }
+
+    // Reverse-proxy everything else to Remotion Studio
+    const remotionPath = path;
     const remotionUrl = `http://localhost:${remotionPort}${remotionPath}${url.search}`;
 
     // WebSocket upgrade (Remotion HMR)
@@ -387,6 +412,36 @@ const server = Bun.serve({
       const headers = new Headers(proxyRes.headers);
       headers.delete("x-frame-options");
       headers.delete("content-security-policy");
+
+      // Inject script into HTML responses to show assets tab and hide compositions tab
+      const contentType = proxyRes.headers.get("content-type") || "";
+      if (contentType.includes("text/html")) {
+        let html = await proxyRes.text();
+        const injection = `<script>
+          // Force assets tab in sidebar
+          localStorage.setItem('remotion.sidebarPanel', 'assets');
+
+          // Hide the "Compositions" tab button once React renders
+          new MutationObserver(function(_, obs) {
+            // Find all role="button" divs that say "Compositions"
+            var btns = document.querySelectorAll('.css-reset div[role="button"]');
+            for (var i = 0; i < btns.length; i++) {
+              if (btns[i].textContent.trim() === 'Compositions') {
+                btns[i].style.display = 'none';
+                obs.disconnect();
+                return;
+              }
+            }
+          }).observe(document.body, { childList: true, subtree: true });
+        </script>`;
+        html = html.replace("</head>", injection + "</head>");
+        headers.set("content-length", String(Buffer.byteLength(html)));
+        return new Response(html, {
+          status: proxyRes.status,
+          headers,
+        });
+      }
+
       return new Response(proxyRes.body, {
         status: proxyRes.status,
         headers,
