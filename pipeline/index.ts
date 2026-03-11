@@ -21,7 +21,7 @@ import {
   isTranscriptionCached, isAnalysisCached,
   updateTranscriptionCache, updateAnalysisCache,
 } from "./cache.js";
-import type { WhisperResult, ClipData } from "./types.js";
+import type { WhisperResult, ClipData, SupportedLanguage } from "./types.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -54,11 +54,22 @@ function resolveInput(arg: string): string {
 async function main() {
   const args = process.argv.slice(2);
   const forceFlag = args.includes("--force");
-  const positionalArgs = args.filter((a) => a !== "--force");
+
+  // Parse --lang flag
+  const langIdx = args.indexOf("--lang");
+  const langArg = langIdx !== -1 ? args[langIdx + 1] : "ja";
+  const validLangs = ["ja", "zh", "ko", "es"];
+  if (!validLangs.includes(langArg)) {
+    console.error(`❌ Invalid language: ${langArg}. Supported: ${validLangs.join(", ")}`);
+    process.exit(1);
+  }
+  const targetLanguage = langArg as SupportedLanguage;
+
+  const positionalArgs = args.filter((a, i) => a !== "--force" && a !== "--lang" && (langIdx === -1 || i !== langIdx + 1));
 
   if (positionalArgs.length === 0) {
-    console.error("Usage: bun process <video-name> [--force]");
-    console.error("Example: bun process video_001");
+    console.error("Usage: bun process <video-name> [--force] [--lang ja|zh|ko|es]");
+    console.error("Example: bun process video_001 --lang zh");
     process.exit(1);
   }
 
@@ -143,12 +154,14 @@ async function main() {
       const raw = await readFile(join(outputDir, "clip.json"), "utf-8");
       clipData = JSON.parse(raw);
     } else {
-      clipData = await analyzeWithGemini(transcript, videoFileName);
+      clipData = await analyzeWithGemini(transcript, videoFileName, targetLanguage);
       clipData.videoDuration = videoDuration;
+      clipData.targetLanguage = targetLanguage;
       await updateAnalysisCache(outputDir, projectRoot, cache);
       await writeCache(outputDir, cache);
     }
     clipData.videoDuration = videoDuration;
+    clipData.targetLanguage = clipData.targetLanguage || targetLanguage;
 
     // Step 4: Remove silence (jump-cut editing)
     console.log(`\n✂️  Step 4: Removing silence gaps...`);

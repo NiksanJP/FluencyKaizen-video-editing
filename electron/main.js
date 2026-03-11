@@ -23,6 +23,7 @@ ipcMain.handle("get-compositions", async () => {
         compositions.push({
           id: dir,
           hookTitle: data.hookTitle || { ja: dir, en: dir },
+          targetLanguage: data.targetLanguage || "ja",
           duration: data.clip
             ? (data.clip.endTime - data.clip.startTime).toFixed(1)
             : null,
@@ -91,7 +92,7 @@ ipcMain.handle("go-back-to-projects", () => {
 
 let pipelineProcess = null;
 
-ipcMain.handle("import-video", async () => {
+ipcMain.handle("import-video", async (_event, lang) => {
   if (pipelineProcess) {
     return { error: "A pipeline is already running" };
   }
@@ -126,7 +127,8 @@ ipcMain.handle("import-video", async () => {
   send({ type: "start", fileName });
 
   return new Promise((resolvePromise) => {
-    pipelineProcess = spawn("bun", ["pipeline/index.ts", destPath], {
+    const targetLang = lang || "ja";
+    pipelineProcess = spawn("bun", ["pipeline/index.ts", destPath, "--lang", targetLang], {
       cwd: projectRoot,
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env },

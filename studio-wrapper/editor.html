@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clip Editor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #1e1e1e;
+      --bg-elevated: #252526;
+      --bg-input: #2d2d2d;
+      --border: #3e3e3e;
+      --border-focus: #0078d4;
+      --text: #d4d4d4;
+      --text-dim: #888;
+      --text-bright: #fff;
+      --accent: #0078d4;
+      --accent-hover: #1a8cff;
+      --gold: #FFD700;
+      --red: #f44747;
+      --green: #6a9955;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .editor-root {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .editor-toolbar .clip-id {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 14px;
+    }
+
+    .editor-toolbar .spacer { flex: 1; }
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toolbar-btn:hover { background: #3a3a3a; border-color: #555; }
+
+    .toolbar-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .toolbar-btn.primary:hover { background: var(--accent-hover); }
+    .toolbar-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .save-status { font-size: 11px; color: var(--text-dim); }
+    .save-status.saved { color: var(--green); }
+    .save-status.saving { color: var(--gold); }
+    .save-status.error { color: var(--red); }
+
+    .editor-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .editor-content::-webkit-scrollbar { width: 8px; }
+    .editor-content::-webkit-scrollbar-track { background: var(--bg); }
+    .editor-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+    .section {
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+    }
+
+    .section-header:hover { background: #2a2a2e; }
+
+    .section-header .arrow {
+      font-size: 10px;
+      color: var(--text-dim);
+      transition: transform 0.15s;
+      display: inline-block;
+    }
+
+    .section.collapsed .arrow { transform: rotate(-90deg); }
+
+    .section-header .title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-bright);
+    }
+
+    .section-header .count {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    .section-body { padding: 12px 14px; }
+    .section.collapsed .section-body { display: none; }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .field-row:last-child { margin-bottom: 0; }
+
+    .field-label {
+      width: 80px;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .field-input {
+      flex: 1;
+      padding: 6px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field-input:focus { border-color: var(--border-focus); }
+    .field-input.time { width: 70px; flex: none; text-align: right; }
+
+    .chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      flex: 1;
+      min-height: 28px;
+      padding: 4px 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 3px;
+      font-size: 12px;
+      color: var(--gold);
+    }
+
+    .chip .remove {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      opacity: 0.6;
+    }
+
+    .chip .remove:hover { opacity: 1; }
+
+    .chip-input {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+      min-width: 60px;
+      flex: 1;
+    }
+
+    .list-item {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+
+    .list-item:hover { border-color: #555; }
+    .list-item:last-child { margin-bottom: 0; }
+
+    .list-item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+    }
+
+    .list-item-header .index {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'SF Mono', Monaco, monospace;
+      width: 20px;
+    }
+
+    .list-item-header .preview {
+      flex: 1;
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .list-item-header .time-badge {
+      font-size: 11px;
+      color: var(--accent);
+      font-family: 'SF Mono', Monaco, monospace;
+      flex-shrink: 0;
+    }
+
+    .list-item-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 14px;
+      transition: all 0.1s;
+    }
+
+    .icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .icon-btn.danger:hover { background: rgba(244, 71, 71, 0.15); color: var(--red); }
+
+    .list-item-body { padding: 10px 12px; display: none; }
+    .list-item.expanded .list-item-body { display: block; }
+    .list-item-body .field-row { margin-bottom: 6px; }
+    .list-item-body .field-label { width: 70px; }
+
+    .timeline-bar {
+      position: relative;
+      height: 24px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .timeline-segment {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: opacity 0.1s;
+    }
+
+    .timeline-segment:hover { opacity: 0.8; }
+    .timeline-segment.subtitle { background: rgba(0, 120, 212, 0.5); }
+    .timeline-segment.vocab { background: rgba(255, 215, 0, 0.4); top: 14px; bottom: 2px; }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      padding: 8px;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+
+    .add-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 120, 212, 0.05);
+    }
+
+    .editor-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 16px;
+      font-size: 10px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-root" id="editorRoot">
+    <div class="editor-loading" id="editorLoading">Select a composition to edit</div>
+  </div>
+
+  <script>
+    // ---- State ----
+    var clipId = null;
+    var clipData = null;
+    var originalJson = '';
+    var isDirty = false;
+    var saveTimeout = null;
+
+    // ---- Init ----
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'load-clip') {
+        loadClip(e.data.clipId);
+      }
+    });
+
+    var hashId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
+    if (hashId) loadClip(hashId);
+
+    // ---- API ----
+    function loadClip(id) {
+      clipId = id;
+      fetch('/api/clip/' + encodeURIComponent(id))
+        .then(function(res) {
+          if (!res.ok) throw new Error('Failed to load clip');
+          return res.json();
+        })
+        .then(function(data) {
+          clipData = data;
+          originalJson = JSON.stringify(clipData);
+          isDirty = false;
+          renderEditor();
+        })
+        .catch(function(err) {
+          var root = document.getElementById('editorRoot');
+          root.textContent = '';
+          var msg = document.createElement('div');
+          msg.className = 'editor-loading';
+          msg.textContent = 'Error: ' + err.message;
+          root.appendChild(msg);
+        });
+    }
+
+    function saveClip() {
+      if (!clipId || !clipData) return;
+      setSaveStatus('saving', 'Saving...');
+      fetch('/api/clip/' + encodeURIComponent(clipId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(clipData, null, 2),
+      })
+        .then(function(res) {
+          if (!res.ok) return res.text().then(function(t) { throw new Error(t); });
+          originalJson = JSON.stringify(clipData);
+          isDirty = false;
+          setSaveStatus('saved', 'Saved');
+          updateDirtyState();
+        })
+        .catch(function(err) {
+          setSaveStatus('error', 'Error: ' + err.message);
+        });
+    }
+
+    function markDirty() {
+      isDirty = true;
+      updateDirtyState();
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveClip, 2000);
+    }
+
+    function updateDirtyState() {
+      var btn = document.getElementById('saveBtn');
+      if (btn) btn.disabled = !isDirty;
+      var status = document.getElementById('saveStatus');
+      if (status && isDirty) {
+        status.className = 'save-status';
+        status.textContent = 'Unsaved changes';
+      }
+    }
+
+    function setSaveStatus(cls, text) {
+      var el = document.getElementById('saveStatus');
+      if (el) {
+        el.className = 'save-status ' + cls;
+        el.textContent = text;
+      }
+    }
+
+    // ---- DOM Helpers ----
+    function el(tag, className, textContent) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (textContent !== undefined) node.textContent = textContent;
+      return node;
+    }
+
+    function labelEl(text, width) {
+      var node = el('span', 'field-label', text);
+      if (width) node.style.width = width + 'px';
+      return node;
+    }
+
+    function createInput(value, onChange) {
+      var input = el('input', 'field-input');
+      input.type = 'text';
+      input.value = value || '';
+      input.addEventListener('input', function() { onChange(input.value); });
+      return input;
+    }
+
+    function createTimeInput(value, onChange) {
+      var input = el('input', 'field-input time');
+      input.type = 'number';
+      input.step = '0.1';
+      input.value = typeof value === 'number' ? value.toFixed(2) : '0';
+      input.addEventListener('input', function() {
+        var v = parseFloat(input.value);
+        if (!isNaN(v)) onChange(v);
+      });
+      return input;
+    }
+
+    function createChips(arr, onChange) {
+      var container = el('div', 'chips-container');
+
+      function render() {
+        container.textContent = '';
+        arr.forEach(function(word, i) {
+          var chip = el('span', 'chip');
+          chip.appendChild(document.createTextNode(word));
+          var rm = el('span', 'remove', '\u00D7');
+          rm.addEventListener('click', function() {
+            arr.splice(i, 1);
+            onChange(arr);
+            render();
+          });
+          chip.appendChild(rm);
+          container.appendChild(chip);
+        });
+        var input = el('input', 'chip-input');
+        input.placeholder = 'Type + Enter';
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && input.value.trim()) {
+            arr.push(input.value.trim());
+            onChange(arr);
+            render();
+          } else if (e.key === 'Backspace' && !input.value && arr.length > 0) {
+            arr.pop();
+            onChange(arr);
+            render();
+          }
+        });
+        container.appendChild(input);
+      }
+      render();
+      return container;
+    }
+
+    function fieldRow(label, inputNode, labelWidth) {
+      var row = el('div', 'field-row');
+      row.appendChild(labelEl(label, labelWidth));
+      row.appendChild(inputNode);
+      return row;
+    }
+
+    function fmtTime(seconds) {
+      if (typeof seconds !== 'number') return '0:00';
+      var m = Math.floor(seconds / 60);
+      var s = (seconds % 60).toFixed(1);
+      return m + ':' + (parseFloat(s) < 10 ? '0' : '') + s;
+    }
+
+    function createSection(title, count, collapsed) {
+      var section = el('div', 'section' + (collapsed ? ' collapsed' : ''));
+
+      var header = el('div', 'section-header');
+      header.appendChild(el('span', 'arrow', '\u25BE'));
+      header.appendChild(el('span', 'title', title));
+      if (count !== null && count !== undefined) {
+        header.appendChild(el('span', 'count', String(count)));
+      }
+      header.addEventListener('click', function() {
+        section.classList.toggle('collapsed');
+      });
+
+      var body = el('div', 'section-body');
+      section.appendChild(header);
+      section.appendChild(body);
+      return section;
+    }
+
+    function iconBtn(text, className, title, onClick) {
+      var btn = el('button', 'icon-btn' + (className ? ' ' + className : ''), text);
+      if (title) btn.title = title;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        onClick();
+      });
+      return btn;
+    }
+
+    // ---- Render ----
+    function renderEditor() {
+      if (!clipData) return;
+      var root = document.getElementById('editorRoot');
+      root.textContent = '';
+
+      // Toolbar
+      var toolbar = el('div', 'editor-toolbar');
+      toolbar.appendChild(el('span', 'clip-id', clipId));
+      toolbar.appendChild(el('span', 'spacer'));
+      var statusEl = el('span', 'save-status saved', 'Up to date');
+      statusEl.id = 'saveStatus';
+      toolbar.appendChild(statusEl);
+      var saveBtn = el('button', 'toolbar-btn primary', 'Save');
+      saveBtn.id = 'saveBtn';
+      saveBtn.disabled = true;
+      saveBtn.addEventListener('click', function() {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveClip();
+      });
+      toolbar.appendChild(saveBtn);
+      root.appendChild(toolbar);
+
+      // Content
+      var content = el('div', 'editor-content');
+      root.appendChild(content);
+
+      content.appendChild(renderHookTitle());
+      content.appendChild(renderClipRange());
+      content.appendChild(renderTimeline());
+      content.appendChild(renderSubtitles());
+      content.appendChild(renderVocabCards());
+    }
+
+    // ---- Hook Title ----
+    function renderHookTitle() {
+      var section = createSection('Hook Title', null, false);
+      var body = section.querySelector('.section-body');
+      body.appendChild(fieldRow('JA', createInput(clipData.hookTitle.ja, function(v) {
+        clipData.hookTitle.ja = v; markDirty();
+      })));
+      body.appendChild(fieldRow('EN', createInput(clipData.hookTitle.en, function(v) {
+        clipData.hookTitle.en = v; markDirty();
+      })));
+      body.appendChild(fieldRow('Highlights', createChips(
+        clipData.hookTitle.highlights || [],
+        function(arr) { clipData.hookTitle.highlights = arr; markDirty(); }
+      )));
+      return section;
+    }
+
+    // ---- Clip Range ----
+    function renderClipRange() {
+      var section = createSection('Clip Range', null, false);
+      var body = section.querySelector('.section-body');
+      var dur = (clipData.clip.endTime - clipData.clip.startTime).toFixed(1);
+
+      var row = el('div', 'field-row');
+      row.appendChild(labelEl('Start'));
+      row.appendChild(createTimeInput(clipData.clip.startTime, function(v) {
+        clipData.clip.startTime = v; markDirty(); updateDuration();
+      }));
+      row.appendChild(labelEl('End'));
+      row.appendChild(createTimeInput(clipData.clip.endTime, function(v) {
+        clipData.clip.endTime = v; markDirty(); updateDuration();
+      }));
+      var durSpan = el('span', null, dur + 's');
+      durSpan.id = 'durationLabel';
+      durSpan.style.cssText = 'font-size:12px; color:#888; margin-left:8px;';
+      row.appendChild(durSpan);
+      body.appendChild(row);
+
+      if (clipData.videoDuration) {
+        var info = el('div', null, 'Source video: ' + clipData.videoDuration.toFixed(1) + 's');
+        info.style.cssText = 'font-size:11px; color:#555; margin-top:4px;';
+        body.appendChild(info);
+      }
+      return section;
+    }
+
+    function updateDuration() {
+      var node = document.getElementById('durationLabel');
+      if (node) node.textContent = (clipData.clip.endTime - clipData.clip.startTime).toFixed(1) + 's';
+    }
+
+    // ---- Timeline ----
+    function renderTimeline() {
+      var section = createSection('Timeline', null, false);
+      var body = section.querySelector('.section-body');
+      var bar = el('div', 'timeline-bar');
+      bar.id = 'timelineBar';
+
+      var clipStart = clipData.clip.startTime;
+      var clipDur = clipData.clip.endTime - clipStart;
+
+      if (clipDur > 0) {
+        (clipData.subtitles || []).forEach(function(sub, i) {
+          var seg = el('div', 'timeline-segment subtitle');
+          seg.style.left = Math.max(0, (sub.startTime - clipStart) / clipDur * 100) + '%';
+          seg.style.width = Math.max(0.5, (sub.endTime - sub.startTime) / clipDur * 100) + '%';
+          seg.title = 'Sub ' + (i+1) + ': ' + sub.en;
+          seg.addEventListener('click', function() {
+            var item = document.getElementById('sub-' + i);
+            if (item) { item.classList.toggle('expanded'); item.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+          });
+          bar.appendChild(seg);
+        });
+        (clipData.vocabCards || []).forEach(function(card, i) {
+          var seg = el('div', 'timeline-segment vocab');
+          seg.style.left = Math.max(0, (card.triggerTime - clipStart) / clipDur * 100) + '%';
+          seg.style.width = Math.max(0.5, card.duration / clipDur * 100) + '%';
+          seg.title = 'Vocab: ' + card.phrase;
+          seg.addEventListener('click', function() {
+            var item = document.getElementById('vocab-' + i);
+            if (item) { item.classList.toggle('expanded'); item.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+          });
+          bar.appendChild(seg);
+        });
+      }
+      body.appendChild(bar);
+
+      var legend = el('div', 'legend-row');
+      var subLeg = el('span');
+      var subDot = el('span', 'legend-dot');
+      subDot.style.background = 'rgba(0,120,212,0.5)';
+      subLeg.appendChild(subDot);
+      subLeg.appendChild(document.createTextNode('Subtitles'));
+      legend.appendChild(subLeg);
+      var vocabLeg = el('span');
+      var vocabDot = el('span', 'legend-dot');
+      vocabDot.style.background = 'rgba(255,215,0,0.4)';
+      vocabLeg.appendChild(vocabDot);
+      vocabLeg.appendChild(document.createTextNode('Vocab Cards'));
+      legend.appendChild(vocabLeg);
+      body.appendChild(legend);
+
+      return section;
+    }
+
+    // ---- Subtitles ----
+    function renderSubtitles() {
+      var section = createSection('Subtitles', (clipData.subtitles || []).length, false);
+      var body = section.querySelector('.section-body');
+      (clipData.subtitles || []).forEach(function(sub, i) {
+        body.appendChild(renderSubtitleItem(sub, i));
+      });
+      var addBtn = el('button', 'add-btn', '+ Add Subtitle');
+      addBtn.addEventListener('click', function() {
+        var last = clipData.subtitles[clipData.subtitles.length - 1];
+        var newStart = last ? last.endTime : clipData.clip.startTime;
+        clipData.subtitles.push({
+          startTime: newStart, endTime: newStart + 3,
+          en: '', ja: '', highlights: [], enHighlights: [],
+        });
+        markDirty(); renderEditor();
+      });
+      body.appendChild(addBtn);
+      return section;
+    }
+
+    function renderSubtitleItem(sub, i) {
+      var item = el('div', 'list-item');
+      item.id = 'sub-' + i;
+
+      var header = el('div', 'list-item-header');
+      header.appendChild(el('span', 'index', '#' + (i+1)));
+      var preview = el('span', 'preview', sub.en || sub.ja || '(empty)');
+      header.appendChild(preview);
+      var timeBadge = el('span', 'time-badge', fmtTime(sub.startTime) + ' - ' + fmtTime(sub.endTime));
+      header.appendChild(timeBadge);
+
+      var actions = el('div', 'list-item-actions');
+      actions.appendChild(iconBtn('\u25BE', null, 'Expand', function() { item.classList.toggle('expanded'); }));
+      actions.appendChild(iconBtn('\u2715', 'danger', 'Delete', function() {
+        clipData.subtitles.splice(i, 1); markDirty(); renderEditor();
+      }));
+      header.appendChild(actions);
+      header.addEventListener('click', function() { item.classList.toggle('expanded'); });
+      item.appendChild(header);
+
+      var body = el('div', 'list-item-body');
+
+      // Timing row
+      var timeRow = el('div', 'field-row');
+      timeRow.appendChild(labelEl('Time', 70));
+      timeRow.appendChild(createTimeInput(sub.startTime, function(v) {
+        sub.startTime = v; markDirty();
+        timeBadge.textContent = fmtTime(sub.startTime) + ' - ' + fmtTime(sub.endTime);
+      }));
+      timeRow.appendChild(el('span', null, 'to'));
+      timeRow.appendChild(createTimeInput(sub.endTime, function(v) {
+        sub.endTime = v; markDirty();
+        timeBadge.textContent = fmtTime(sub.startTime) + ' - ' + fmtTime(sub.endTime);
+      }));
+      body.appendChild(timeRow);
+
+      body.appendChild(fieldRow('EN', createInput(sub.en, function(v) {
+        sub.en = v; preview.textContent = v || sub.ja || '(empty)'; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('JA', createInput(sub.ja, function(v) {
+        sub.ja = v; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('JA HL', createChips(sub.highlights || [], function(arr) {
+        sub.highlights = arr; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('EN HL', createChips(sub.enHighlights || [], function(arr) {
+        sub.enHighlights = arr; markDirty();
+      }), 70));
+
+      item.appendChild(body);
+      return item;
+    }
+
+    // ---- Vocab Cards ----
+    function renderVocabCards() {
+      var section = createSection('Vocab Cards', (clipData.vocabCards || []).length, false);
+      var body = section.querySelector('.section-body');
+      (clipData.vocabCards || []).forEach(function(card, i) {
+        body.appendChild(renderVocabItem(card, i));
+      });
+      var addBtn = el('button', 'add-btn', '+ Add Vocab Card');
+      addBtn.addEventListener('click', function() {
+        var last = clipData.vocabCards[clipData.vocabCards.length - 1];
+        var trigger = last ? last.triggerTime + last.duration + 1 : clipData.clip.startTime + 5;
+        clipData.vocabCards.push({
+          triggerTime: trigger, duration: 4, category: '\u30D3\u30B8\u30CD\u30B9\u82F1\u8A9E',
+          phrase: '', literal: '', nuance: '',
+        });
+        markDirty(); renderEditor();
+      });
+      body.appendChild(addBtn);
+      return section;
+    }
+
+    function renderVocabItem(card, i) {
+      var item = el('div', 'list-item');
+      item.id = 'vocab-' + i;
+
+      var header = el('div', 'list-item-header');
+      header.appendChild(el('span', 'index', '#' + (i+1)));
+      var preview = el('span', 'preview', card.phrase || '(empty)');
+      header.appendChild(preview);
+      var timeBadge = el('span', 'time-badge', fmtTime(card.triggerTime) + ' (' + card.duration + 's)');
+      header.appendChild(timeBadge);
+
+      var actions = el('div', 'list-item-actions');
+      actions.appendChild(iconBtn('\u25B2', null, 'Move up', function() {
+        if (i > 0) {
+          var tmp = clipData.vocabCards[i];
+          clipData.vocabCards[i] = clipData.vocabCards[i-1];
+          clipData.vocabCards[i-1] = tmp;
+          markDirty(); renderEditor();
+        }
+      }));
+      actions.appendChild(iconBtn('\u25BC', null, 'Move down', function() {
+        if (i < clipData.vocabCards.length - 1) {
+          var tmp = clipData.vocabCards[i];
+          clipData.vocabCards[i] = clipData.vocabCards[i+1];
+          clipData.vocabCards[i+1] = tmp;
+          markDirty(); renderEditor();
+        }
+      }));
+      actions.appendChild(iconBtn('\u25BE', null, 'Expand', function() { item.classList.toggle('expanded'); }));
+      actions.appendChild(iconBtn('\u2715', 'danger', 'Delete', function() {
+        clipData.vocabCards.splice(i, 1); markDirty(); renderEditor();
+      }));
+      header.appendChild(actions);
+      header.addEventListener('click', function() { item.classList.toggle('expanded'); });
+      item.appendChild(header);
+
+      var body = el('div', 'list-item-body');
+
+      var timeRow = el('div', 'field-row');
+      timeRow.appendChild(labelEl('Trigger', 70));
+      timeRow.appendChild(createTimeInput(card.triggerTime, function(v) {
+        card.triggerTime = v; markDirty();
+        timeBadge.textContent = fmtTime(card.triggerTime) + ' (' + card.duration + 's)';
+      }));
+      timeRow.appendChild(el('span', null, 'dur'));
+      timeRow.appendChild(createTimeInput(card.duration, function(v) {
+        card.duration = v; markDirty();
+        timeBadge.textContent = fmtTime(card.triggerTime) + ' (' + card.duration + 's)';
+      }));
+      body.appendChild(timeRow);
+
+      body.appendChild(fieldRow('Category', createInput(card.category, function(v) {
+        card.category = v; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('Phrase', createInput(card.phrase, function(v) {
+        card.phrase = v; preview.textContent = v || '(empty)'; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('Literal', createInput(card.literal, function(v) {
+        card.literal = v; markDirty();
+      }), 70));
+      body.appendChild(fieldRow('Nuance', createInput(card.nuance, function(v) {
+        card.nuance = v; markDirty();
+      }), 70));
+
+      item.appendChild(body);
+      return item;
+    }
+
+    // ---- Keyboard shortcuts ----
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        if (isDirty) { if (saveTimeout) clearTimeout(saveTimeout); saveClip(); }
+      }
+    });
+
+    // ---- Live reload when clip data changes externally (e.g. from AI terminal) ----
+    (function() {
+      function connectEvents() {
+        var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var ws = new WebSocket(protocol + '//' + location.host + '/ws/events');
+        ws.addEventListener('message', function(event) {
+          try {
+            var msg = JSON.parse(event.data);
+            if (msg.type === 'clip-data-updated' && clipId && !isDirty) {
+              loadClip(clipId);
+            }
+          } catch(e) {}
+        });
+        ws.addEventListener('close', function() {
+          setTimeout(connectEvents, 3000);
+        });
+      }
+      connectEvents();
+    })();
+  </script>
+</body>
+</html>

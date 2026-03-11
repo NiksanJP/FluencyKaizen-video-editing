@@ -196,18 +196,6 @@ const allClips: Record<string, ClipData> = {
   },
   "subtitles": [
     {
-      "startTime": 0,
-      "endTime": 1.4399999999999995,
-      "en": "Nick, thank you for",
-      "ja": "ニック、ありがとう",
-      "highlights": [
-        "ありがとう"
-      ],
-      "enHighlights": [
-        "thank you"
-      ]
-    },
-    {
       "startTime": 1.2599999999999998,
       "endTime": 2.4399999999999995,
       "en": "scheduling this one...",
@@ -907,7 +895,7 @@ const allClips: Record<string, ClipData> = {
       "triggerTime": 1.8599999999999994,
       "duration": 3.5,
       "category": "ビジネス英語",
-      "phrase": "one on one",
+      "phrase": "1-1",
       "literal": "1対1",
       "nuance": "「1対1の面談」や「個別ミーティング」を指すビジネス英語。上司と部下の定期的な面談など、個人的な話やフィードバックを行う場によく使われます。上司からのフィードバックや、部下からの相談など、個人的なコミュニケーションの場として重要です。例：\"Let's schedule a one-on-one for next week.\" (来週、個別面談を設定しましょう。)"
     },

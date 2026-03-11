@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import type { ClipData, WhisperResult } from "./types.js";
-import { LIMITS } from "./config.js";
+import type { ClipData, WhisperResult, SupportedLanguage } from "./types.js";
+import { LANGUAGE_CONFIG } from "./types.js";
+import { LIMITS, getLimits } from "./config.js";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -10,8 +11,12 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  */
 export async function analyzeWithGemini(
   transcript: WhisperResult,
-  videoFileName: string
+  videoFileName: string,
+  targetLanguage: SupportedLanguage = "ja"
 ): Promise<ClipData> {
+  const langConfig = LANGUAGE_CONFIG[targetLanguage];
+  const limits = getLimits(targetLanguage);
+
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     generationConfig: {
@@ -23,14 +28,14 @@ export async function analyzeWithGemini(
           hookTitle: {
             type: SchemaType.OBJECT,
             properties: {
-              ja: { type: SchemaType.STRING },
+              target: { type: SchemaType.STRING },
               en: { type: SchemaType.STRING },
               highlights: {
                 type: SchemaType.ARRAY,
                 items: { type: SchemaType.STRING },
               },
             },
-            required: ["ja", "en", "highlights"],
+            required: ["target", "en", "highlights"],
           },
           clip: {
             type: SchemaType.OBJECT,
@@ -48,7 +53,7 @@ export async function analyzeWithGemini(
                 startTime: { type: SchemaType.NUMBER },
                 endTime: { type: SchemaType.NUMBER },
                 en: { type: SchemaType.STRING },
-                ja: { type: SchemaType.STRING },
+                target: { type: SchemaType.STRING },
                 highlights: {
                   type: SchemaType.ARRAY,
                   items: { type: SchemaType.STRING },
@@ -58,7 +63,7 @@ export async function analyzeWithGemini(
                   items: { type: SchemaType.STRING },
                 },
               },
-              required: ["startTime", "endTime", "en", "ja", "highlights", "enHighlights"],
+              required: ["startTime", "endTime", "en", "target", "highlights", "enHighlights"],
             },
           },
           vocabCards: {
@@ -101,10 +106,10 @@ export async function analyzeWithGemini(
   const firstWordTime = allWords[0]?.start ?? 0;
   const lastWordTime = allWords[allWords.length - 1]?.end ?? 0;
 
-  const prompt = `You are a professional video editor specializing in Business English educational content for Japanese learners.
+  const prompt = `You are a professional video editor specializing in Business English educational content for ${langConfig.name} learners.
 
 ## Task
-Analyze this bilingual (English/Japanese mixed) video transcript and produce a JSON output for a short-form video clip.
+Analyze this bilingual (English/${langConfig.name} mixed) video transcript and produce a JSON output for a short-form video clip.
 
 ## Transcript
 ${transcriptText}
@@ -117,11 +122,11 @@ ${transcriptText}
 
 2. **Subtitles**: For each 2-4 second segment within the clip:
    ⚠️ MOST IMPORTANT RULE: The English text MUST be the EXACT words spoken in the video at that timestamp. Do NOT paraphrase, rearrange, or invent text. Use the transcript to extract the actual spoken words for each time range.
-   ⚠️ Each English subtitle MUST be ≤ ${LIMITS.subtitle.en} characters (including spaces). Count before outputting.
+   ⚠️ Each English subtitle MUST be ≤ ${limits.subtitle.en} characters (including spaces). Count before outputting.
    - Good examples: "show up on the 30th" (19), "like never before" (17), "ladies and gentlemen" (20)
-   - If a phrase exceeds ${LIMITS.subtitle.en} characters, split at the nearest natural pause
-   - Provide Japanese translation of what was said
-   - Identify 1-2 key business words/phrases in the Japanese line for highlighting (yellow color) → put in \`highlights\`
+   - If a phrase exceeds ${limits.subtitle.en} characters, split at the nearest natural pause
+   - Provide ${langConfig.name} translation of what was said
+   - Identify 1-2 key business words/phrases in the ${langConfig.name} line for highlighting (yellow color) → put in \`highlights\`
    - Identify the same 1-2 corresponding business words/phrases as they appear in the English line → put in \`enHighlights\` (must be exact substrings of the English text)
 ${hasWordTimestamps ? `
    ⚠️ WORD-LEVEL TIMESTAMPS: Each word in the transcript has a bracketed timestamp (e.g. "hello[1.24] world[1.56]").
@@ -129,7 +134,7 @@ ${hasWordTimestamps ? `
    - Split subtitles at gaps of >0.3 seconds between consecutive words — these are natural speech pauses.
    - Do NOT guess or interpolate timestamps. Every subtitle boundary must align with an actual word timestamp from the transcript.` : `   ⚠️ Split at natural speech pauses and phrase boundaries — never mid-phrase.`}
 
-3. **Vocabulary Cards**: Extract 3-5 expressions that Japanese learners would NOT understand even with basic English knowledge. Prioritize in this order:
+3. **Vocabulary Cards**: Extract 3-5 expressions that ${langConfig.name} learners would NOT understand even with basic English knowledge. Prioritize in this order:
    a. **Corporate jargon / office idioms** — phrases that are common in business but confusing to non-natives:
       Examples: "park this", "circle back", "ping me", "take this offline", "loop you in", "move the needle", "boil the ocean", "low-hanging fruit", "bandwidth", "drill down", "touch base", "on the same page", "run it up the flagpole"
    b. **Misleading phrases** — words that sound simple but have a completely different meaning in context:
@@ -138,47 +143,43 @@ ${hasWordTimestamps ? `
 
    For each card:
    - phrase: The English expression exactly as said
-   - literal: Word-by-word translation to Japanese (including the misleading literal meaning if relevant)
-   - nuance: Contextual meaning in business Japanese, when/how to use it — make this the main educational value
-   - category: "社内英語" for office jargon, "スラング" for casual/informal, "ビジネス英語" for formal expressions
+   - literal: Word-by-word translation to ${langConfig.name} (including the misleading literal meaning if relevant)
+   - nuance: Contextual meaning in ${langConfig.name}, when/how to use it — make this the main educational value
+   - category: "${langConfig.categories.office}" for office jargon, "${langConfig.categories.slang}" for casual/informal, "${langConfig.categories.business}" for formal expressions
    - Place cards strategically throughout the clip (don't all appear at once)
 
-   ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words Japanese learners already know (e.g. "meeting", "schedule", "team")
+   ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words ${langConfig.name} learners already know (e.g. "meeting", "schedule", "team")
 
-4. **Hook Title**: Create a catchy EDUCATIONAL title that teaches Japanese learners a specific English phrase from the clip.
+4. **Hook Title**: Create a catchy EDUCATIONAL title that teaches ${langConfig.name} learners a specific English phrase from the clip.
    - The title MUST feature the key English word/phrase — this is the learning hook
-   - Japanese learners should see it and think "How do you use that in English?"
+   - ${langConfig.name} learners should see it and think "How do you use that in English?"
    - Use 1-2 relevant emojis (e.g. 📊💼🎯🔥✅🗣️)
 
-   **JA title format**: Mix Japanese context + English keyword. Frame it as "how to use [English word] in business English".
-   - Pattern: ビジネス英語で[English word]の使い方 + emoji
-   - Good: "💼ビジネス英語でParkの使い方" (15 chars ✓), "🎯英語でCircle backの意味" (15 chars ✓), "🔥Pushbackって何？" (12 chars ✓)
-   - Bad: "ビジネス英語の重要フレーズ" (no English word = not educational ✗)
-   - Bad: '🎯"parking"って？' (too vague, doesn't say it's for learning English ✗)
+   **Target language title format**: Mix ${langConfig.name} context + English keyword. Frame it as "how to use [English word] in business English".
+   - Pattern: ${langConfig.titlePattern} + emoji
+${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い方" (15 chars ✓), "🎯英語でCircle backの意味" (15 chars ✓), "🔥Pushbackって何？" (12 chars ✓)
+   - Bad: "ビジネス英語の重要フレーズ" (no English word = not educational ✗)` : `   - The title MUST contain the English keyword prominently`}
 
    **EN title format**: The phrase + benefit or meaning hint
-   - Good: "Park This = 後回し？🤔" (18 chars ✓), "Loop You In 🔥" (14 chars ✓)
+   - Good: "Park This = hold off? 🤔" (18 chars ✓), "Loop You In 🔥" (14 chars ✓)
 
-   ⚠️ **highlights** (REQUIRED — MUST NOT be empty): Pick 1-2 key words/phrases from the JA title to highlight in yellow (the rest renders white). These must be exact substrings of hookTitle.ja.
-   - ALWAYS highlight the English keyword that appears in the JA title — this is the most eye-catching part
-   - Optionally also highlight a key Japanese word for extra visual pop
-   - Example: "💼ビジネス英語でParkの使い方" → highlights: ["Park"]
-   - Example: "🔥Pushbackって何？" → highlights: ["Pushback"]
-   - Example: "🎯英語でCircle backの意味" → highlights: ["Circle back", "意味"]
+   ⚠️ **highlights** (REQUIRED — MUST NOT be empty): Pick 1-2 key words/phrases from the target language title to highlight in yellow (the rest renders white). These must be exact substrings of hookTitle.target.
+   - ALWAYS highlight the English keyword that appears in the target title — this is the most eye-catching part
+   - Optionally also highlight a key ${langConfig.name} word for extra visual pop
    - ❌ NEVER return an empty highlights array — the title MUST have at least 1 highlighted word
 
    ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting (emojis count as 1):
-   - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total.
-   - English: ≤ ${LIMITS.hookTitle.en} characters, max 6 words
+   - Target language (${langConfig.name}): STRICTLY ≤ ${limits.hookTitle.target} characters total.
+   - English: ≤ ${limits.hookTitle.en} characters, max 6 words
 
 ## Output Schema (MUST be valid JSON)
 \`\`\`json
 {
   "videoFile": "${videoFileName}",
   "hookTitle": {
-    "ja": "string",
+    "target": "string (${langConfig.name} title)",
     "en": "string",
-    "highlights": ["キーワード1", "キーワード2"]
+    "highlights": ["keyword1", "keyword2"]
   },
   "clip": {
     "startTime": number,
@@ -189,8 +190,8 @@ ${hasWordTimestamps ? `
       "startTime": number,
       "endTime": number,
       "en": "string",
-      "ja": "string",
-      "highlights": ["日本語ワード1", "日本語ワード2"],
+      "target": "string (${langConfig.name} translation)",
+      "highlights": ["${langConfig.name} word1", "${langConfig.name} word2"],
       "enHighlights": ["English word1", "English phrase2"]
     }
   ],
@@ -198,7 +199,7 @@ ${hasWordTimestamps ? `
     {
       "triggerTime": number,
       "duration": 3.5,
-      "category": "ビジネス英語",
+      "category": "${langConfig.categories.business}",
       "phrase": "string",
       "literal": "string",
       "nuance": "string"
@@ -210,10 +211,10 @@ ${hasWordTimestamps ? `
 ## Requirements
 - Subtitles must cover all speech segments within the clip (silence gaps will be automatically removed)
 - Each subtitle segment should be 2-4 seconds
-- \`highlights\` words must actually appear in the Japanese text; \`enHighlights\` words must actually appear in the English text
-- **hookTitle.ja must be ≤ ${LIMITS.hookTitle.ja} characters** — count each character as 1, no exceptions
-- **hookTitle.en must be ≤ ${LIMITS.hookTitle.en} characters** — keep it short and punchy
-- **Each subtitle en must be ≤ ${LIMITS.subtitle.en} characters** — use exact words spoken, split at natural pauses
+- \`highlights\` words must actually appear in the target language text; \`enHighlights\` words must actually appear in the English text
+- **hookTitle.target must be ≤ ${limits.hookTitle.target} characters** — count each character as 1, no exceptions
+- **hookTitle.en must be ≤ ${limits.hookTitle.en} characters** — keep it short and punchy
+- **Each subtitle en must be ≤ ${limits.subtitle.en} characters** — use exact words spoken, split at natural pauses
 - Return ONLY valid JSON, no markdown code blocks, no explanations
 - All timestamps are in seconds (can be floats like 1.5)
 
@@ -269,7 +270,7 @@ Now analyze and output the JSON:`;
       validateClipData(clipData);
 
       // Enforce character limits on AI-generated content
-      enforceCharacterLimits(clipData);
+      enforceCharacterLimits(clipData, targetLanguage);
 
       // Fix relative timestamps if Gemini returned them
       normalizeTimestamps(clipData);
@@ -297,40 +298,46 @@ Now analyze and output the JSON:`;
  * Enforce strict character limits on AI-generated content.
  * Limits are defined in pipeline/config.ts.
  */
-function enforceCharacterLimits(data: ClipData): void {
+function enforceCharacterLimits(data: ClipData, targetLanguage: SupportedLanguage = "ja"): void {
+  const limits = getLimits(targetLanguage);
   let truncationCount = 0;
+
+  // Resolve the target title text (target field, falling back to ja for backward compat)
+  const targetTitle = data.hookTitle.target || data.hookTitle.ja || "";
 
   // Auto-generate hookTitle highlights if Gemini returned empty array
   if (!data.hookTitle.highlights || data.hookTitle.highlights.length === 0) {
-    // Extract English words/phrases from the JA title (Latin characters)
-    const englishWords = data.hookTitle.ja.match(/[A-Za-z][A-Za-z\s]*[A-Za-z]|[A-Za-z]+/g);
+    // Extract English words/phrases from the target title (Latin characters)
+    const englishWords = targetTitle.match(/[A-Za-z][A-Za-z\s]*[A-Za-z]|[A-Za-z]+/g);
     if (englishWords && englishWords.length > 0) {
       data.hookTitle.highlights = [englishWords[0].trim()];
       console.warn(`⚠️  hookTitle.highlights was empty — auto-generated: ${JSON.stringify(data.hookTitle.highlights)}`);
     } else {
       // Fallback: highlight the first 2-4 characters (likely the key word)
-      const jaText = data.hookTitle.ja.replace(/[^\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+/gu, ' ').trim();
-      const firstWord = jaText.split(/\s+/)[0];
+      const nativeText = targetTitle.replace(/[A-Za-z0-9\s.,!?'"()]+/g, ' ').trim();
+      const firstWord = nativeText.split(/\s+/)[0];
       if (firstWord && firstWord.length >= 2) {
         data.hookTitle.highlights = [firstWord];
-        console.warn(`⚠️  hookTitle.highlights was empty — auto-generated from JA: ${JSON.stringify(data.hookTitle.highlights)}`);
+        console.warn(`⚠️  hookTitle.highlights was empty — auto-generated from target: ${JSON.stringify(data.hookTitle.highlights)}`);
       }
     }
   }
 
-  if (data.hookTitle.ja.length > LIMITS.hookTitle.ja) {
+  if (targetTitle.length > limits.hookTitle.target) {
     console.warn(
-      `⚠️  hookTitle.ja truncated: "${data.hookTitle.ja}" (${data.hookTitle.ja.length} chars) → ${LIMITS.hookTitle.ja} chars`
+      `⚠️  hookTitle.target truncated: "${targetTitle}" (${targetTitle.length} chars) → ${limits.hookTitle.target} chars`
     );
-    data.hookTitle.ja = data.hookTitle.ja.slice(0, LIMITS.hookTitle.ja);
+    const truncated = targetTitle.slice(0, limits.hookTitle.target);
+    if (data.hookTitle.target) data.hookTitle.target = truncated;
+    else if (data.hookTitle.ja) data.hookTitle.ja = truncated;
     truncationCount++;
   }
 
-  if (data.hookTitle.en.length > LIMITS.hookTitle.en) {
+  if (data.hookTitle.en.length > limits.hookTitle.en) {
     console.warn(
-      `⚠️  hookTitle.en truncated: "${data.hookTitle.en}" (${data.hookTitle.en.length} chars) → ${LIMITS.hookTitle.en} chars`
+      `⚠️  hookTitle.en truncated: "${data.hookTitle.en}" (${data.hookTitle.en.length} chars) → ${limits.hookTitle.en} chars`
     );
-    const trimmed = data.hookTitle.en.slice(0, LIMITS.hookTitle.en - 3);
+    const trimmed = data.hookTitle.en.slice(0, limits.hookTitle.en - 3);
     const lastSpace = trimmed.lastIndexOf(" ");
     data.hookTitle.en = (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed) + "...";
     truncationCount++;
@@ -338,9 +345,9 @@ function enforceCharacterLimits(data: ClipData): void {
 
   for (let i = 0; i < data.subtitles.length; i++) {
     const sub = data.subtitles[i];
-    if (sub.en.length > LIMITS.subtitle.en) {
+    if (sub.en.length > limits.subtitle.en) {
       console.warn(`⚠️  Subtitle ${i} EN truncated: "${sub.en}" (${sub.en.length} chars)`);
-      const trimmed = sub.en.slice(0, LIMITS.subtitle.en - 3);
+      const trimmed = sub.en.slice(0, limits.subtitle.en - 3);
       const lastSpace = trimmed.lastIndexOf(" ");
       sub.en = (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed) + "...";
       console.log(`    → "${sub.en}" (${sub.en.length} chars)`);
@@ -399,8 +406,8 @@ function validateClipData(data: unknown): asserts data is ClipData {
   const clip = data as Partial<ClipData>;
 
   if (!clip.videoFile) throw new Error("Missing videoFile");
-  if (!clip.hookTitle?.ja || !clip.hookTitle?.en)
-    throw new Error("Missing hookTitle");
+  if ((!clip.hookTitle?.target && !clip.hookTitle?.ja) || !clip.hookTitle?.en)
+    throw new Error("Missing hookTitle (need target or ja, and en)");
   if (typeof clip.clip?.startTime !== "number" ||
       typeof clip.clip?.endTime !== "number")
     throw new Error("Missing or invalid clip timestamps");
@@ -415,7 +422,7 @@ function validateClipData(data: unknown): asserts data is ClipData {
     if (typeof sub.startTime !== "number" ||
         typeof sub.endTime !== "number" ||
         typeof sub.en !== "string" ||
-        typeof sub.ja !== "string" ||
+        (typeof sub.target !== "string" && typeof sub.ja !== "string") ||
         !Array.isArray(sub.highlights) ||
         !Array.isArray(sub.enHighlights)) {
       throw new Error(`Invalid subtitle segment: ${JSON.stringify(sub)}`);

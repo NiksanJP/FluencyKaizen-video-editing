@@ -174,30 +174,62 @@ function switchTab(id: string) {
     wrapper.classList.toggle("active", wrapper.id === `terminal-${id}`);
   });
 
-  // Refit the now-visible terminal
+  // Refit the now-visible terminal (skip for editor tabs)
   const inst = terminals[id];
   if (inst) {
     setTimeout(() => inst.fitAddon.fit(), 50);
   }
 }
 
-// Activate (or create) Claude + Gemini tabs for a composition
+// --- Editor tab support ---
+
+const editorFrames: Record<string, HTMLIFrameElement> = {};
+
+function createEditorTab(compId: string) {
+  const editorId = `comp-${compId}-editor`;
+  const tabBar = document.getElementById("tabBar")!;
+  const termContainer = document.getElementById("terminalContainer")!;
+
+  // Create tab element
+  const tab = document.createElement("div");
+  tab.className = "tab editor";
+  tab.setAttribute("data-target", editorId);
+  tab.textContent = `${compId}\u00B7Edit`;
+  tab.addEventListener("click", () => switchTab(editorId));
+  tabBar.appendChild(tab);
+
+  // Create wrapper with iframe
+  const wrapper = document.createElement("div");
+  wrapper.className = "terminal-wrapper";
+  wrapper.id = `terminal-${editorId}`;
+  const iframe = document.createElement("iframe");
+  iframe.src = `/editor#${encodeURIComponent(compId)}`;
+  iframe.style.cssText = "width:100%; height:100%; border:none; background:#1e1e1e;";
+  wrapper.appendChild(iframe);
+  termContainer.appendChild(wrapper);
+
+  editorFrames[editorId] = iframe;
+}
+
+// Activate (or create) Editor + Claude + Gemini tabs for a composition
 (window as any).activateCompositionTabs = function(compId: string) {
+  const editorId = `comp-${compId}-editor`;
   const claudeId = `comp-${compId}-claude`;
   const geminiId = `comp-${compId}-gemini`;
 
   // Create tabs lazily on first selection
   if (!terminals[claudeId]) {
-    createTabAndTerminal(claudeId, `${compId}\u00B7C`, `/ws/claude/${compId}`, "claude");
-    createTabAndTerminal(geminiId, `${compId}\u00B7G`, `/ws/gemini/${compId}`, "gemini");
+    createEditorTab(compId);
+    createTabAndTerminal(claudeId, `${compId}\u00B7Claude`, `/ws/claude/${compId}`, "claude");
+    createTabAndTerminal(geminiId, `${compId}\u00B7Gemini`, `/ws/gemini/${compId}`, "gemini");
   }
 
-  // Switch to Claude tab for this composition
-  switchTab(claudeId);
+  // Switch to Editor tab by default
+  switchTab(editorId);
 
   // Update status bar
-  const el = document.getElementById("clipName");
-  if (el) el.textContent = `Composition: ${compId}`;
+  const statusEl = document.getElementById("clipName");
+  if (statusEl) statusEl.textContent = `Composition: ${compId}`;
 };
 
 (window as any).switchTab = switchTab;

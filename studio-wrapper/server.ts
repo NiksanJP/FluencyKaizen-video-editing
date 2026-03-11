@@ -16,7 +16,7 @@
  */
 
 import { resolve, dirname, extname } from "path";
-import { readFile, readdir } from "fs/promises";
+import { readFile, readdir, writeFile } from "fs/promises";
 import { watch } from "fs";
 import { execFileSync } from "child_process";
 
@@ -353,6 +353,56 @@ const server = Bun.serve({
           headers: { "Content-Type": "application/json" },
         });
       }
+    }
+
+    // API: read/write a single clip's data
+    const clipApiMatch = path.match(/^\/api\/clip\/(.+)$/);
+    if (clipApiMatch && req.method === "GET") {
+      const compId = decodeURIComponent(clipApiMatch[1]);
+      try {
+        const raw = await readFile(resolve(outputDir, compId, "clip.json"), "utf-8");
+        return new Response(raw, {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch {
+        return new Response("Clip not found", { status: 404 });
+      }
+    }
+
+    // API: save clip data + regenerate clip-data-all.ts for live preview
+    if (clipApiMatch && req.method === "PUT") {
+      const compId = decodeURIComponent(clipApiMatch[1]);
+      try {
+        const body = await req.text();
+        // Validate it's valid JSON
+        JSON.parse(body);
+        const clipPath = resolve(outputDir, compId, "clip.json");
+        await writeFile(clipPath, body);
+
+        // Regenerate clip-data-all.ts so Remotion preview updates
+        try {
+          const regen = Bun.spawn(["bun", resolve(projectRoot, "remotion/watch-clip.ts")], {
+            cwd: projectRoot,
+            stdio: ["ignore", "ignore", "ignore"],
+          });
+        } catch {}
+
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(err.message || "Failed to save", { status: 400 });
+      }
+    }
+
+    // Serve editor.html
+    if (path === "/editor" || path === "/editor/") {
+      try {
+        const content = await readFile(resolve(__dir, "editor.html"));
+        return new Response(content, {
+          headers: { "Content-Type": "text/html" },
+        });
+      } catch {}
     }
 
     // Serve bundled terminal.js

@@ -3,7 +3,7 @@ import { staticFile, useCurrentFrame } from "remotion";
 import styleConfig from "../../../style.json";
 
 interface HookTitleProps {
-  title: { ja: string; en: string; highlights?: string[] };
+  title: { ja?: string; target?: string; en: string; highlights?: string[] };
 }
 
 /**
@@ -96,7 +96,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
           }}
         >
           <TitleWithHighlights
-            text={title.ja}
+            text={title.target || title.ja || ""}
             highlights={highlights}
             highlightColor={s.highlightColor}
           />

@@ -94,6 +94,7 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
         <BilingualCaption
           subtitles={clipData.subtitles}
           clipStart={clipData.clip.startTime}
+          targetLanguage={clipData.targetLanguage}
           onCaptionBottom={handleCaptionBottom}
         />
       </Sequence>

@@ -109,6 +109,10 @@ html, body {
   border-bottom-color: #8ab4f8;
 }
 
+.tab.active.editor {
+  border-bottom-color: #6a9955;
+}
+
 /* Terminal containers */
 .terminal-container {
   flex: 1;

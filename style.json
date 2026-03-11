@@ -33,9 +33,22 @@
       "color": "#ffffff",
       "textShadow": "3px 3px 6px rgba(0,0,0,0.9)"
     },
+    "target": {
+      "fontFamily": "sans-serif",
+      "fontSize": 48,
+      "fontWeight": "600",
+      "color": "#ffffff",
+      "textShadow": "3px 3px 6px rgba(0,0,0,0.9)"
+    },
     "top": 1280,
     "marginX": "15%",
     "gap": 6
+  },
+  "fontOverrides": {
+    "ja": { "fontFamily": "sans-serif" },
+    "zh": { "fontFamily": "sans-serif" },
+    "ko": { "fontFamily": "sans-serif" },
+    "es": { "fontFamily": "sans-serif" }
   },
   "highlight": {
     "color": "#FFD700",

@@ -180,6 +180,52 @@
       height: 18px;
     }
 
+    .lang-select {
+      background: #1e1e1e;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    .lang-select:hover {
+      border-color: #555;
+    }
+
+    .lang-select:focus {
+      border-color: #fff;
+    }
+
+    .import-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-badge {
+      display: inline-block;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px;
+      color: #888;
+      font-weight: 500;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
     /* Pipeline progress overlay */
     .pipeline-overlay {
       display: none;
@@ -316,14 +362,22 @@
         <h1>Compositions</h1>
         <p>Select a composition to open in the studio</p>
       </div>
-      <button class="import-btn" id="import-btn" onclick="importVideo()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        Import Video
-      </button>
+      <div class="import-group">
+        <select class="lang-select" id="lang-select">
+          <option value="ja">🇯🇵 日本語 (Japanese)</option>
+          <option value="zh">🇨🇳 中文 (Chinese)</option>
+          <option value="ko">🇰🇷 한국어 (Korean)</option>
+          <option value="es">🇪🇸 Español (Spanish)</option>
+        </select>
+        <button class="import-btn" id="import-btn" onclick="importVideo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Import Video
+        </button>
+      </div>
     </div>
     <div id="content">
       <div class="loading">Loading compositions...</div>
@@ -391,12 +445,21 @@
         meta.appendChild(el("span", { textContent: comp.subtitleCount + " subtitles" }));
         meta.appendChild(el("span", { textContent: comp.vocabCount + " vocab cards" }));
 
+        const titleTarget = comp.hookTitle.target || comp.hookTitle.ja || comp.id;
+
+        const badgeRow = el("div", { style: "display:flex;align-items:center;gap:8px;margin-bottom:12px;" }, [
+          el("div", { className: "badge", textContent: comp.id, style: "margin-bottom:0;" }),
+        ]);
+        if (comp.targetLanguage) {
+          badgeRow.appendChild(el("span", { className: "lang-badge", textContent: comp.targetLanguage }));
+        }
+
         const card = el("div", {
           className: "card",
           onClick: () => window.studio.openComposition(comp.id),
         }, [
-          el("div", { className: "badge", textContent: comp.id }),
-          el("div", { className: "card-title-ja", textContent: comp.hookTitle.ja || comp.id }),
+          badgeRow,
+          el("div", { className: "card-title-ja", textContent: titleTarget }),
           el("div", { className: "card-title-en", textContent: comp.hookTitle.en || "" }),
           meta,
         ]);
@@ -418,7 +481,8 @@
       btn.disabled = true;
       pipelineRunning = true;
 
-      const result = await window.studio.importVideo();
+      const lang = document.getElementById("lang-select").value;
+      const result = await window.studio.importVideo(lang);
 
       if (result.canceled) {
         btn.disabled = false;
