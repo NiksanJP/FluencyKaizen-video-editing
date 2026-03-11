@@ -9,6 +9,7 @@ export interface ClipData {
   hookTitle: {
     ja: string;
     en: string;
+    highlights?: string[];  // words/phrases to highlight yellow in the ja title
   };
   clip: {
     startTime: number;

@@ -3,8 +3,44 @@ import { staticFile, useCurrentFrame } from "remotion";
 import styleConfig from "../../../style.json";
 
 interface HookTitleProps {
-  title: { ja: string; en: string };
+  title: { ja: string; en: string; highlights?: string[] };
 }
+
+/**
+ * Render title text with highlighted words in yellow, rest in white.
+ * Same approach as HighlightedText but for the hook title.
+ */
+const TitleWithHighlights: React.FC<{
+  text: string;
+  highlights: string[];
+  highlightColor: string;
+}> = ({ text, highlights, highlightColor }) => {
+  if (!highlights.length) return <>{text}</>;
+
+  const sorted = [...highlights].sort((a, b) => b.length - a.length);
+  const pattern = sorted
+    .map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|");
+  const regex = new RegExp(`(${pattern})`, "gi");
+  const parts = text.split(regex);
+
+  return (
+    <>
+      {parts.map((part, idx) => {
+        const isHighlighted = sorted.some(
+          (h) => h.toLowerCase() === part.toLowerCase()
+        );
+        return isHighlighted ? (
+          <span key={idx} style={{ color: highlightColor }}>
+            {part}
+          </span>
+        ) : (
+          <span key={idx}>{part}</span>
+        );
+      })}
+    </>
+  );
+};
 
 export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
   if (!title) return null;
@@ -13,6 +49,8 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
 
   // One full rotation per 4 seconds (4 * 30fps = 120 frames)
   const logoRotation = (frame / 120) * 360;
+
+  const highlights = title.highlights ?? [];
 
   return (
     <div
@@ -57,7 +95,11 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             overflowWrap: "break-word",
           }}
         >
-          {title.ja}
+          <TitleWithHighlights
+            text={title.ja}
+            highlights={highlights}
+            highlightColor={s.highlightColor}
+          />
         </div>
       </div>
 

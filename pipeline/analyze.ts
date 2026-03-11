@@ -25,8 +25,12 @@ export async function analyzeWithGemini(
             properties: {
               ja: { type: SchemaType.STRING },
               en: { type: SchemaType.STRING },
+              highlights: {
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.STRING },
+              },
             },
-            required: ["ja", "en"],
+            required: ["ja", "en", "highlights"],
           },
           clip: {
             type: SchemaType.OBJECT,
@@ -155,6 +159,14 @@ ${hasWordTimestamps ? `
    **EN title format**: The phrase + benefit or meaning hint
    - Good: "Park This = 後回し？🤔" (18 chars ✓), "Loop You In 🔥" (14 chars ✓)
 
+   ⚠️ **highlights** (REQUIRED — MUST NOT be empty): Pick 1-2 key words/phrases from the JA title to highlight in yellow (the rest renders white). These must be exact substrings of hookTitle.ja.
+   - ALWAYS highlight the English keyword that appears in the JA title — this is the most eye-catching part
+   - Optionally also highlight a key Japanese word for extra visual pop
+   - Example: "💼ビジネス英語でParkの使い方" → highlights: ["Park"]
+   - Example: "🔥Pushbackって何？" → highlights: ["Pushback"]
+   - Example: "🎯英語でCircle backの意味" → highlights: ["Circle back", "意味"]
+   - ❌ NEVER return an empty highlights array — the title MUST have at least 1 highlighted word
+
    ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting (emojis count as 1):
    - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total.
    - English: ≤ ${LIMITS.hookTitle.en} characters, max 6 words
@@ -165,7 +177,8 @@ ${hasWordTimestamps ? `
   "videoFile": "${videoFileName}",
   "hookTitle": {
     "ja": "string",
-    "en": "string"
+    "en": "string",
+    "highlights": ["キーワード1", "キーワード2"]
   },
   "clip": {
     "startTime": number,
@@ -286,6 +299,24 @@ Now analyze and output the JSON:`;
  */
 function enforceCharacterLimits(data: ClipData): void {
   let truncationCount = 0;
+
+  // Auto-generate hookTitle highlights if Gemini returned empty array
+  if (!data.hookTitle.highlights || data.hookTitle.highlights.length === 0) {
+    // Extract English words/phrases from the JA title (Latin characters)
+    const englishWords = data.hookTitle.ja.match(/[A-Za-z][A-Za-z\s]*[A-Za-z]|[A-Za-z]+/g);
+    if (englishWords && englishWords.length > 0) {
+      data.hookTitle.highlights = [englishWords[0].trim()];
+      console.warn(`⚠️  hookTitle.highlights was empty — auto-generated: ${JSON.stringify(data.hookTitle.highlights)}`);
+    } else {
+      // Fallback: highlight the first 2-4 characters (likely the key word)
+      const jaText = data.hookTitle.ja.replace(/[^\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+/gu, ' ').trim();
+      const firstWord = jaText.split(/\s+/)[0];
+      if (firstWord && firstWord.length >= 2) {
+        data.hookTitle.highlights = [firstWord];
+        console.warn(`⚠️  hookTitle.highlights was empty — auto-generated from JA: ${JSON.stringify(data.hookTitle.highlights)}`);
+      }
+    }
+  }
 
   if (data.hookTitle.ja.length > LIMITS.hookTitle.ja) {
     console.warn(

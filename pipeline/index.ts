@@ -9,13 +9,19 @@
 
 import { existsSync, readdirSync } from "fs";
 import { execSync } from "child_process";
-import { writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { join, basename, extname, resolve, dirname } from "path";
 import { copyFileSync } from "fs";
 import { transcribe } from "./transcribe.js";
 import { analyzeWithGemini } from "./analyze.js";
 import { removeSilence } from "./silence.js";
 import { generateClipTsx } from "./generate-tsx.js";
+import {
+  readCache, writeCache,
+  isTranscriptionCached, isAnalysisCached,
+  updateTranscriptionCache, updateAnalysisCache,
+} from "./cache.js";
+import type { WhisperResult, ClipData } from "./types.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 
@@ -47,14 +53,16 @@ function resolveInput(arg: string): string {
 
 async function main() {
   const args = process.argv.slice(2);
+  const forceFlag = args.includes("--force");
+  const positionalArgs = args.filter((a) => a !== "--force");
 
-  if (args.length === 0) {
-    console.error("Usage: bun process <video-name>");
+  if (positionalArgs.length === 0) {
+    console.error("Usage: bun process <video-name> [--force]");
     console.error("Example: bun process video_001");
     process.exit(1);
   }
 
-  const fullInputPath = resolveInput(args[0]);
+  const fullInputPath = resolveInput(positionalArgs[0]);
 
   // Validate input file
   if (!existsSync(fullInputPath)) {
@@ -98,8 +106,20 @@ async function main() {
       }
     }
 
+    // Load pipeline cache
+    const cache = await readCache(outputDir);
+
     // Step 1: Transcribe
-    const transcript = await transcribe(inputForTranscribe, outputDir);
+    let transcript: WhisperResult;
+    if (!forceFlag && isTranscriptionCached(inputForTranscribe, outputDir, cache)) {
+      console.log(`⏩ Using cached transcription (video unchanged)`);
+      const raw = await readFile(join(outputDir, "audio.json"), "utf-8");
+      transcript = JSON.parse(raw);
+    } else {
+      transcript = await transcribe(inputForTranscribe, outputDir);
+      updateTranscriptionCache(inputForTranscribe, cache);
+      await writeCache(outputDir, cache);
+    }
 
     // Step 2: Get video duration via ffprobe
     let videoDuration: number;
@@ -111,14 +131,23 @@ async function main() {
       videoDuration = parseFloat(JSON.parse(probe).format.duration);
       console.log(`📏 Video duration: ${videoDuration.toFixed(1)}s`);
     } catch {
-      // Fallback: use last transcript segment end time
       const lastSeg = transcript.segments[transcript.segments.length - 1];
       videoDuration = lastSeg?.end || 60;
       console.warn(`⚠️  ffprobe failed, using transcript duration: ${videoDuration.toFixed(1)}s`);
     }
 
-    // Step 3: Analyze with Ollama
-    const clipData = await analyzeWithGemini(transcript, videoFileName);
+    // Step 3: Analyze with Gemini
+    let clipData: ClipData;
+    if (!forceFlag && await isAnalysisCached(outputDir, cache, projectRoot)) {
+      console.log(`⏩ Using cached analysis (transcript & prompt unchanged)`);
+      const raw = await readFile(join(outputDir, "clip.json"), "utf-8");
+      clipData = JSON.parse(raw);
+    } else {
+      clipData = await analyzeWithGemini(transcript, videoFileName);
+      clipData.videoDuration = videoDuration;
+      await updateAnalysisCache(outputDir, projectRoot, cache);
+      await writeCache(outputDir, cache);
+    }
     clipData.videoDuration = videoDuration;
 
     // Step 4: Remove silence (jump-cut editing)
