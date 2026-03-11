@@ -141,16 +141,23 @@ ${hasWordTimestamps ? `
 
    ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words Japanese learners already know (e.g. "meeting", "schedule", "team")
 
-4. **Hook Title**: Create a catchy 1-line title in both EN and JA:
-   - Use 1-2 relevant emojis to make it visually engaging (e.g. 📊💼🎯🔥✅🗣️)
-   - Make it feel like a YouTube Shorts thumbnail — exciting, curiosity-inducing
+4. **Hook Title**: Create a catchy EDUCATIONAL title that teaches Japanese learners a specific English phrase from the clip.
+   - The title MUST feature the key English word/phrase — this is the learning hook
+   - Japanese learners should see it and think "How do you use that in English?"
+   - Use 1-2 relevant emojis (e.g. 📊💼🎯🔥✅🗣️)
+
+   **JA title format**: Mix Japanese context + English keyword. Frame it as "how to use [English word] in business English".
+   - Pattern: ビジネス英語で[English word]の使い方 + emoji
+   - Good: "💼ビジネス英語でParkの使い方" (15 chars ✓), "🎯英語でCircle backの意味" (15 chars ✓), "🔥Pushbackって何？" (12 chars ✓)
+   - Bad: "ビジネス英語の重要フレーズ" (no English word = not educational ✗)
+   - Bad: '🎯"parking"って？' (too vague, doesn't say it's for learning English ✗)
+
+   **EN title format**: The phrase + benefit or meaning hint
+   - Good: "Park This = 後回し？🤔" (18 chars ✓), "Loop You In 🔥" (14 chars ✓)
+
    ⚠️ CRITICAL CHARACTER LIMITS — count characters before outputting (emojis count as 1):
-   - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total. Count each character (kanji, kana, punctuation, emoji) as 1.
-     Good: "📊英語で交渉術" (7 chars ✓), "🎯会議の表現" (6 chars ✓)
-     Bad: "ビジネス英語の重要フレーズ" (13 chars ✗ — TOO LONG)
-   - English: ≤ ${LIMITS.hookTitle.en} characters, benefit-focused, max 6 words
-     Good: "Negotiate Like a Native 🔥" (25 chars ✓)
-     Bad: "Essential Business Phrases You Need to Know Today" (50 chars ✗ — TOO LONG)
+   - Japanese: STRICTLY ≤ ${LIMITS.hookTitle.ja} characters total.
+   - English: ≤ ${LIMITS.hookTitle.en} characters, max 6 words
 
 ## Output Schema (MUST be valid JSON)
 \`\`\`json

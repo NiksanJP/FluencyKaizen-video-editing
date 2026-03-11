@@ -1,5 +1,5 @@
 import React from "react";
-import { staticFile } from "remotion";
+import { staticFile, useCurrentFrame } from "remotion";
 import styleConfig from "../../../style.json";
 
 interface HookTitleProps {
@@ -9,6 +9,10 @@ interface HookTitleProps {
 export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
   if (!title) return null;
   const s = styleConfig.hookTitle;
+  const frame = useCurrentFrame();
+
+  // One full rotation per 4 seconds (4 * 30fps = 120 frames)
+  const logoRotation = (frame / 120) * 360;
 
   return (
     <div
@@ -37,6 +41,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
           paddingRight: s.paddingX,
           textAlign: "center",
           maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         <div
@@ -47,9 +52,9 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             fontWeight: s.fontWeight,
             textAlign: "center",
             lineHeight: s.lineHeight,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            overflowWrap: "break-word",
           }}
         >
           {title.ja}
@@ -88,6 +93,7 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
             height: s.logoHeight,
             width: "auto",
             objectFit: "contain",
+            transform: `rotate(${logoRotation}deg)`,
           }}
         />
         <span
@@ -101,6 +107,20 @@ export const HookTitle: React.FC<HookTitleProps> = ({ title }) => {
         >
           Fluency <span style={{ color: "#FFD700" }}>改善</span>
         </span>
+      </div>
+
+      {/* Website URL */}
+      <div
+        style={{
+          fontFamily: s.fontFamily,
+          fontSize: s.urlFontSize,
+          color: "rgba(255,255,255,0.7)",
+          fontWeight: "500",
+          letterSpacing: 1.5,
+          marginTop: 2,
+        }}
+      >
+        fluencykaizen.com
       </div>
     </div>
   );
