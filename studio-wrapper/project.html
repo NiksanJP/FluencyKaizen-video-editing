@@ -345,6 +345,10 @@
       return node;
     }
 
+    function toRemotionCompositionId(value) {
+      return String(value || "").replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
+    }
+
     function getLanguageLabel(comp) {
       if (!comp) return "Unknown";
       if (comp.languageName && comp.languageNativeName) {
@@ -455,7 +459,7 @@
 
         grid.appendChild(el("a", {
           className: "card" + (isProcessing ? " card-processing" : ""),
-          href: "/app/studio#" + encodeURIComponent(comp.id)
+          href: "/_studio/" + encodeURIComponent(toRemotionCompositionId(comp.id))
         }, children));
       }
 

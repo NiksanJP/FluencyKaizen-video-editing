@@ -1,6 +1,6 @@
 import type {SetStateAction} from 'react';
 import React, {useCallback, useMemo, useState} from 'react';
-import {BACKGROUND} from '../helpers/colors';
+import {BACKGROUND, getBackgroundFromHoverState, LIGHT_TEXT} from '../helpers/colors';
 import {useMobileLayout} from '../helpers/mobile-layout';
 import {useMenuStructure} from '../helpers/use-menu-structure';
 import {Row, Spacing} from './layout';
@@ -9,6 +9,49 @@ import {MenuItem} from './Menu/MenuItem';
 import {MenuBuildIndicator} from './MenuBuildIndicator';
 import {SidebarCollapserControls} from './SidebarCollapserControls';
 import {UpdateCheck} from './UpdateCheck';
+
+const BackToHomeButton: React.FC<{readonly onClick: () => void}> = ({onClick}) => {
+	const [hovered, setHovered] = useState(false);
+	const btnStyle: React.CSSProperties = useMemo(
+		() => ({
+			display: 'inline-flex',
+			alignItems: 'center',
+			gap: 6,
+			padding: '4px 10px',
+			marginRight: 4,
+			background: getBackgroundFromHoverState({hovered, selected: false}),
+			border: '1px solid rgba(255,255,255,0.15)',
+			borderRadius: 4,
+			color: hovered ? 'white' : LIGHT_TEXT,
+			fontSize: 12,
+			fontFamily: 'inherit',
+			cursor: 'pointer',
+			transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+			whiteSpace: 'nowrap' as const,
+			flexShrink: 0,
+		}),
+		[hovered],
+	);
+	return (
+		<button
+			type="button"
+			id="fk-back-home"
+			title="Back to Home"
+			style={btnStyle}
+			onClick={onClick}
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+		>
+			<svg
+				viewBox="0 0 24 24"
+				style={{width: 14, height: 14, fill: 'currentColor'}}
+			>
+				<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+			</svg>
+			Home
+		</button>
+	);
+};
 
 const row: React.CSSProperties = {
 	alignItems: 'center',
@@ -113,9 +156,21 @@ export const MenuToolbar: React.FC<{
 		setSelected(null);
 	}, [setSelected]);
 
+	const goBackToProjects = useCallback(() => {
+		if (typeof window !== 'undefined' && (window as Window & {studio?: {goBack?: () => void}}).studio?.goBack) {
+			(window as Window & {studio: {goBack: () => void}}).studio.goBack();
+		} else if (typeof window !== 'undefined' && window.parent !== window) {
+			window.parent.postMessage({type: 'go-home'}, '*');
+		} else if (typeof window !== 'undefined') {
+			window.location.href = '/';
+		}
+	}, []);
+
 	return (
 		<Row align="center" className="css-reset" style={row}>
 			<div style={fixedWidthLeft}>
+				<BackToHomeButton onClick={goBackToProjects} />
+				<Spacing x={1} />
 				{structure.map((s) => {
 					return (
 						<MenuItem

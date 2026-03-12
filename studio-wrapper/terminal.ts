@@ -17,6 +17,42 @@ const terminals: Record<string, TerminalInstance> = {};
 const toRemotionCompositionId = (id: string) =>
   id.replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
 let activeTabId: string | null = null;
+let knownClipIds: string[] = [];
+
+function getCompositionIdFromStudioPathname(pathname: string): string | null {
+  const decodeSafely = (value: string) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
+  const prefixed = pathname.match(/^\/_studio\/([^/?#]+)/);
+  if (prefixed?.[1]) {
+    return decodeSafely(prefixed[1]);
+  }
+
+  const direct = pathname.match(/^\/([^/?#]+)/);
+  if (!direct?.[1]) return null;
+  const first = decodeSafely(direct[1]);
+  const ignore = new Set(["_studio", "assets", "outputs", "render", "bundle", "app", "api", "ws", "editor"]);
+  if (ignore.has(first)) return null;
+
+  try {
+    return first;
+  } catch {
+    return null;
+  }
+}
+
+function resolveClipId(raw: string | null): string | null {
+  if (!raw || knownClipIds.length === 0) return raw;
+  if (knownClipIds.includes(raw)) return raw;
+  const normalizedRaw = toRemotionCompositionId(raw);
+  const mapped = knownClipIds.find((id) => toRemotionCompositionId(id) === normalizedRaw);
+  return mapped || null;
+}
 
 const RECONNECT_BASE_DELAY = 1000;   // 1s initial
 const RECONNECT_MAX_DELAY = 15000;   // 15s cap
@@ -267,26 +303,34 @@ fetch("/api/clips")
   .then((clips: Array<{ id: string } | string>) => {
     // Normalize: /api/clips returns objects with { id, hookTitle, ... }
     const clipIds = clips.map((c) => (typeof c === "string" ? c : c.id));
+    knownClipIds = clipIds;
 
     const el = document.getElementById("clipName");
     if (el) el.textContent = `${clipIds.length} clip(s) available`;
 
-    // Check URL hash for a specific composition (set by Electron project page)
+    // Prefer current /_studio/:composition route, then URL hash, then first clip.
+    const pathCompRaw = getCompositionIdFromStudioPathname(location.pathname);
+    const pathComp = resolveClipId(pathCompRaw);
     const hashComp = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-    const targetComp = hashComp
+    const hashMapped = hashComp
       ? (clipIds.includes(hashComp)
         ? hashComp
         : clipIds.find((id) => toRemotionCompositionId(id) === hashComp))
-      : clipIds[0];
+      : null;
+    const targetComp = pathComp || hashMapped || clipIds[0];
 
     if (targetComp) {
       (window as any).activateCompositionTabs(targetComp);
-
-      // Also navigate the Remotion iframe to this composition
-      const frame = document.getElementById("studioFrame") as HTMLIFrameElement | null;
-      if (frame) {
-        frame.src = `/${encodeURIComponent(toRemotionCompositionId(targetComp))}`;
-      }
     }
+
+    // Keep assistant tabs synced with in-app composition navigation in Studio.
+    let lastComp = targetComp || null;
+    setInterval(() => {
+      const currentRaw = getCompositionIdFromStudioPathname(location.pathname);
+      const current = resolveClipId(currentRaw);
+      if (!current || current === lastComp) return;
+      lastComp = current;
+      (window as any).activateCompositionTabs(current);
+    }, 500);
   })
   .catch(() => {});

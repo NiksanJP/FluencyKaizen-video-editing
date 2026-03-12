@@ -3,233 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FluencyKaizen Studio</title>
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/node_modules/@xterm/xterm/css/xterm.css">
+  <title>Opening Remotion Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0f1115;
+      color: #d7dbe3;
+    }
+    .card {
+      max-width: 520px;
+      width: calc(100% - 48px);
+      background: #171a21;
+      border: 1px solid #2a3140;
+      border-radius: 10px;
+      padding: 22px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #f5f7fa;
+    }
+    p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      color: #aeb8cb;
+    }
+    a {
+      color: #72b7ff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Left: Remotion Studio -->
-    <div class="preview-panel" id="previewPanel">
-      <div class="loading-overlay" id="loadingOverlay">Loading Remotion Studio...</div>
-      <iframe id="studioFrame" src="/_studio"></iframe>
-    </div>
-
-    <!-- Draggable splitter -->
-    <div class="splitter" id="splitter"></div>
-
-    <!-- Right: AI Terminals -->
-    <div class="terminal-panel" id="terminalPanel">
-      <div class="tab-bar" id="tabBar">
-        <!-- Tabs are created dynamically per composition -->
-      </div>
-      <div class="terminal-container" id="terminalContainer">
-        <!-- Terminal wrappers are created dynamically -->
-      </div>
-      <div class="status-bar">
-        <span>FluencyKaizen Studio</span>
-        <span class="clip-name" id="clipName"></span>
-      </div>
-    </div>
+  <div class="card">
+    <h1>Opening Remotion Studio...</h1>
+    <p id="status">Redirecting to direct Studio view (no iframe).</p>
+    <p style="margin-top:10px">
+      If redirect does not happen, <a id="fallback" href="/_studio">open Studio</a>.
+    </p>
   </div>
 
-  <script type="module" src="/terminal.js"></script>
   <script>
-    // Hide loading overlay when iframe loads
-    // Studio customizations (hide Compositions, Back to Home) are injected by server.ts proxy
-    const frame = document.getElementById('studioFrame');
-    const overlay = document.getElementById('loadingOverlay');
-    frame.addEventListener('load', () => {
-      overlay.classList.add('hidden');
-    });
-
-    // Listen for "go-home" message from Remotion iframe
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'go-home') {
-        if (window.studio && typeof window.studio.goBack === 'function') {
-          // Electron mode: navigate back to project page
-          window.studio.goBack();
-        } else {
-          // Browser mode: navigate to the project picker
-          window.location.href = '/';
-        }
-      }
-    });
-
-    function getCompositionIdFromStudioHref(href) {
-      try {
-        const url = new URL(href);
-        const decodeSafely = (value) => {
-          try {
-            return decodeURIComponent(value);
-          } catch {
-            return value;
-          }
-        };
-
-        const fromRoute = (route) => {
-          if (!route) return null;
-          const pathOnly = decodeSafely(route).split(/[?#]/)[0];
-          const segments = pathOnly.split('/').filter(Boolean);
-          if (segments.length === 0) return null;
-          if (segments[0] === 'assets' || segments[0] === 'outputs') return null;
-          if (segments[0] === 'compositions') return decodeSafely(segments[1] || '') || null; // legacy path style
-          return decodeSafely(segments[segments.length - 1] || '') || null; // Remotion v4 SPA style: /<compositionId>
-        };
-
-        const pathRoute = url.pathname;
-        const queryRoute = url.search.startsWith('?') ? url.search.slice(1) : '';
-        const hashRoute = url.hash.startsWith('#') ? url.hash.slice(1) : '';
-
-        return fromRoute(pathRoute) || fromRoute(queryRoute) || fromRoute(hashRoute);
-      } catch {
-        return null;
-      }
+    function toRemotionCompositionId(value) {
+      return String(value || "").replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
     }
 
-    // Poll iframe URL for composition changes
-    const IGNORE_IDS = new Set(['blank', 'assets', 'outputs', 'render', 'bundle', '_studio']);
-    let lastCompId = null;
-    let knownClips = null;
-    fetch('/api/clips').then(r => r.json()).then(clips => {
-      knownClips = new Set(clips.map(c => typeof c === 'string' ? c : c.id));
-    }).catch(() => {});
+    var hashComp = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+    var compId = toRemotionCompositionId(hashComp);
+    var target = compId ? ("/_studio/" + encodeURIComponent(compId)) : "/_studio";
 
-    function getDesiredCompositionId() {
-      const hash = window.location.hash.startsWith('#')
-        ? window.location.hash.slice(1)
-        : '';
-      return hash ? decodeURIComponent(hash) : '';
-    }
+    var fallback = document.getElementById("fallback");
+    if (fallback) fallback.href = target;
 
-    let desiredCompositionId = getDesiredCompositionId();
-
-    function getStudioUrlForComposition(compId) {
-      return compId ? `/_studio/${encodeURIComponent(compId)}` : '/_studio';
-    }
-
-    function syncFrameToDesiredComposition(force) {
-      desiredCompositionId = getDesiredCompositionId();
-      if (!desiredCompositionId) {
-        if (force) {
-          frame.src = '/_studio';
-        }
-        return;
-      }
-
-      try {
-        const currentHref = frame.contentWindow.location.href;
-        const currentCompId = getCompositionIdFromStudioHref(currentHref);
-        if (force || currentCompId !== desiredCompositionId) {
-          frame.contentWindow.location.replace(getStudioUrlForComposition(desiredCompositionId));
-        }
-      } catch {
-        if (force || !frame.src.endsWith(`/${encodeURIComponent(desiredCompositionId)}`)) {
-          frame.src = getStudioUrlForComposition(desiredCompositionId);
-        }
-      }
-    }
-
-    syncFrameToDesiredComposition(true);
-    window.addEventListener('hashchange', () => syncFrameToDesiredComposition(true));
-
-    setInterval(() => {
-      try {
-        const href = frame.contentWindow.location.href;
-        const compId = getCompositionIdFromStudioHref(href);
-        if (compId && compId !== lastCompId && !IGNORE_IDS.has(compId)) {
-          // Only activate if it matches a known clip (when list is available)
-          if (knownClips && !knownClips.has(compId)) return;
-          lastCompId = compId;
-          if (window.location.hash !== `#${encodeURIComponent(compId)}`) {
-            history.replaceState(null, '', `#${encodeURIComponent(compId)}`);
-          }
-          if (window.activateCompositionTabs) {
-            window.activateCompositionTabs(compId);
-          }
-        }
-        if (desiredCompositionId && compId !== desiredCompositionId) {
-          syncFrameToDesiredComposition(false);
-        }
-      } catch(e) {
-        // cross-origin or not loaded yet
-      }
-    }, 500);
-
-    // Auto-reload composition when clip-data-all.ts changes
-    (function() {
-      let reloadInFlight = false;
-
-      function connectEventsWs() {
-        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${protocol}//${location.host}/ws/events`);
-
-        ws.addEventListener('message', (event) => {
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.type !== 'clip-data-updated' || reloadInFlight) return;
-
-            let compositionPath = null;
-            let compositionId = null;
-            try {
-              const href = frame.contentWindow.location.href;
-              compositionId = getCompositionIdFromStudioHref(href);
-              const url = new URL(href);
-              compositionPath = url.pathname + url.search + url.hash;
-            } catch { return; }
-
-            if (!compositionPath || !compositionId) return;
-
-            reloadInFlight = true;
-            setTimeout(() => {
-              try {
-                frame.contentWindow.location.href = compositionPath;
-              } catch {
-                frame.src = frame.src;
-              }
-              setTimeout(() => { reloadInFlight = false; }, 2000);
-            }, 300);
-          } catch {}
-        });
-
-        ws.addEventListener('close', () => {
-          setTimeout(connectEventsWs, 2000);
-        });
-        ws.addEventListener('error', () => {});
-      }
-
-      connectEventsWs();
-    })();
-
-    // Draggable splitter
-    const splitter = document.getElementById('splitter');
-    const previewPanel = document.getElementById('previewPanel');
-    const container = document.querySelector('.container');
-    let isDragging = false;
-
-    splitter.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      splitter.classList.add('dragging');
-      document.body.style.cursor = 'col-resize';
-      frame.style.pointerEvents = 'none';
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const pct = (e.clientX / container.offsetWidth) * 100;
-      const clamped = Math.max(30, Math.min(80, pct));
-      previewPanel.style.flex = `0 0 ${clamped}%`;
-      window.dispatchEvent(new Event('resize'));
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      splitter.classList.remove('dragging');
-      document.body.style.cursor = '';
-      frame.style.pointerEvents = '';
-    });
+    location.replace(target);
   </script>
 </body>
 </html>

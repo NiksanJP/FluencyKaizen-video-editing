@@ -1,7 +1,7 @@
 /**
  * Custom Remotion Studio preview entry.
  * Imports the original studio and applies FluencyKaizen customizations:
- * - Force Assets tab in sidebar (hide Compositions)
+ * - Compositions tab removed at source (ExplorerPanel.tsx in remotion-upstream)
  * - Add "Back to Home" button in menubar
  */
 // Use relative path (remotion/studio-overrides -> remotion -> root/node_modules)
@@ -9,39 +9,11 @@ import "../../node_modules/@remotion/studio/dist/esm/previewEntry.mjs";
 
 // Apply customizations after the studio has loaded
 function applyFluencyKaizenCustomizations() {
-  // Force assets tab in sidebar (same as original DOM injection)
-  localStorage.setItem("remotion.sidebarPanel", "assets");
-
   let backBtnInjected = false;
 
-  const hideCompositionsTab = () => {
-    const btns = document.querySelectorAll('.css-reset div[role="button"]');
-    let compositionsHidden = false;
-    let assetsBtn: HTMLElement | null = null;
-
-    for (let i = 0; i < btns.length; i++) {
-      const btn = btns[i] as HTMLElement;
-      const label = btn.textContent?.trim();
-      if (label === "Compositions") {
-        btn.style.display = "none";
-        compositionsHidden = true;
-      } else if (label === "Assets") {
-        assetsBtn = btn;
-      }
-    }
-
-    if (assetsBtn && localStorage.getItem("remotion.sidebarPanel") !== "assets") {
-      assetsBtn.click();
-    }
-    localStorage.setItem("remotion.sidebarPanel", "assets");
-    return compositionsHidden;
-  };
-
   const observer = new MutationObserver(() => {
-    hideCompositionsTab();
-
-    // Inject "Back to Home" button into the top menubar
-    if (!backBtnInjected) {
+    // Inject "Back to Home" button into the top menubar (skip if already in DOM from MenuToolbar)
+    if (!backBtnInjected && !document.getElementById("fk-back-home")) {
       let menubar =
         document.querySelector("[role='menubar']") ||
         document.querySelector(".css-reset > div > div > div");
@@ -110,7 +82,13 @@ function applyFluencyKaizenCustomizations() {
         btn.appendChild(document.createTextNode(" Home"));
 
         btn.addEventListener("click", () => {
-          window.parent.postMessage({ type: "go-home" }, "*");
+          if ((window as any).studio?.goBack) {
+            (window as any).studio.goBack();
+          } else if (window.parent !== window) {
+            window.parent.postMessage({ type: "go-home" }, "*");
+          } else {
+            window.location.href = "/";
+          }
         });
 
         menubar.insertBefore(btn, menubar.firstChild);

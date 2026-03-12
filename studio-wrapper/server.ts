@@ -7,7 +7,7 @@
  *
  * Routes:
  *   GET /              → project picker (home)
- *   GET /app/studio    → split-pane studio wrapper
+ *   GET /app/studio    → direct Studio redirect helper (no iframe)
  *   GET /_studio/*     → Remotion Studio proxy namespace
  *   GET /styles.css    → styles.css
  *   GET /terminal.js   → bundled terminal.ts
@@ -884,7 +884,7 @@ const server = Bun.serve({
 
     // Serve wrapper's own static files
     // / and /app → project picker (browser landing page)
-    // /app/studio → studio split-pane view
+    // /app/studio → direct Studio redirect helper page
     if (path === "/" || path === "/app" || path.startsWith("/app/")) {
       let relative: string;
       if (path === "/" || path === "/app" || path === "/app/") {
@@ -947,7 +947,8 @@ const server = Bun.serve({
       const contentType = proxyRes.headers.get("content-type") || "";
       if (contentType.includes("text/html")) {
         let html = await proxyRes.text();
-        const injection = `<style>
+        const injection = `<link rel="stylesheet" href="/node_modules/@xterm/xterm/css/xterm.css">
+        <style>
           #fk-back-home {
             display: inline-flex;
             align-items: center;
@@ -975,35 +976,93 @@ const server = Bun.serve({
             height: 14px;
             fill: currentColor;
           }
+
+          :root { --fk-assistant-panel-width: 400px; }
+          html, body { height: 100%; margin: 0; overflow: hidden; box-sizing: border-box; }
+          *, *::before, *::after { box-sizing: inherit; }
+          body { padding-right: var(--fk-assistant-panel-width) !important; }
+          #fk-assistant-panel {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: var(--fk-assistant-panel-width) !important;
+            min-width: 360px;
+            max-width: 35vw;
+            background: #1e1e1e;
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+          }
+          #fk-assistant-panel .tab-bar {
+            display: flex;
+            background: #252526;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #555 #252526;
+          }
+          #fk-assistant-panel .tab-bar::-webkit-scrollbar { height: 3px; }
+          #fk-assistant-panel .tab-bar::-webkit-scrollbar-track { background: #252526; }
+          #fk-assistant-panel .tab-bar::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+          #fk-assistant-panel .tab {
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #888;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+          #fk-assistant-panel .tab:hover { color: #ccc; }
+          #fk-assistant-panel .tab.active { color: #fff; border-bottom-color: #0078d4; }
+          #fk-assistant-panel .tab.active.claude { border-bottom-color: #d4a574; }
+          #fk-assistant-panel .tab.active.gemini { border-bottom-color: #8ab4f8; }
+          #fk-assistant-panel .tab.active.editor { border-bottom-color: #6a9955; }
+          #fk-assistant-panel .terminal-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+          }
+          #fk-assistant-panel .terminal-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            padding: 4px;
+          }
+          #fk-assistant-panel .terminal-wrapper.active { display: block; }
+          #fk-assistant-panel .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 12px;
+            background: #007acc;
+            color: #fff;
+            font-size: 12px;
+            flex-shrink: 0;
+          }
         </style>
         <script>
-          localStorage.setItem('remotion.sidebarPanel', 'assets');
-          var backBtnInjected = false;
-          var hideCompositionsTab = function() {
-            var btns = document.querySelectorAll('.css-reset div[role="button"]');
-            var compositionsHidden = false;
-            var assetsBtn = null;
-            for (var i = 0; i < btns.length; i++) {
-              var label = (btns[i].textContent || '').trim();
-              if (label === 'Compositions') {
-                btns[i].style.display = 'none';
-                compositionsHidden = true;
-              } else if (label === 'Assets') {
-                assetsBtn = btns[i];
-              }
-            }
-            var selectedPanel = localStorage.getItem('remotion.sidebarPanel');
-            if (assetsBtn && selectedPanel !== 'assets') {
-              assetsBtn.click();
-            }
-            localStorage.setItem('remotion.sidebarPanel', 'assets');
-            return compositionsHidden;
-          };
-          new MutationObserver(function() {
-            hideCompositionsTab();
-            if (!backBtnInjected) {
+          (function() {
+            if (window.__fkStudioOverlayBootstrapped) return;
+            window.__fkStudioOverlayBootstrapped = true;
+
+            function tryInsertBackButton() {
+              if (document.getElementById('fk-back-home')) return true;
+
               var menubar = document.querySelector('[role="menubar"]')
                 || document.querySelector('.css-reset > div > div > div');
+
               if (!menubar) {
                 var allDivs = document.querySelectorAll('.css-reset div');
                 for (var j = 0; j < allDivs.length; j++) {
@@ -1014,30 +1073,72 @@ const server = Bun.serve({
                   }
                 }
               }
-              if (menubar) {
-                var btn = document.createElement('button');
-                btn.id = 'fk-back-home';
-                btn.title = 'Back to Home';
-                var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.setAttribute('viewBox', '0 0 24 24');
-                var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z');
-                svg.appendChild(path);
-                btn.appendChild(svg);
-                btn.appendChild(document.createTextNode(' Home'));
-                btn.addEventListener('click', function() {
-                  if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({ type: 'go-home' }, '*');
-                    return;
-                  }
+
+              if (!menubar) return false;
+
+              var btn = document.createElement('button');
+              btn.id = 'fk-back-home';
+              btn.title = 'Back to Home';
+              var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+              svg.setAttribute('viewBox', '0 0 24 24');
+              var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              path.setAttribute('d', 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z');
+              svg.appendChild(path);
+              btn.appendChild(svg);
+              btn.appendChild(document.createTextNode(' Home'));
+              btn.addEventListener('click', function() {
+                if (window.studio && typeof window.studio.goBack === 'function') {
+                  window.studio.goBack();
+                } else if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'go-home' }, '*');
+                } else {
                   window.location.href = '/';
-                });
-                menubar.insertBefore(btn, menubar.firstChild);
-                backBtnInjected = true;
+                }
+              });
+              menubar.insertBefore(btn, menubar.firstChild);
+              return true;
+            }
+
+            function mountAssistantPanel() {
+              if (document.getElementById('fk-assistant-panel')) return;
+
+              var panel = document.createElement('aside');
+              panel.id = 'fk-assistant-panel';
+              panel.innerHTML =
+                '<div class="tab-bar" id="tabBar"></div>' +
+                '<div class="terminal-container" id="terminalContainer"></div>' +
+                '<div class="status-bar"><span>FluencyKaizen Studio</span><span class="clip-name" id="clipName"></span></div>';
+
+              document.body.appendChild(panel);
+
+              if (!document.querySelector('script[data-fk-terminal]')) {
+                var terminalScript = document.createElement('script');
+                terminalScript.type = 'module';
+                terminalScript.src = '/terminal.js';
+                terminalScript.setAttribute('data-fk-terminal', '1');
+                document.body.appendChild(terminalScript);
               }
             }
-          }).observe(document.body, { childList: true, subtree: true });
-          hideCompositionsTab();
+
+            function boot() {
+              if (!document.body) {
+                setTimeout(boot, 50);
+                return;
+              }
+
+              mountAssistantPanel();
+              tryInsertBackButton();
+              new MutationObserver(function() {
+                tryInsertBackButton();
+              }).observe(document.body, { childList: true, subtree: true });
+            }
+
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', boot, { once: true });
+            } else {
+              boot();
+            }
+          })();
         </script>`;
         html = html.replace("</head>", injection + "</head>");
         headers.set("content-length", String(Buffer.byteLength(html)));
