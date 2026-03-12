@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import type { PlayerRef } from "@remotion/player";
 import type { ClipData } from "../../pipeline/types";
+import { getHookDurationSeconds, getTimelineDurationSeconds } from "../../pipeline/hook";
 import { Toolbar } from "./components/Toolbar";
 import { PlayerPanel } from "./components/PlayerPanel";
 import { Timeline } from "./components/Timeline";
@@ -13,7 +14,7 @@ import { EditPanel } from "./components/EditPanel";
 
 export interface ClipMeta {
   id: string;
-  hookTitle: { ja: string; en: string };
+  hookTitle: { ja?: string; target?: string; en: string };
   duration: string | null;
   subtitleCount: number;
   vocabCount: number;
@@ -122,12 +123,19 @@ export const App: React.FC = () => {
       setSelectedSubtitleIdx(idx);
       setSelectedVocabIdx(null);
       if (clipData) {
-        const relSec = clipData.subtitles[idx].startTime - clipData.clip.startTime;
+        const hookLeadIn = getHookDurationSeconds(clipData);
+        const relSec =
+          hookLeadIn + (clipData.subtitles[idx].startTime - clipData.clip.startTime);
         seekToSecond(Math.max(0, relSec));
       }
     },
     [clipData, seekToSecond]
   );
+
+  const handleSubtitleSelect = useCallback((idx: number) => {
+    setSelectedSubtitleIdx(idx);
+    setSelectedVocabIdx(null);
+  }, []);
 
   // Click vocab card → seek to it
   const handleVocabClick = useCallback(
@@ -135,15 +143,22 @@ export const App: React.FC = () => {
       setSelectedVocabIdx(idx);
       setSelectedSubtitleIdx(null);
       if (clipData) {
-        const relSec = clipData.vocabCards[idx].triggerTime - clipData.clip.startTime;
+        const hookLeadIn = getHookDurationSeconds(clipData);
+        const relSec =
+          hookLeadIn + (clipData.vocabCards[idx].triggerTime - clipData.clip.startTime);
         seekToSecond(Math.max(0, relSec));
       }
     },
     [clipData, seekToSecond]
   );
 
+  const handleVocabSelect = useCallback((idx: number) => {
+    setSelectedVocabIdx(idx);
+    setSelectedSubtitleIdx(null);
+  }, []);
+
   const durationInFrames = clipData
-    ? Math.max(1, Math.round((clipData.clip.endTime - clipData.clip.startTime) * FPS))
+    ? Math.max(1, Math.round(getTimelineDurationSeconds(clipData) * FPS))
     : 1;
 
   return (
@@ -203,8 +218,8 @@ export const App: React.FC = () => {
           playerRef.current?.seekTo(frame);
           setCurrentFrame(frame);
         }}
-        onSubtitleClick={handleSubtitleClick}
-        onVocabClick={handleVocabClick}
+        onSubtitleSelect={handleSubtitleSelect}
+        onVocabSelect={handleVocabSelect}
       />
     </div>
   );

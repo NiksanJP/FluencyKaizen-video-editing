@@ -8,7 +8,14 @@
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
-import type { ClipData, SilenceGap, WhisperResult } from "./types.js";
+import type {
+  AppliedCut,
+  ClipData,
+  RetentionCut,
+  SilenceGap,
+  WhisperResult,
+} from "./types.js";
+import { resolveHookSegment } from "./hook.js";
 
 export interface SilenceRemovalResult {
   gaps: SilenceGap[];
@@ -18,6 +25,11 @@ export interface SilenceRemovalResult {
 interface Segment {
   start: number;
   end: number;
+}
+
+interface CutGap extends SilenceGap {
+  type: "silence" | "retention";
+  reason?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -115,6 +127,139 @@ export function gapsToSpeechSegments(
   }
 
   return segments;
+}
+
+function toSilenceCutGaps(gaps: SilenceGap[]): CutGap[] {
+  return gaps.map((gap) => ({
+    ...gap,
+    type: "silence",
+  }));
+}
+
+function retentionCutsToGaps(
+  cuts: RetentionCut[],
+  clipStart: number,
+  clipEnd: number,
+  protectedRange?: { start: number; end: number }
+): CutGap[] {
+  const MIN_RETENTION_CUT_SECONDS = 0.25;
+  if (!Array.isArray(cuts) || cuts.length === 0) return [];
+
+  const output: CutGap[] = [];
+
+  for (const cut of cuts) {
+    const start = Math.max(clipStart, Math.min(clipEnd, cut.startTime));
+    const end = Math.max(clipStart, Math.min(clipEnd, cut.endTime));
+    const cutStart = Math.min(start, end);
+    const cutEnd = Math.max(start, end);
+    const duration = cutEnd - cutStart;
+    if (duration < MIN_RETENTION_CUT_SECONDS) continue;
+
+    let fragments: SilenceGap[] = [
+      {
+        originalStart: cutStart,
+        originalEnd: cutEnd,
+        duration,
+      },
+    ];
+
+    // Keep hook content available for the duplicated opening.
+    if (protectedRange && protectedRange.end > protectedRange.start) {
+      fragments = fragments.flatMap((frag) =>
+        subtractProtectedRange(frag, protectedRange.start, protectedRange.end)
+      );
+    }
+
+    for (const frag of fragments) {
+      if (frag.duration < MIN_RETENTION_CUT_SECONDS) continue;
+      output.push({
+        ...frag,
+        type: "retention",
+        reason: cut.reason,
+      });
+    }
+  }
+
+  return output;
+}
+
+function subtractProtectedRange(
+  gap: SilenceGap,
+  protectStart: number,
+  protectEnd: number
+): SilenceGap[] {
+  if (gap.originalEnd <= protectStart || gap.originalStart >= protectEnd) {
+    return [gap];
+  }
+
+  // Full overlap — drop this cut entirely.
+  if (gap.originalStart >= protectStart && gap.originalEnd <= protectEnd) {
+    return [];
+  }
+
+  const parts: SilenceGap[] = [];
+
+  if (gap.originalStart < protectStart) {
+    const end = Math.min(gap.originalEnd, protectStart);
+    if (end > gap.originalStart) {
+      parts.push({
+        originalStart: gap.originalStart,
+        originalEnd: end,
+        duration: end - gap.originalStart,
+      });
+    }
+  }
+
+  if (gap.originalEnd > protectEnd) {
+    const start = Math.max(gap.originalStart, protectEnd);
+    if (gap.originalEnd > start) {
+      parts.push({
+        originalStart: start,
+        originalEnd: gap.originalEnd,
+        duration: gap.originalEnd - start,
+      });
+    }
+  }
+
+  return parts;
+}
+
+function mergeCutGaps(gaps: CutGap[]): CutGap[] {
+  if (gaps.length === 0) return [];
+
+  const sorted = [...gaps].sort((a, b) => a.originalStart - b.originalStart);
+  const merged: CutGap[] = [sorted[0]];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const current = sorted[i];
+    const prev = merged[merged.length - 1];
+
+    if (current.originalStart <= prev.originalEnd + 0.05) {
+      prev.originalEnd = Math.max(prev.originalEnd, current.originalEnd);
+      prev.duration = prev.originalEnd - prev.originalStart;
+      if (prev.type !== current.type) {
+        prev.type = "retention";
+      }
+      if (current.reason) {
+        prev.reason = prev.reason ? `${prev.reason}; ${current.reason}` : current.reason;
+      }
+      continue;
+    }
+
+    merged.push({ ...current });
+  }
+
+  return merged;
+}
+
+function toAppliedCuts(gaps: CutGap[]): AppliedCut[] {
+  return gaps.map((gap) => ({
+    originalStart: gap.originalStart,
+    originalEnd: gap.originalEnd,
+    duration: gap.duration,
+    type: gap.type,
+    reason: gap.reason,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -217,6 +362,7 @@ export function remapTimestamp(
 export interface RemoveSilenceOptions {
   threshold?: number; // default 0.8s
   padding?: number;   // default 0.1s
+  retentionCuts?: RetentionCut[];
 }
 
 /**
@@ -231,7 +377,7 @@ export async function removeSilence(
   outputDir: string,
   options: RemoveSilenceOptions = {}
 ): Promise<SilenceRemovalResult | null> {
-  const { threshold = 0.8, padding = 0.1 } = options;
+  const { threshold = 0.8, padding = 0.1, retentionCuts = [] } = options;
   const { startTime: clipStart, endTime: clipEnd } = clipData.clip;
 
   // Collect word-level timestamps from all segments
@@ -251,18 +397,37 @@ export async function removeSilence(
     }
   }
 
+  const silenceGaps =
+    words.length < 2
+      ? []
+      : detectSilenceGaps(words, clipStart, clipEnd, threshold, padding);
+
   if (words.length < 2) {
-    console.log(`⏭️  Not enough word data for silence detection`);
-    return null;
+    console.log(`⏭️  Not enough word data for silence detection — skipping silence cuts`);
   }
 
-  const gaps = detectSilenceGaps(words, clipStart, clipEnd, threshold, padding);
+  const hook = resolveHookSegment(clipData);
+  const retentionGaps = retentionCutsToGaps(retentionCuts, clipStart, clipEnd, {
+    start: hook.startTime,
+    end: hook.endTime,
+  });
+  const mergedGapsWithType = mergeCutGaps([
+    ...toSilenceCutGaps(silenceGaps),
+    ...retentionGaps,
+  ]);
+  const gaps: SilenceGap[] = mergedGapsWithType.map((gap) => ({
+    originalStart: gap.originalStart,
+    originalEnd: gap.originalEnd,
+    duration: gap.duration,
+  }));
 
   if (gaps.length === 0) {
-    console.log(`⏭️  No silence gaps found above ${threshold}s threshold`);
+    console.log(`⏭️  No silence or retention cuts selected`);
     return null;
   }
 
+  const silenceRemoved = silenceGaps.reduce((acc, g) => acc + g.duration, 0);
+  const retentionRemoved = retentionGaps.reduce((acc, g) => acc + g.duration, 0);
   const totalRemoved = gaps.reduce((acc, g) => acc + g.duration, 0);
   const originalDuration = clipEnd - clipStart;
   const compressedDuration = originalDuration - totalRemoved;
@@ -278,9 +443,10 @@ export async function removeSilence(
 
   {
     const segments = gapsToSpeechSegments(gaps, clipStart, clipEnd);
-    console.log(
-      `   Cutting ${segments.length} segment(s) from ${originalDuration.toFixed(1)}s → ${compressedDuration.toFixed(1)}s`
-    );
+    console.log(`   Silence cuts: ${silenceGaps.length} (${silenceRemoved.toFixed(1)}s)`);
+    console.log(`   Retention cuts: ${retentionGaps.length} (${retentionRemoved.toFixed(1)}s)`);
+    console.log(`   Final merged cuts: ${gaps.length} (${totalRemoved.toFixed(1)}s)`);
+    console.log(`   Cutting ${segments.length} segment(s): ${originalDuration.toFixed(1)}s → ${compressedDuration.toFixed(1)}s`);
     try {
       buildAndRunFfmpeg(sourceVideoPath, outputPath, segments);
     } catch (err) {
@@ -316,11 +482,23 @@ export async function removeSilence(
     triggerTime: remapTimestamp(card.triggerTime, clipStart, gaps),
   }));
 
+  if (clipData.hook) {
+    clipData.hook = {
+      ...clipData.hook,
+      startTime: remapTimestamp(clipData.hook.startTime, clipStart, gaps),
+      endTime: remapTimestamp(clipData.hook.endTime, clipStart, gaps),
+    };
+    if (clipData.hook.endTime <= clipData.hook.startTime) {
+      clipData.hook.endTime = Math.min(actualDuration, clipData.hook.startTime + 1.0);
+    }
+  }
+
   // Update clip boundaries and video reference
   clipData.videoFile = "clip_trimmed.mp4";
   clipData.videoDuration = actualDuration;
   clipData.clip = { startTime: 0, endTime: actualDuration };
-  clipData.silenceGaps = gaps;
+  clipData.silenceGaps = silenceGaps;
+  clipData.appliedCuts = toAppliedCuts(mergedGapsWithType);
 
   return { gaps, compressedDuration: actualDuration };
 }

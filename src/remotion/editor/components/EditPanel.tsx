@@ -568,13 +568,14 @@ export const EditPanel: React.FC<Props> = ({
         {tab === "hook" && (
           <div>
             <div style={{ marginBottom: 12 }}>
-              <div style={S.label}>Japanese Title</div>
+              <div style={S.label}>Target Language Title</div>
               <input
                 style={S.input}
-                value={clipData.hookTitle.ja}
+                value={clipData.hookTitle.target ?? clipData.hookTitle.ja ?? ""}
                 onChange={(e) =>
                   onUpdateClip((d) => {
-                    d.hookTitle.ja = e.target.value;
+                    d.hookTitle.target = e.target.value;
+                    if (!d.hookTitle.ja) d.hookTitle.ja = e.target.value;
                     return d;
                   })
                 }
@@ -594,7 +595,7 @@ export const EditPanel: React.FC<Props> = ({
               />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <div style={S.label}>Highlights (JA words to color gold)</div>
+              <div style={S.label}>Highlights (words to color gold)</div>
               <ChipInput
                 chips={clipData.hookTitle.highlights ?? []}
                 onChange={(arr) =>
@@ -645,6 +646,72 @@ export const EditPanel: React.FC<Props> = ({
               <div style={{ fontSize: 11, color: "#555", marginTop: 4 }}>
                 Duration:{" "}
                 {(clipData.clip.endTime - clipData.clip.startTime).toFixed(1)}s
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 16,
+                padding: 12,
+                background: "#1e1e1e",
+                borderRadius: 6,
+                border: "1px solid #2a2a2a",
+              }}
+            >
+              <div style={{ ...S.label, marginBottom: 8 }}>Hook Segment (prepended opening)</div>
+              <div style={S.row}>
+                <div style={S.col}>
+                  <div style={S.label}>Hook Start</div>
+                  <TimeInput
+                    value={clipData.hook?.startTime ?? clipData.clip.startTime}
+                    onChange={(v) =>
+                      onUpdateClip((d) => {
+                        d.hook = d.hook || {
+                          startTime: d.clip.startTime,
+                          endTime: Math.min(d.clip.endTime, d.clip.startTime + 2),
+                          reason: "Manual hook",
+                        };
+                        d.hook.startTime = v;
+                        return d;
+                      })
+                    }
+                  />
+                </div>
+                <div style={S.col}>
+                  <div style={S.label}>Hook End</div>
+                  <TimeInput
+                    value={clipData.hook?.endTime ?? Math.min(clipData.clip.endTime, clipData.clip.startTime + 2)}
+                    onChange={(v) =>
+                      onUpdateClip((d) => {
+                        d.hook = d.hook || {
+                          startTime: d.clip.startTime,
+                          endTime: Math.min(d.clip.endTime, d.clip.startTime + 2),
+                          reason: "Manual hook",
+                        };
+                        d.hook.endTime = v;
+                        return d;
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <div style={S.label}>Hook Reason</div>
+                <input
+                  style={S.input}
+                  value={clipData.hook?.reason ?? ""}
+                  onChange={(e) =>
+                    onUpdateClip((d) => {
+                      d.hook = d.hook || {
+                        startTime: d.clip.startTime,
+                        endTime: Math.min(d.clip.endTime, d.clip.startTime + 2),
+                        reason: "",
+                      };
+                      d.hook.reason = e.target.value;
+                      return d;
+                    })
+                  }
+                />
               </div>
             </div>
           </div>

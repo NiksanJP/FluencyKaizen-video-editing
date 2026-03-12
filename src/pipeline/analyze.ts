@@ -1,9 +1,19 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import type { ClipData, WhisperResult, SupportedLanguage } from "./types.js";
+import type { ClipData, RetentionCut, WhisperResult, SupportedLanguage } from "./types.js";
 import { LANGUAGE_CONFIG } from "./types.js";
-import { LIMITS, getLimits } from "./config.js";
+import { getLimits } from "./config.js";
+import {
+  HOOK_DEFAULT_SECONDS,
+  HOOK_MAX_SECONDS,
+  HOOK_MIN_SECONDS,
+  resolveHookSegment,
+} from "./hook.js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const geminiApiKey = process.env.GEMINI_API_KEY;
+if (!geminiApiKey) {
+  throw new Error("GEMINI_API_KEY is required");
+}
+const genAI = new GoogleGenerativeAI(geminiApiKey);
 
 /**
  * Send transcript to Gemini for analysis
@@ -45,6 +55,15 @@ export async function analyzeWithGemini(
             },
             required: ["startTime", "endTime"],
           },
+          hook: {
+            type: SchemaType.OBJECT,
+            properties: {
+              startTime: { type: SchemaType.NUMBER },
+              endTime: { type: SchemaType.NUMBER },
+              reason: { type: SchemaType.STRING },
+            },
+            required: ["startTime", "endTime", "reason"],
+          },
           subtitles: {
             type: SchemaType.ARRAY,
             items: {
@@ -81,8 +100,29 @@ export async function analyzeWithGemini(
               required: ["triggerTime", "duration", "category", "phrase", "literal", "nuance"],
             },
           },
+          boringCuts: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                startTime: { type: SchemaType.NUMBER },
+                endTime: { type: SchemaType.NUMBER },
+                reason: { type: SchemaType.STRING },
+                confidence: { type: SchemaType.NUMBER },
+              },
+              required: ["startTime", "endTime", "reason"],
+            },
+          },
         },
-        required: ["videoFile", "hookTitle", "clip", "subtitles", "vocabCards"],
+        required: [
+          "videoFile",
+          "hookTitle",
+          "clip",
+          "hook",
+          "subtitles",
+          "vocabCards",
+          "boringCuts",
+        ],
       },
     },
   });
@@ -118,7 +158,7 @@ ${transcriptText}
 
 1. **Clip Range**: Use the ENTIRE video. Set clip.startTime = ${firstWordTime.toFixed(1)} and clip.endTime = ${lastWordTime.toFixed(1)}. Silence removal is handled automatically — your job is subtitles, vocab cards, and hook title.
 
-⚠️ TIMESTAMP RULE: All timestamps (subtitle startTime/endTime, vocabCard triggerTime) must use ABSOLUTE timestamps matching the input transcript — NOT relative to clip start.
+⚠️ TIMESTAMP RULE: All timestamps (hook.startTime/endTime, subtitle startTime/endTime, vocabCard triggerTime, boringCuts start/end) must use ABSOLUTE timestamps matching the input transcript — NOT relative to clip start.
 
 2. **Subtitles**: For each 2-4 second segment within the clip:
    ⚠️ MOST IMPORTANT RULE: The English text MUST be the EXACT words spoken in the video at that timestamp. Do NOT paraphrase, rearrange, or invent text. Use the transcript to extract the actual spoken words for each time range.
@@ -150,7 +190,15 @@ ${hasWordTimestamps ? `
 
    ❌ Do NOT pick: basic vocabulary, simple phrases native speakers explain clearly in the video, or common English words ${langConfig.name} learners already know (e.g. "meeting", "schedule", "team")
 
-4. **Hook Title**: Create a catchy EDUCATIONAL title that teaches ${langConfig.name} learners a specific English phrase from the clip.
+4. **Hook Segment (first 1-3s opening)**: Pick one high-retention moment from the clip to DUPLICATE as the opening hook.
+   - Set hook.startTime and hook.endTime to a segment that is between ${HOOK_MIN_SECONDS.toFixed(1)} and ${HOOK_MAX_SECONDS.toFixed(1)} seconds
+   - Default target duration is around ${HOOK_DEFAULT_SECONDS.toFixed(1)} seconds
+   - This segment should maximize curiosity and watch-through: strong claim, surprising line, tension, question, or strong business phrase payoff
+   - Do NOT choose dead air, greetings, filler, or setup-only lines
+   - Do NOT choose a segment that conflicts with your boringCuts
+   - Add a short \`hook.reason\` explaining why this specific moment should improve retention
+
+5. **Hook Title**: Create a catchy EDUCATIONAL title that teaches ${langConfig.name} learners a specific English phrase from the clip.
    - The title MUST feature the key English word/phrase — this is the learning hook
    - ${langConfig.name} learners should see it and think "How do you use that in English?"
    - Use 1-2 relevant emojis (e.g. 📊💼🎯🔥✅🗣️)
@@ -172,6 +220,17 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
    - Target language (${langConfig.name}): STRICTLY ≤ ${limits.hookTitle.target} characters total.
    - English: ≤ ${limits.hookTitle.en} characters, max 6 words
 
+6. **Retention Cuts (remove boring bits)**:
+   Identify boring/low-retention spans to remove and return them in \`boringCuts\`.
+   Use short-form platform heuristics (TikTok/Reels): fast pacing, no dead air, no repetitive setup, front-load value, keep tension moving every 1-2s.
+   - Return 0 to 8 cuts.
+   - Each cut should be short: 0.3s to 3.0s.
+   - Focus on filler words, repeated ideas, long transitions, weak setup lines, or flat moments.
+   - Keep educational clarity: never cut key phrase explanations or examples.
+   - Cuts must stay inside the clip range.
+   - Add a clear reason for each cut.
+   - Optional confidence from 0 to 1.
+
 ## Output Schema (MUST be valid JSON)
 \`\`\`json
 {
@@ -184,6 +243,11 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
   "clip": {
     "startTime": number,
     "endTime": number
+  },
+  "hook": {
+    "startTime": number,
+    "endTime": number,
+    "reason": "string"
   },
   "subtitles": [
     {
@@ -204,6 +268,14 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
       "literal": "string",
       "nuance": "string"
     }
+  ],
+  "boringCuts": [
+    {
+      "startTime": number,
+      "endTime": number,
+      "reason": "string",
+      "confidence": 0.0
+    }
   ]
 }
 \`\`\`
@@ -212,6 +284,8 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
 - Subtitles must cover all speech segments within the clip (silence gaps will be automatically removed)
 - Each subtitle segment should be 2-4 seconds
 - \`highlights\` words must actually appear in the target language text; \`enHighlights\` words must actually appear in the English text
+- Hook duration must be between ${HOOK_MIN_SECONDS.toFixed(1)} and ${HOOK_MAX_SECONDS.toFixed(1)} seconds
+- \`boringCuts\` may be empty, but if present every cut must be 0.3-3.0s and inside the clip window
 - **hookTitle.target must be ≤ ${limits.hookTitle.target} characters** — count each character as 1, no exceptions
 - **hookTitle.en must be ≤ ${limits.hookTitle.en} characters** — keep it short and punchy
 - **Each subtitle en must be ≤ ${limits.subtitle.en} characters** — use exact words spoken, split at natural pauses
@@ -274,6 +348,7 @@ Now analyze and output the JSON:`;
 
       // Fix relative timestamps if Gemini returned them
       normalizeTimestamps(clipData);
+      normalizeHookAndCuts(clipData);
 
       console.log(
         `✅ Gemini analysis complete: ${clipData.clip.endTime - clipData.clip.startTime}s clip selected`
@@ -387,6 +462,16 @@ function normalizeTimestamps(data: ClipData): void {
     for (const card of data.vocabCards) {
       card.triggerTime += clipStart;
     }
+    if (data.hook) {
+      data.hook.startTime += clipStart;
+      data.hook.endTime += clipStart;
+    }
+    if (Array.isArray(data.boringCuts)) {
+      for (const cut of data.boringCuts) {
+        cut.startTime += clipStart;
+        cut.endTime += clipStart;
+      }
+    }
   }
 
   // Clamp all timestamps to clip window
@@ -395,8 +480,122 @@ function normalizeTimestamps(data: ClipData): void {
     sub.endTime = Math.max(clipStart, Math.min(clipEnd, sub.endTime));
   }
   for (const card of data.vocabCards) {
-    card.triggerTime = Math.max(clipStart, Math.min(clipEnd - card.duration, card.triggerTime));
+    const latest = Math.max(clipStart, clipEnd - card.duration);
+    card.triggerTime = Math.max(clipStart, Math.min(latest, card.triggerTime));
   }
+}
+
+const MIN_RETENTION_CUT_SECONDS = 0.3;
+const MAX_RETENTION_CUT_SECONDS = 3;
+const MAX_RETENTION_REMOVAL_RATIO = 0.35;
+
+function normalizeHookAndCuts(data: ClipData): void {
+  const clipStart = data.clip.startTime;
+  const clipEnd = data.clip.endTime;
+  if (clipEnd <= clipStart) return;
+
+  // Ensure hook always exists and stays in bounds.
+  data.hook = resolveHookSegment(data);
+
+  // If Gemini omitted/over-shot cuts, sanitize to safe conservative values.
+  const sanitizedCuts = sanitizeRetentionCuts(
+    data.boringCuts || [],
+    clipStart,
+    clipEnd
+  );
+
+  // Never remove the chosen hook segment from the body.
+  const hook = resolveHookSegment(data);
+  data.boringCuts = sanitizedCuts.filter(
+    (cut) => cut.endTime <= hook.startTime || cut.startTime >= hook.endTime
+  );
+}
+
+function sanitizeRetentionCuts(
+  cuts: RetentionCut[],
+  clipStart: number,
+  clipEnd: number
+): RetentionCut[] {
+  if (!Array.isArray(cuts) || cuts.length === 0) return [];
+
+  type NormalizedCut = RetentionCut & { duration: number };
+
+  const normalized: NormalizedCut[] = cuts
+    .map((cut) => {
+      const start = Math.max(clipStart, Math.min(clipEnd, cut.startTime));
+      const end = Math.max(clipStart, Math.min(clipEnd, cut.endTime));
+      const cleanStart = Math.min(start, end);
+      const cleanEnd = Math.max(start, end);
+      const duration = cleanEnd - cleanStart;
+      return {
+        startTime: cleanStart,
+        endTime: cleanEnd,
+        reason: (cut.reason || "low-retention section").trim(),
+        confidence:
+          typeof cut.confidence === "number"
+            ? Math.max(0, Math.min(1, cut.confidence))
+            : undefined,
+        duration,
+      };
+    })
+    .filter(
+      (cut) =>
+        cut.duration >= MIN_RETENTION_CUT_SECONDS &&
+        cut.duration <= MAX_RETENTION_CUT_SECONDS
+    )
+    .sort((a, b) => a.startTime - b.startTime);
+
+  if (normalized.length === 0) return [];
+
+  const merged: RetentionCut[] = [];
+  for (const cut of normalized) {
+    const prev = merged[merged.length - 1];
+    if (!prev || cut.startTime > prev.endTime + 0.05) {
+      merged.push({
+        startTime: cut.startTime,
+        endTime: cut.endTime,
+        reason: cut.reason,
+        confidence: cut.confidence,
+      });
+      continue;
+    }
+    prev.endTime = Math.max(prev.endTime, cut.endTime);
+    prev.reason = `${prev.reason}; ${cut.reason}`;
+    if (typeof prev.confidence === "number" && typeof cut.confidence === "number") {
+      prev.confidence = Math.max(prev.confidence, cut.confidence);
+    } else if (typeof cut.confidence === "number") {
+      prev.confidence = cut.confidence;
+    }
+  }
+
+  // Safety guard: don't remove too much content.
+  const maxTotalRemoval = (clipEnd - clipStart) * MAX_RETENTION_REMOVAL_RATIO;
+  let removed = 0;
+  const limited: RetentionCut[] = [];
+
+  for (const cut of merged) {
+    const remainingBudget = maxTotalRemoval - removed;
+    if (remainingBudget <= 0) break;
+
+    const dur = cut.endTime - cut.startTime;
+    if (dur <= remainingBudget) {
+      limited.push(cut);
+      removed += dur;
+      continue;
+    }
+
+    if (remainingBudget >= MIN_RETENTION_CUT_SECONDS) {
+      limited.push({
+        ...cut,
+        endTime: cut.startTime + remainingBudget,
+        reason: `${cut.reason} (trimmed)`,
+      });
+      removed += remainingBudget;
+    }
+    break;
+  }
+
+  return limited;
 }
 
 /**
@@ -415,6 +614,17 @@ function validateClipData(data: unknown): asserts data is ClipData {
     throw new Error("Missing subtitles");
   if (!Array.isArray(clip.vocabCards))
     throw new Error("vocabCards must be an array");
+  if (clip.hook) {
+    if (
+      typeof clip.hook.startTime !== "number" ||
+      typeof clip.hook.endTime !== "number"
+    ) {
+      throw new Error("Invalid hook segment");
+    }
+  }
+  if (clip.boringCuts && !Array.isArray(clip.boringCuts)) {
+    throw new Error("boringCuts must be an array");
+  }
 
 
   // Validate subtitles structure
@@ -438,6 +648,18 @@ function validateClipData(data: unknown): asserts data is ClipData {
         typeof card.literal !== "string" ||
         typeof card.nuance !== "string") {
       throw new Error(`Invalid vocab card: ${JSON.stringify(card)}`);
+    }
+  }
+
+  if (clip.boringCuts) {
+    for (const cut of clip.boringCuts) {
+      if (
+        typeof cut.startTime !== "number" ||
+        typeof cut.endTime !== "number" ||
+        typeof cut.reason !== "string"
+      ) {
+        throw new Error(`Invalid retention cut: ${JSON.stringify(cut)}`);
+      }
     }
   }
 }

@@ -7,6 +7,23 @@ import type { ViteDevServer } from "vite";
 const projectRoot = resolve(__dirname, "..", "..");
 const outputDir = resolve(projectRoot, "output");
 
+function getHookDurationSeconds(data: any): number {
+  if (!data?.hook) return 0;
+  const start = Number(data.hook.startTime);
+  const end = Number(data.hook.endTime);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return 0;
+  return Math.max(0, Math.min(3, end - start));
+}
+
+function getTimelineDurationSeconds(data: any): number {
+  if (!data?.clip) return 0;
+  const clipDuration = Math.max(
+    0,
+    Number(data.clip.endTime) - Number(data.clip.startTime)
+  );
+  return clipDuration + getHookDurationSeconds(data);
+}
+
 /** Vite plugin that adds REST API routes for reading/writing clip data */
 function clipApiPlugin() {
   return {
@@ -32,7 +49,7 @@ function clipApiPlugin() {
                   id: dir,
                   hookTitle: data.hookTitle ?? { ja: dir, en: dir },
                   duration: data.clip
-                    ? (data.clip.endTime - data.clip.startTime).toFixed(1)
+                    ? getTimelineDurationSeconds(data).toFixed(1)
                     : null,
                   subtitleCount: data.subtitles?.length ?? 0,
                   vocabCount: data.vocabCards?.length ?? 0,

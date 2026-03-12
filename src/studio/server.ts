@@ -62,6 +62,20 @@ const LANGUAGE_LABELS: Record<SupportedLanguage, { name: string; nativeName: str
   es: { name: "Spanish", nativeName: "Español" },
 };
 
+function getHookDurationSeconds(data: ClipData): number {
+  const start = data.hook?.startTime;
+  const end = data.hook?.endTime;
+  if (typeof start !== "number" || typeof end !== "number") return 0;
+  return Math.max(0, Math.min(3, end - start));
+}
+
+function getTimelineDurationSeconds(data: ClipData): number {
+  const clipDuration = data.clip
+    ? Math.max(0, data.clip.endTime - data.clip.startTime)
+    : 0;
+  return clipDuration + getHookDurationSeconds(data);
+}
+
 // MIME types for static files
 const MIME: Record<string, string> = {
   ".html": "text/html",
@@ -369,7 +383,7 @@ async function listClipMetadata() {
         id: dir,
         hookTitle: data.hookTitle || { ja: dir, en: dir },
         duration: data.clip
-          ? (data.clip.endTime - data.clip.startTime).toFixed(1)
+          ? getTimelineDurationSeconds(data).toFixed(1)
           : null,
         subtitleCount: data.subtitles?.length || 0,
         vocabCount: data.vocabCards?.length || 0,

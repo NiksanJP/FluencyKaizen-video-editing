@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../pipeline/types";
+import { resolveHookSegment } from "../pipeline/hook";
 import { BilingualCaption } from "./components/BilingualCaption";
 import { VocabCard } from "./components/VocabCard";
 import { HookTitle } from "./components/HookTitle";
@@ -57,6 +58,22 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
   // Convert clip times to frames
   const clipStartFrame = Math.floor(clipData.clip.startTime * fps);
   const clipEndFrame = Math.floor(clipData.clip.endTime * fps);
+  const hook = resolveHookSegment(clipData);
+  const hookStartFrame = Math.floor(hook.startTime * fps);
+  const hookEndFrame = Math.max(hookStartFrame + 1, Math.floor(hook.endTime * fps));
+  const hookDurationInFrames = Math.max(0, hookEndFrame - hookStartFrame);
+  const bodyDurationInFrames = Math.max(1, durationInFrames - hookDurationInFrames);
+
+  const videoStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "100%",
+    height: "auto",
+    minHeight: "100%",
+    objectFit: "contain",
+  };
 
   return (
     <div
@@ -69,28 +86,40 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
         overflow: "hidden",
       }}
     >
-      {/* Background video — centered for landscape videos in portrait canvas */}
-      <OffthreadVideo
-        src={staticFile(clipData.videoFile)}
-        startFrom={clipStartFrame}
-        endAt={clipEndFrame}
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "100%",
-          height: "auto",
-          minHeight: "100%",
-          objectFit: "contain",
-        }}
-      />
+      {/* Prepend a duplicated high-retention hook segment for the first 1-3 seconds. */}
+      {hookDurationInFrames > 0 ? (
+        <>
+          <Sequence from={0} durationInFrames={hookDurationInFrames} premountFor={15}>
+            <OffthreadVideo
+              src={staticFile(clipData.videoFile)}
+              startFrom={hookStartFrame}
+              endAt={hookEndFrame}
+              style={videoStyle}
+            />
+          </Sequence>
+          <Sequence from={hookDurationInFrames} durationInFrames={bodyDurationInFrames} premountFor={15}>
+            <OffthreadVideo
+              src={staticFile(clipData.videoFile)}
+              startFrom={clipStartFrame}
+              endAt={clipEndFrame}
+              style={videoStyle}
+            />
+          </Sequence>
+        </>
+      ) : (
+        <OffthreadVideo
+          src={staticFile(clipData.videoFile)}
+          startFrom={clipStartFrame}
+          endAt={clipEndFrame}
+          style={videoStyle}
+        />
+      )}
 
       {/* Hook title with branding */}
       <HookTitle title={clipData.hookTitle} />
 
       {/* Bilingual captions — positioned at absolute timestamps */}
-      <Sequence from={0} durationInFrames={durationInFrames}>
+      <Sequence from={hookDurationInFrames} durationInFrames={Math.max(1, durationInFrames - hookDurationInFrames)}>
         <BilingualCaption
           subtitles={clipData.subtitles}
           clipStart={clipData.clip.startTime}
@@ -103,7 +132,7 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {clipData.vocabCards.slice(0, styleConfig.vocabCard.maxCount).map((card, idx) => (
         <Sequence
           key={idx}
-          from={Math.floor((card.triggerTime - clipData.clip.startTime) * fps)}
+          from={Math.max(0, hookDurationInFrames + Math.floor((card.triggerTime - clipData.clip.startTime) * fps))}
           durationInFrames={Math.floor(card.duration * fps)}
         >
           <VocabCard card={card} top={vocabTop} />

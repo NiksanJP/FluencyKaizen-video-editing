@@ -29,6 +29,10 @@ export interface PipelineCache {
 
 const CACHE_FILE = ".pipeline-cache.json";
 
+function getPipelineSourcePath(projectRoot: string, fileName: string): string {
+  return join(projectRoot, "src", "pipeline", fileName);
+}
+
 export async function readCache(outputDir: string): Promise<PipelineCache> {
   const path = join(outputDir, CACHE_FILE);
   try {
@@ -99,8 +103,8 @@ export async function isAnalysisCached(
   try {
     const [transcriptHash, analyzeHash, configHash] = await Promise.all([
       hashFileContent(join(outputDir, "audio.json")),
-      hashFileContent(join(projectRoot, "pipeline", "analyze.ts")),
-      hashFileContent(join(projectRoot, "pipeline", "config.ts")),
+      hashFileContent(getPipelineSourcePath(projectRoot, "analyze.ts")),
+      hashFileContent(getPipelineSourcePath(projectRoot, "config.ts")),
     ]);
 
     return (
@@ -133,8 +137,8 @@ export async function updateAnalysisCache(
 ): Promise<void> {
   const [transcriptHash, analyzeHash, configHash] = await Promise.all([
     hashFileContent(join(outputDir, "audio.json")),
-    hashFileContent(join(projectRoot, "pipeline", "analyze.ts")),
-    hashFileContent(join(projectRoot, "pipeline", "config.ts")),
+    hashFileContent(getPipelineSourcePath(projectRoot, "analyze.ts")),
+    hashFileContent(getPipelineSourcePath(projectRoot, "config.ts")),
   ]);
 
   cache.analysis = {

@@ -26,6 +26,11 @@ function rewriteCompositionImports(source: string): string {
       /from\s+["']\.\.\/pipeline\/types["']/g,
       'from "../../src/pipeline/types"'
     )
+    // ../pipeline/hook -> ../../src/pipeline/hook from output/[name]/
+    .replace(
+      /from\s+["']\.\.\/pipeline\/hook["']/g,
+      'from "../../src/pipeline/hook"'
+    )
     // ../../style.json → ./style.json  (local copy in output/[name]/)
     .replace(
       /from\s+["']\.\.\/\.\.\/style\.json["']/g,

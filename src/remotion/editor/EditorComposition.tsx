@@ -7,6 +7,7 @@
 import React, { useState, useCallback } from "react";
 import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
+import { resolveHookSegment } from "../../pipeline/hook";
 import { BilingualCaption } from "../components/BilingualCaption";
 import { VocabCard } from "../components/VocabCard";
 import { HookTitle } from "../components/HookTitle";
@@ -30,6 +31,22 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
 
   const clipStartFrame = Math.floor(clipData.clip.startTime * fps);
   const clipEndFrame = Math.floor(clipData.clip.endTime * fps);
+  const hook = resolveHookSegment(clipData);
+  const hookStartFrame = Math.floor(hook.startTime * fps);
+  const hookEndFrame = Math.max(hookStartFrame + 1, Math.floor(hook.endTime * fps));
+  const hookDurationInFrames = Math.max(0, hookEndFrame - hookStartFrame);
+  const bodyDurationInFrames = Math.max(1, durationInFrames - hookDurationInFrames);
+
+  const videoStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "100%",
+    height: "auto",
+    minHeight: "100%",
+    objectFit: "contain",
+  };
 
   return (
     <div
@@ -41,25 +58,37 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
         overflow: "hidden",
       }}
     >
-      <OffthreadVideo
-        src={staticFile(clipData.videoFile)}
-        startFrom={clipStartFrame}
-        endAt={clipEndFrame}
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "100%",
-          height: "auto",
-          minHeight: "100%",
-          objectFit: "contain",
-        }}
-      />
+      {hookDurationInFrames > 0 ? (
+        <>
+          <Sequence from={0} durationInFrames={hookDurationInFrames} premountFor={15}>
+            <OffthreadVideo
+              src={staticFile(clipData.videoFile)}
+              startFrom={hookStartFrame}
+              endAt={hookEndFrame}
+              style={videoStyle}
+            />
+          </Sequence>
+          <Sequence from={hookDurationInFrames} durationInFrames={bodyDurationInFrames} premountFor={15}>
+            <OffthreadVideo
+              src={staticFile(clipData.videoFile)}
+              startFrom={clipStartFrame}
+              endAt={clipEndFrame}
+              style={videoStyle}
+            />
+          </Sequence>
+        </>
+      ) : (
+        <OffthreadVideo
+          src={staticFile(clipData.videoFile)}
+          startFrom={clipStartFrame}
+          endAt={clipEndFrame}
+          style={videoStyle}
+        />
+      )}
 
       <HookTitle title={clipData.hookTitle} />
 
-      <Sequence from={0} durationInFrames={durationInFrames}>
+      <Sequence from={hookDurationInFrames} durationInFrames={Math.max(1, durationInFrames - hookDurationInFrames)}>
         <BilingualCaption
           subtitles={clipData.subtitles}
           clipStart={clipData.clip.startTime}
@@ -75,7 +104,7 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
           );
           const dur = Math.floor(card.duration * fps);
           return (
-            <Sequence key={idx} from={from} durationInFrames={Math.max(1, dur)}>
+            <Sequence key={idx} from={Math.max(0, hookDurationInFrames + from)} durationInFrames={Math.max(1, dur)}>
               <VocabCard card={card} top={vocabTop} />
             </Sequence>
           );

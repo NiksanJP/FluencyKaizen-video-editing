@@ -23,7 +23,7 @@ import {
 } from "./cache.js";
 import type { WhisperResult, ClipData, SupportedLanguage } from "./types.js";
 
-const projectRoot = resolve(dirname(import.meta.dir));
+const projectRoot = resolve(import.meta.dir, "..", "..");
 
 function resolveInput(arg: string): string {
   // 1. Absolute path — use as-is
@@ -163,15 +163,21 @@ async function main() {
     clipData.videoDuration = videoDuration;
     clipData.targetLanguage = clipData.targetLanguage || targetLanguage;
 
-    // Step 4: Remove silence (jump-cut editing)
-    console.log(`\n✂️  Step 4: Removing silence gaps...`);
-    const silenceResult = await removeSilence(clipData, transcript, inputForTranscribe, outputDir);
+    // Step 4: Remove silence + boring sections (jump-cut editing)
+    console.log(`\n✂️  Step 4: Removing silence + low-retention sections...`);
+    const silenceResult = await removeSilence(
+      clipData,
+      transcript,
+      inputForTranscribe,
+      outputDir,
+      { retentionCuts: clipData.boringCuts || [] }
+    );
     if (silenceResult) {
       const totalRemoved = silenceResult.gaps.reduce((acc, g) => acc + g.duration, 0);
-      console.log(`✅ Removed ${silenceResult.gaps.length} gap(s), saved ${totalRemoved.toFixed(1)}s`);
+      console.log(`✅ Removed ${silenceResult.gaps.length} segment(s), saved ${totalRemoved.toFixed(1)}s`);
       console.log(`   Compressed: ${silenceResult.compressedDuration.toFixed(1)}s`);
     } else {
-      console.log(`⏭️  No silence removed — using original clip`);
+      console.log(`⏭️  No silence/retention cuts applied — using original clip`);
     }
 
     // Step 5: Write outputs

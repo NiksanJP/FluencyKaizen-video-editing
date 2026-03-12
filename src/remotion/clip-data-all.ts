@@ -648,7 +648,7 @@ const allClips: Record<string, ClipData> = {
     {
       "startTime": 0,
       "endTime": 1.4399999999999995,
-      "en": "Nick, thank you for",
+      "en": "Nik, thank you for",
       "target": "ニック、ありがとう。",
       "highlights": [
         "ニック",
@@ -1697,6 +1697,711 @@ const allClips: Record<string, ClipData> = {
       "originalStart": 95.24,
       "originalEnd": 100.34,
       "duration": 5.1000000000000085
+    }
+  ]
+} as unknown as ClipData,
+  "CleanShot_2026-03-12_at_20_18_04-1": {
+  "videoFile": "CleanShot_2026-03-12_at_20_18_04-1/clip_trimmed.mp4",
+  "hookTitle": {
+    "target": "💼英語で「too much on my plate」の使い",
+    "en": "Too much on my plate? 🍽️",
+    "highlights": [
+      "too much on my plate"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 44.51
+  },
+  "hook": {
+    "startTime": 25.659999999999993,
+    "endTime": 26.659999999999993,
+    "reason": "Introduces a common business idiom about being busy, sparking curiosity."
+  },
+  "subtitles": [
+    {
+      "startTime": 0.040000000000000924,
+      "endTime": 1.7400000000000002,
+      "en": "Hey, Nick. Just...",
+      "target": "やあ、ニック。ちょっと引き止めてごめんね",
+      "highlights": [
+        "引き止めて"
+      ],
+      "enHighlights": [
+        "catching you"
+      ]
+    },
+    {
+      "startTime": 1.58,
+      "endTime": 2.3200000000000003,
+      "en": "before you head out.",
+      "target": "出かける前に。",
+      "highlights": [
+        "出かける前に"
+      ],
+      "enHighlights": [
+        "head out"
+      ]
+    },
+    {
+      "startTime": 2.66,
+      "endTime": 3.34,
+      "en": "Did you want to confirm",
+      "target": "何か確認したいことありましたか",
+      "highlights": [
+        "確認したい"
+      ],
+      "enHighlights": [
+        "confirm"
+      ]
+    },
+    {
+      "startTime": 3.379999999999999,
+      "endTime": 4.260000000000002,
+      "en": "something from the",
+      "target": "会議で何か",
+      "highlights": [
+        "会議で"
+      ],
+      "enHighlights": [
+        "the"
+      ]
+    },
+    {
+      "startTime": 4.080000000000002,
+      "endTime": 4.360000000000003,
+      "en": "meeting?",
+      "target": "会議の？",
+      "highlights": [
+        "会議の"
+      ],
+      "enHighlights": [
+        "meeting"
+      ]
+    },
+    {
+      "startTime": 4.360000000000003,
+      "endTime": 6.160000000000004,
+      "en": "Hey, Alex. Thanks for",
+      "target": "やあ、アレックス。連絡ありがとう",
+      "highlights": [
+        "連絡ありがとう"
+      ],
+      "enHighlights": [
+        "Thanks for"
+      ]
+    },
+    {
+      "startTime": 6.040000000000003,
+      "endTime": 7.300000000000001,
+      "en": "reaching out. Yeah,",
+      "target": "連絡してくれて。ええ、",
+      "highlights": [
+        "連絡してくれて"
+      ],
+      "enHighlights": [
+        "reaching out"
+      ]
+    },
+    {
+      "startTime": 7.220000000000002,
+      "endTime": 8.880000000000003,
+      "en": "I wanted to. How are",
+      "target": "そう思っていました。調子はどう？",
+      "highlights": [
+        "そう思っていました"
+      ],
+      "enHighlights": [
+        "I wanted to"
+      ]
+    },
+    {
+      "startTime": 8.780000000000001,
+      "endTime": 9.580000000000002,
+      "en": "you before that?",
+      "target": "その前に、お元気ですか",
+      "highlights": [
+        "お元気ですか"
+      ],
+      "enHighlights": [
+        "How are you"
+      ]
+    },
+    {
+      "startTime": 9.740000000000002,
+      "endTime": 11.040000000000003,
+      "en": "I'm doing well. Thanks.",
+      "target": "元気だよ。ありがとう",
+      "highlights": [
+        "元気だよ"
+      ],
+      "enHighlights": [
+        "doing well"
+      ]
+    },
+    {
+      "startTime": 11.34,
+      "endTime": 12.240000000000002,
+      "en": "Just trying to keep",
+      "target": "ただ、物事を進めようと",
+      "highlights": [
+        "物事を進めようと"
+      ],
+      "enHighlights": [
+        "keep"
+      ]
+    },
+    {
+      "startTime": 12.060000000000002,
+      "endTime": 12.560000000000002,
+      "en": "things moving.",
+      "target": "物事を進めているよ。",
+      "highlights": [
+        "物事を進めている"
+      ],
+      "enHighlights": [
+        "things moving"
+      ]
+    },
+    {
+      "startTime": 12.96,
+      "endTime": 14.240000000000002,
+      "en": "You wanted to confirm...",
+      "target": "君はあれを確認したかったんだよね",
+      "highlights": [
+        "確認したかった"
+      ],
+      "enHighlights": [
+        "confirm that"
+      ]
+    },
+    {
+      "startTime": 14.200000000000003,
+      "endTime": 14.98,
+      "en": "competitor research",
+      "target": "競合調査の",
+      "highlights": [
+        "競合調査"
+      ],
+      "enHighlights": [
+        "competitor research"
+      ]
+    },
+    {
+      "startTime": 15.040000000000003,
+      "endTime": 15.780000000000001,
+      "en": "action item.",
+      "target": "アクションアイテムを。",
+      "highlights": [
+        "アクションアイテム"
+      ],
+      "enHighlights": [
+        "action item"
+      ]
+    },
+    {
+      "startTime": 16.14,
+      "endTime": 16.939999999999998,
+      "en": "Yeah, yeah, exactly.",
+      "target": "ええ、ええ、その通りです。",
+      "highlights": [
+        "その通りです"
+      ],
+      "enHighlights": [
+        "exactly"
+      ]
+    },
+    {
+      "startTime": 16.939999999999998,
+      "endTime": 18.739999999999995,
+      "en": "So yeah, what I want",
+      "target": "だから、ええ、お伝えしたいのは",
+      "highlights": [
+        "お伝えしたい"
+      ],
+      "enHighlights": [
+        "want to tell"
+      ]
+    },
+    {
+      "startTime": 18.559999999999995,
+      "endTime": 19.71999999999999,
+      "en": "to tell you, I'm...",
+      "target": "お伝えしたいのは、私はかなり忙しいと",
+      "highlights": [
+        "かなり忙しい"
+      ],
+      "enHighlights": [
+        "quite busy"
+      ]
+    },
+    {
+      "startTime": 19.839999999999996,
+      "endTime": 21.359999999999992,
+      "en": "and I do understand",
+      "target": "そして、私は理解しています",
+      "highlights": [
+        "理解しています"
+      ],
+      "enHighlights": [
+        "understand"
+      ]
+    },
+    {
+      "startTime": 21.539999999999992,
+      "endTime": 22.739999999999995,
+      "en": "the task, the research",
+      "target": "そのタスク、その調査タスクを",
+      "highlights": [
+        "タスク",
+        "調査タスク"
+      ],
+      "enHighlights": [
+        "task",
+        "research"
+      ]
+    },
+    {
+      "startTime": 22.759999999999998,
+      "endTime": 23.419999999999995,
+      "en": "task you gave me.",
+      "target": "あなたが私に与えたタスクを。",
+      "highlights": [
+        "タスク"
+      ],
+      "enHighlights": [
+        "task"
+      ]
+    },
+    {
+      "startTime": 23.419999999999995,
+      "endTime": 25.139999999999997,
+      "en": "The main thing I want to",
+      "target": "私が伝えたい主なことは",
+      "highlights": [
+        "伝えたい主なこと"
+      ],
+      "enHighlights": [
+        "main thing"
+      ]
+    },
+    {
+      "startTime": 24.939999999999994,
+      "endTime": 26.219999999999995,
+      "en": "tell you is I have too",
+      "target": "伝えたいのは、私には多すぎる",
+      "highlights": [
+        "多すぎる"
+      ],
+      "enHighlights": [
+        "too"
+      ]
+    },
+    {
+      "startTime": 26.019999999999992,
+      "endTime": 26.95999999999999,
+      "en": "much under my plate.",
+      "target": "多くの仕事があるということです。",
+      "highlights": [
+        "多くの仕事"
+      ],
+      "enHighlights": [
+        "my plate"
+      ]
+    },
+    {
+      "startTime": 27.140000000000004,
+      "endTime": 28.200000000000006,
+      "en": "So I'm going to be...",
+      "target": "だから、私は取り組むつもりです",
+      "highlights": [
+        "取り組む"
+      ],
+      "enHighlights": [
+        "working"
+      ]
+    },
+    {
+      "startTime": 28.280000000000005,
+      "endTime": 28.640000000000004,
+      "en": "on this tomorrow.",
+      "target": "明日これに。",
+      "highlights": [
+        "明日"
+      ],
+      "enHighlights": [
+        "tomorrow"
+      ]
+    },
+    {
+      "startTime": 28.640000000000004,
+      "endTime": 29.959999999999997,
+      "en": "And I will ping you once",
+      "target": "そして、一度連絡します",
+      "highlights": [
+        "連絡します"
+      ],
+      "enHighlights": [
+        "ping you"
+      ]
+    },
+    {
+      "startTime": 30.02,
+      "endTime": 30.74,
+      "en": "I'm done tomorrow.",
+      "target": "明日終わったら。",
+      "highlights": [
+        "明日終わったら"
+      ],
+      "enHighlights": [
+        "done tomorrow"
+      ]
+    },
+    {
+      "startTime": 31.560000000000006,
+      "endTime": 32.620000000000005,
+      "en": "That works for me.",
+      "target": "それで大丈夫です。",
+      "highlights": [
+        "大丈夫です"
+      ],
+      "enHighlights": [
+        "works for me"
+      ]
+    },
+    {
+      "startTime": 33,
+      "endTime": 33.72,
+      "en": "Thanks for the update,",
+      "target": "最新情報ありがとう、",
+      "highlights": [
+        "最新情報ありがとう"
+      ],
+      "enHighlights": [
+        "update"
+      ]
+    },
+    {
+      "startTime": 33.739999999999995,
+      "endTime": 35.519999999999996,
+      "en": "Nick. Efficiency is key.",
+      "target": "ニック。効率性が重要だね。",
+      "highlights": [
+        "効率性",
+        "重要"
+      ],
+      "enHighlights": [
+        "Efficiency",
+        "key"
+      ]
+    },
+    {
+      "startTime": 35.82000000000001,
+      "endTime": 36.5,
+      "en": "I'll look for your ping",
+      "target": "あなたの連絡を待っているよ",
+      "highlights": [
+        "連絡を待っている"
+      ],
+      "enHighlights": [
+        "your ping"
+      ]
+    },
+    {
+      "startTime": 36.32000000000001,
+      "endTime": 36.5,
+      "en": "tomorrow.",
+      "target": "明日ね。",
+      "highlights": [
+        "明日"
+      ],
+      "enHighlights": [
+        "tomorrow"
+      ]
+    },
+    {
+      "startTime": 36.500000000000014,
+      "endTime": 37.88000000000001,
+      "en": "Okay, no worries, Alex.",
+      "target": "分かった、気にしないで、アレックス。",
+      "highlights": [
+        "気にしないで"
+      ],
+      "enHighlights": [
+        "no worries"
+      ]
+    },
+    {
+      "startTime": 38.08000000000001,
+      "endTime": 39,
+      "en": "I will ping you tomorrow.",
+      "target": "明日連絡するよ。",
+      "highlights": [
+        "連絡する"
+      ],
+      "enHighlights": [
+        "ping you"
+      ]
+    },
+    {
+      "startTime": 39.18000000000001,
+      "endTime": 39.599999999999994,
+      "en": "See you.",
+      "target": "またね。",
+      "highlights": [
+        "またね"
+      ],
+      "enHighlights": [
+        "See you"
+      ]
+    },
+    {
+      "startTime": 39.69999999999999,
+      "endTime": 41.15999999999998,
+      "en": "Sounds good. Have a",
+      "target": "いいね。良い一日を",
+      "highlights": [
+        "良い一日を"
+      ],
+      "enHighlights": [
+        "Sounds good"
+      ]
+    },
+    {
+      "startTime": 40.93999999999998,
+      "endTime": 41.499999999999986,
+      "en": "productive day.",
+      "target": "生産的な一日を。",
+      "highlights": [
+        "生産的な一日"
+      ],
+      "enHighlights": [
+        "productive day"
+      ]
+    },
+    {
+      "startTime": 41.699999999999974,
+      "endTime": 42.73999999999998,
+      "en": "You too. Bye-bye.",
+      "target": "あなたもね。じゃあね。",
+      "highlights": [
+        "あなたもね"
+      ],
+      "enHighlights": [
+        "You too"
+      ]
+    },
+    {
+      "startTime": 42.839999999999975,
+      "endTime": 43.85999999999997,
+      "en": "Take care, Nick.",
+      "target": "気をつけて、ニック。",
+      "highlights": [
+        "気をつけて"
+      ],
+      "enHighlights": [
+        "Take care"
+      ]
+    },
+    {
+      "startTime": 44.03999999999998,
+      "endTime": 44.49999999999997,
+      "en": "Have a great day.",
+      "target": "良い一日を。",
+      "highlights": [
+        "良い一日を"
+      ],
+      "enHighlights": [
+        "great day"
+      ]
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 25.659999999999993,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "too much on my plate",
+      "literal": "皿の上のものが多すぎる",
+      "nuance": "抱えている仕事や責任が多すぎて、処理しきれない状態を表すイディオムです。通常、ポジティブな意味ではなく、忙しさやストレスを感じている状況で使われます。"
+    },
+    {
+      "triggerTime": 29.099999999999998,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "ping you",
+      "literal": "あなたをピンで打つ",
+      "nuance": "ビジネスシーンで「後で連絡する」「メッセージを送る」という意味で使われるカジュアルな表現です。特にチャットやメールで短い連絡を入れる場合によく用いられます。"
+    },
+    {
+      "triggerTime": 6.040000000000003,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "reaching out",
+      "literal": "手を伸ばす",
+      "nuance": "連絡を取る、働きかける、という意味のビジネスでよく使われるフレーズです。特に、相手に何かを依頼したり、情報共有のために自ら積極的に連絡を取る際に用いられます。"
+    },
+    {
+      "triggerTime": 11.940000000000001,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "keep things moving",
+      "literal": "物事を動き続ける",
+      "nuance": "プロジェクトやタスクの進捗を滞らせずに、円滑に進める、という意味の表現です。ビジネスの効率性や生産性を重視する文脈で使われます。"
+    }
+  ],
+  "boringCuts": [
+    {
+      "startTime": 17.08,
+      "endTime": 18.3,
+      "reason": "Long pause between speakers."
+    },
+    {
+      "startTime": 33.66,
+      "endTime": 34.88,
+      "reason": "Filler 'So' and long pause."
+    },
+    {
+      "startTime": 41.36,
+      "endTime": 43.18,
+      "reason": "Long pause before new thought."
+    },
+    {
+      "startTime": 49.04,
+      "endTime": 50.52,
+      "reason": "Pause before stating next action."
+    },
+    {
+      "startTime": 61.2,
+      "endTime": 62.38,
+      "reason": "Pause before 'Okay'."
+    }
+  ],
+  "videoDuration": 44.51,
+  "targetLanguage": "ja",
+  "silenceGaps": [
+    {
+      "originalStart": 17.060000000000002,
+      "originalEnd": 18.2,
+      "duration": 1.139999999999997
+    },
+    {
+      "originalStart": 23.580000000000002,
+      "originalEnd": 26.360000000000003,
+      "duration": 2.780000000000001
+    },
+    {
+      "originalStart": 41.68,
+      "originalEnd": 43.08,
+      "duration": 1.3999999999999986
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935
+    },
+    {
+      "originalStart": 49.52,
+      "originalEnd": 50.42,
+      "duration": 0.8999999999999986
+    },
+    {
+      "originalStart": 53.34,
+      "originalEnd": 56.16,
+      "duration": 2.819999999999993
+    },
+    {
+      "originalStart": 61.68,
+      "originalEnd": 62.28,
+      "duration": 0.6000000000000014
+    },
+    {
+      "originalStart": 65.47999999999999,
+      "originalEnd": 68.46000000000001,
+      "duration": 2.980000000000018
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068
+    },
+    {
+      "originalStart": 72.28,
+      "originalEnd": 75.34,
+      "duration": 3.0600000000000023
+    }
+  ],
+  "appliedCuts": [
+    {
+      "originalStart": 17.060000000000002,
+      "originalEnd": 18.3,
+      "duration": 1.2399999999999984,
+      "type": "retention",
+      "reason": "Long pause between speakers."
+    },
+    {
+      "originalStart": 23.580000000000002,
+      "originalEnd": 26.360000000000003,
+      "duration": 2.780000000000001,
+      "type": "silence"
+    },
+    {
+      "originalStart": 33.66,
+      "originalEnd": 34.88,
+      "duration": 1.220000000000006,
+      "type": "retention",
+      "reason": "Filler 'So' and long pause."
+    },
+    {
+      "originalStart": 41.36,
+      "originalEnd": 43.18,
+      "duration": 1.8200000000000003,
+      "type": "retention",
+      "reason": "Long pause before new thought."
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935,
+      "type": "silence"
+    },
+    {
+      "originalStart": 49.04,
+      "originalEnd": 50.52,
+      "duration": 1.480000000000004,
+      "type": "retention",
+      "reason": "Pause before stating next action."
+    },
+    {
+      "originalStart": 53.34,
+      "originalEnd": 56.16,
+      "duration": 2.819999999999993,
+      "type": "silence"
+    },
+    {
+      "originalStart": 61.2,
+      "originalEnd": 62.38,
+      "duration": 1.1799999999999997,
+      "type": "retention",
+      "reason": "Pause before 'Okay'."
+    },
+    {
+      "originalStart": 65.47999999999999,
+      "originalEnd": 68.46000000000001,
+      "duration": 2.980000000000018,
+      "type": "silence"
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068,
+      "type": "silence"
+    },
+    {
+      "originalStart": 72.28,
+      "originalEnd": 75.34,
+      "duration": 3.0600000000000023,
+      "type": "silence"
     }
   ]
 } as unknown as ClipData

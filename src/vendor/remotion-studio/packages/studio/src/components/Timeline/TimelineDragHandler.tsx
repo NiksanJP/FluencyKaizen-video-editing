@@ -152,6 +152,7 @@ const Inner: React.FC = () => {
 	const {playing, play, pause, seek} = PlayerInternals.usePlayer();
 
 	const scroller = useRef<Timer | null>(null);
+	const hasMovedWhileDragging = useRef(false);
 
 	const stopInterval = () => {
 		if (scroller.current) {
@@ -213,13 +214,7 @@ const Inner: React.FC = () => {
 				return;
 			}
 
-			const frame = getFrameFromX({
-				clientX: getClientXWithScroll(e.clientX) - left,
-				durationInFrames: videoConfig.durationInFrames,
-				width,
-				extrapolate: 'clamp',
-			});
-			seek(frame);
+			hasMovedWhileDragging.current = false;
 			setDragging({
 				dragging: true,
 				wasPlaying: playing,
@@ -287,6 +282,7 @@ const Inner: React.FC = () => {
 					});
 
 					redrawTimelineSliderFast.current?.draw(nextFrame);
+					hasMovedWhileDragging.current = true;
 					seek(nextFrame);
 					scrollToTimelineXOffset(scrollPos);
 				};
@@ -320,6 +316,7 @@ const Inner: React.FC = () => {
 					});
 
 					redrawTimelineSliderFast.current?.draw(nextFrame);
+					hasMovedWhileDragging.current = true;
 					seek(nextFrame);
 					scrollToTimelineXOffset(scrollPos);
 				};
@@ -331,6 +328,7 @@ const Inner: React.FC = () => {
 				}, 100);
 			} else {
 				stopInterval();
+				hasMovedWhileDragging.current = true;
 				seek(frame);
 			}
 		},
@@ -417,18 +415,21 @@ const Inner: React.FC = () => {
 				dragging: false,
 			});
 
-			const frame = getFrameFromX({
-				clientX: getClientXWithScroll(e.clientX) - left,
-				durationInFrames: videoConfig.durationInFrames,
-				width,
-				extrapolate: 'clamp',
-			});
+			// Only update frame if user actually dragged; ignore simple clicks
+			if (hasMovedWhileDragging.current) {
+				const frame = getFrameFromX({
+					clientX: getClientXWithScroll(e.clientX) - left,
+					durationInFrames: videoConfig.durationInFrames,
+					width,
+					extrapolate: 'clamp',
+				});
 
-			setFrame((c) => {
-				const newObj = {...c, [videoConfig.id]: frame};
-				Internals.persistCurrentFrame(newObj);
-				return newObj;
-			});
+				setFrame((c) => {
+					const newObj = {...c, [videoConfig.id]: frame};
+					Internals.persistCurrentFrame(newObj);
+					return newObj;
+				});
+			}
 
 			if (dragging.wasPlaying) {
 				play();

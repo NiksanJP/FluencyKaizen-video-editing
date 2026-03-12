@@ -605,8 +605,10 @@
     function renderHookTitle() {
       var section = createSection('Hook Title', null, false);
       var body = section.querySelector('.section-body');
-      body.appendChild(fieldRow('JA', createInput(clipData.hookTitle.ja, function(v) {
-        clipData.hookTitle.ja = v; markDirty();
+      body.appendChild(fieldRow('Target', createInput(clipData.hookTitle.target || clipData.hookTitle.ja || '', function(v) {
+        clipData.hookTitle.target = v;
+        if (!clipData.hookTitle.ja) clipData.hookTitle.ja = v;
+        markDirty();
       })));
       body.appendChild(fieldRow('EN', createInput(clipData.hookTitle.en, function(v) {
         clipData.hookTitle.en = v; markDirty();

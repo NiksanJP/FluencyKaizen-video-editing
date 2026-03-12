@@ -58,9 +58,12 @@ export interface ClipData {
     startTime: number;
     endTime: number;
   };
+  hook?: HookSegment; // opening 1-3s attention segment (prepended in render)
   subtitles: SubtitleSegment[];
   vocabCards: VocabCard[];
+  boringCuts?: RetentionCut[]; // Gemini-proposed boring sections to remove
   silenceGaps?: SilenceGap[]; // gaps removed by silence detection (audit trail)
+  appliedCuts?: AppliedCut[]; // all removed segments after merge (silence + retention)
 }
 
 export interface SubtitleSegment {
@@ -86,6 +89,27 @@ export interface SilenceGap {
   originalStart: number; // absolute source video time (seconds)
   originalEnd: number;   // absolute source video time (seconds)
   duration: number;      // originalEnd - originalStart
+}
+
+export interface HookSegment {
+  startTime: number; // absolute timestamp on current source timeline
+  endTime: number;   // absolute timestamp on current source timeline
+  reason?: string;
+}
+
+export interface RetentionCut {
+  startTime: number; // absolute timestamp on transcript/source timeline
+  endTime: number;   // absolute timestamp on transcript/source timeline
+  reason: string;
+  confidence?: number; // 0-1 score from Gemini
+}
+
+export interface AppliedCut {
+  originalStart: number;
+  originalEnd: number;
+  duration: number;
+  type: "silence" | "retention";
+  reason?: string;
 }
 
 /**
