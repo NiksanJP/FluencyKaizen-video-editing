@@ -97,7 +97,7 @@ ok "input/ and output/ exist"
 echo ""
 echo "🔧 Patching PATH in transcribe.ts..."
 PYTHON_BIN_DIR=$(dirname "$PYTHON")
-TRANSCRIBE="pipeline/transcribe.ts"
+TRANSCRIBE="src/pipeline/transcribe.ts"
 
 # Find the directory containing the whisper binary
 WHISPER_BIN=$(command -v whisper 2>/dev/null)

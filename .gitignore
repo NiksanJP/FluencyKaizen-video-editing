@@ -51,9 +51,12 @@ npm-debug.log*
 *.tmp
 .turbo/
 
-# Studio wrapper build artifacts
-studio-wrapper/.build/
-studio-wrapper/.context-prompt.txt
+# Studio build artifacts
+src/studio/.build/
+src/studio/.context-prompt.txt
+
+# Electron build output
+out/
 
 # Auto-generated per-clip Remotion sources (synced from output/)
 remotion/src/clips/

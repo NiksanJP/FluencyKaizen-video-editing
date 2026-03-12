@@ -12,6 +12,6 @@
     "baseUrl": ".",
     "types": ["bun-types"]
   },
-  "include": ["pipeline/**/*.ts"],
-  "exclude": ["node_modules", "dist", "remotion"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

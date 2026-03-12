@@ -177,12 +177,12 @@ interface VocabCard {
 
 | Path | Purpose | Agent |
 |------|---------|-------|
-| `pipeline/types.ts` | ClipData schema (single source of truth) | All agents |
-| `pipeline/index.ts` | CLI entrypoint | Pipeline Orchestrator |
-| `pipeline/transcribe.ts` | Whisper integration | Pipeline Orchestrator |
-| `pipeline/analyze.ts` | Gemini API integration | Pipeline Orchestrator |
-| `remotion/src/ClipComposition.tsx` | Main composition | Remotion Composer |
-| `remotion/src/components/` | Visual components | Remotion Composer |
+| `src/pipeline/types.ts` | ClipData schema (single source of truth) | All agents |
+| `src/pipeline/index.ts` | CLI entrypoint | Pipeline Orchestrator |
+| `src/pipeline/transcribe.ts` | Whisper integration | Pipeline Orchestrator |
+| `src/pipeline/analyze.ts` | Gemini API integration | Pipeline Orchestrator |
+| `src/remotion/ClipComposition.tsx` | Main composition | Remotion Composer |
+| `src/remotion/components/` | Visual components | Remotion Composer |
 | `output/[name]/clip.json` | **Editable artifact** | Clip Editor, Schema Validator |
 | `.claude/agents.json` | Agent configuration | Agent framework |
 | `.claude/settings.json` | Claude Code settings | Setup Manager |
@@ -245,8 +245,8 @@ When user runs `/edit-clip` and makes a natural language request (e.g. "make the
 ## Setup Checklist
 
 Before first run, agents will verify:
-- [ ] Create pipeline/ directory and TypeScript files ✓
-- [ ] Create remotion/ workspace ✓
+- [ ] Create src/pipeline/ directory and TypeScript files ✓
+- [ ] Create src/remotion/ source tree ✓
 - [ ] Install dependencies: `bun install`
 - [ ] Add Gemini API key to `.env`
 - [ ] Create `input/` and `output/` directories ✓
