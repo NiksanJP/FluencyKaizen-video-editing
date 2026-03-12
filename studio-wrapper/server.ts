@@ -979,16 +979,28 @@ const server = Bun.serve({
         <script>
           localStorage.setItem('remotion.sidebarPanel', 'assets');
           var backBtnInjected = false;
-          new MutationObserver(function(mutations, obs) {
+          var hideCompositionsTab = function() {
             var btns = document.querySelectorAll('.css-reset div[role="button"]');
             var compositionsHidden = false;
+            var assetsBtn = null;
             for (var i = 0; i < btns.length; i++) {
-              if (btns[i].textContent.trim() === 'Compositions') {
+              var label = (btns[i].textContent || '').trim();
+              if (label === 'Compositions') {
                 btns[i].style.display = 'none';
                 compositionsHidden = true;
-                break;
+              } else if (label === 'Assets') {
+                assetsBtn = btns[i];
               }
             }
+            var selectedPanel = localStorage.getItem('remotion.sidebarPanel');
+            if (assetsBtn && selectedPanel !== 'assets') {
+              assetsBtn.click();
+            }
+            localStorage.setItem('remotion.sidebarPanel', 'assets');
+            return compositionsHidden;
+          };
+          new MutationObserver(function() {
+            hideCompositionsTab();
             if (!backBtnInjected) {
               var menubar = document.querySelector('[role="menubar"]')
                 || document.querySelector('.css-reset > div > div > div');
@@ -1024,8 +1036,8 @@ const server = Bun.serve({
                 backBtnInjected = true;
               }
             }
-            if (compositionsHidden && backBtnInjected) obs.disconnect();
           }).observe(document.body, { childList: true, subtree: true });
+          hideCompositionsTab();
         </script>`;
         html = html.replace("</head>", injection + "</head>");
         headers.set("content-length", String(Buffer.byteLength(html)));

@@ -13,19 +13,32 @@ function applyFluencyKaizenCustomizations() {
   localStorage.setItem("remotion.sidebarPanel", "assets");
 
   let backBtnInjected = false;
-  let compositionsHidden = false;
 
-  const observer = new MutationObserver(() => {
-    // Hide the "Compositions" tab button
+  const hideCompositionsTab = () => {
     const btns = document.querySelectorAll('.css-reset div[role="button"]');
+    let compositionsHidden = false;
+    let assetsBtn: HTMLElement | null = null;
+
     for (let i = 0; i < btns.length; i++) {
       const btn = btns[i] as HTMLElement;
-      if (btn.textContent?.trim() === "Compositions") {
+      const label = btn.textContent?.trim();
+      if (label === "Compositions") {
         btn.style.display = "none";
         compositionsHidden = true;
-        break;
+      } else if (label === "Assets") {
+        assetsBtn = btn;
       }
     }
+
+    if (assetsBtn && localStorage.getItem("remotion.sidebarPanel") !== "assets") {
+      assetsBtn.click();
+    }
+    localStorage.setItem("remotion.sidebarPanel", "assets");
+    return compositionsHidden;
+  };
+
+  const observer = new MutationObserver(() => {
+    hideCompositionsTab();
 
     // Inject "Back to Home" button into the top menubar
     if (!backBtnInjected) {
@@ -104,13 +117,10 @@ function applyFluencyKaizenCustomizations() {
         backBtnInjected = true;
       }
     }
-
-    if (compositionsHidden && backBtnInjected) {
-      observer.disconnect();
-    }
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
+  hideCompositionsTab();
 }
 
 // Run when DOM is ready (studio loads asynchronously)

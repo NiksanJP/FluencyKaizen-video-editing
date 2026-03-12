@@ -17,6 +17,7 @@ const projectRoot = resolve(dirname(import.meta.dir));
 const outputDir = resolve(projectRoot, "output");
 
 const requestedClipName = process.argv[2] || null;
+const toCompositionId = (name: string) => name.replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
 
 if (requestedClipName) {
   console.log(`\n🎬 Launching FluencyKaizen Studio for clip: ${requestedClipName}\n`);
@@ -290,7 +291,7 @@ Checks:
 Renders this composition's clip.json to MP4 using Remotion.
 
 ## Steps
-1. Run: \`cd ${projectRoot}/remotion && bun remotion render ClipComposition ${resolve(outputDir, clip.name, "render.mp4")}\`
+1. Run: \`cd ${projectRoot}/remotion && bun remotion render ${toCompositionId(clip.name)} ${resolve(outputDir, clip.name, "render.mp4")}\`
 2. Output: \`./render.mp4\`
 
 ## Output Format

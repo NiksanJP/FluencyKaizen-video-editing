@@ -11,13 +11,13 @@
     "editor": "vite --config vite.editor.config.ts"
   },
   "devDependencies": {
-    "@remotion/cli": "^4.0.429",
-    "@remotion/studio": "^4.0.429",
+    "@remotion/cli": "4.0.434",
+    "@remotion/studio": "4.0.434",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "bun-types": "latest",
-    "remotion": "^4.0.429",
+    "remotion": "4.0.434",
     "typescript": "^5.0.0"
   },
   "dependencies": {

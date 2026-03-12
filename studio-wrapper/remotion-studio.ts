@@ -7,13 +7,29 @@
  */
 
 import { createRequire } from "module";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
 import { existsSync } from "fs";
 import { StudioServerInternals } from "@remotion/studio-server";
-import type { RenderJob, RenderJobWithCleanup } from "@remotion/studio-shared";
+import type { RenderJob } from "@remotion/studio-shared";
 
 // createRequire is needed to resolve CJS packages (Remotion uses require.resolve internally)
 const _require = createRequire(import.meta.url);
+const remotionCliPkgPath = _require.resolve("@remotion/cli/package.json");
+const remotionCliQueuePath = resolve(
+  dirname(remotionCliPkgPath),
+  "dist/render-queue/queue.js",
+);
+const renderQueue = _require(remotionCliQueuePath) as {
+  getRenderQueue: () => RenderJob[];
+  addJob: (args: {
+    job: unknown;
+    entryPoint: string;
+    remotionRoot: string;
+    logLevel: "error" | "info" | "trace" | "verbose" | "warn";
+  }) => void;
+  cancelJob: (jobId: string) => void;
+  removeJob: (jobId: string) => void;
+};
 
 /**
  * Start Remotion Studio programmatically.
@@ -41,9 +57,6 @@ export async function startRemotionStudio({
       ? `Using vendored Remotion Studio source: ${vendoredPreviewEntry}`
       : `Using installed Remotion Studio package entry: ${previewEntry}`,
   );
-
-  // Minimal render queue — no render jobs needed for preview-only mode
-  const renderQueue: RenderJob[] = [];
 
   await StudioServerInternals.startStudio({
     previewEntry,
@@ -106,30 +119,12 @@ export async function startRemotionStudio({
       publicLicenseKey: null,
       outputLocation: null,
     }),
-    getRenderQueue: () => renderQueue,
+    getRenderQueue: renderQueue.getRenderQueue,
     numberOfAudioTags: 0,
     queueMethods: {
-      addJob: ({
-        job,
-        entryPoint,
-        remotionRoot: root,
-        logLevel,
-      }: {
-        job: RenderJobWithCleanup;
-        entryPoint: string;
-        remotionRoot: string;
-        logLevel: any;
-      }) => {
-        renderQueue.push(job);
-      },
-      cancelJob: (jobId: string) => {
-        const job = renderQueue.find((j) => j.id === jobId) as any;
-        if (job?.cleanup) job.cleanup();
-      },
-      removeJob: (jobId: string) => {
-        const idx = renderQueue.findIndex((j) => j.id === jobId);
-        if (idx !== -1) renderQueue.splice(idx, 1);
-      },
+      addJob: renderQueue.addJob,
+      cancelJob: renderQueue.cancelJob,
+      removeJob: renderQueue.removeJob,
     },
     gitSource: null,
     bufferStateDelayInMilliseconds: null,
