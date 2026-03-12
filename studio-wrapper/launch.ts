@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
 /**
- * Studio launcher — orchestrates Remotion Studio, file watcher, and the wrapper server.
+ * Studio launcher — orchestrates Remotion Studio and file watching.
  *
  * Usage: bun studio-wrapper/launch.ts [clip-name]
- *
- * If no clip name is given, uses the first clip found in output/.
  */
 
 import { readdir, readFile, writeFile, mkdir, copyFile } from "fs/promises";
@@ -13,34 +11,18 @@ import { existsSync } from "fs";
 import { $ } from "bun";
 import { generateClipTsx } from "../pipeline/generate-tsx.js";
 import { syncClipFiles, generateClipCompositions } from "../remotion/watch-clip.js";
+import { startRemotionStudio } from "./remotion-studio.js";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 const outputDir = resolve(projectRoot, "output");
-const wrapperDir = resolve(projectRoot, "studio-wrapper");
 
-// --- Determine clip name ---
+const requestedClipName = process.argv[2] || null;
 
-let clipName = process.argv[2];
-
-if (!clipName) {
-  try {
-    const dirs = (await readdir(outputDir)).sort();
-    for (const dir of dirs) {
-      try {
-        await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
-        clipName = dir;
-        break;
-      } catch {}
-    }
-  } catch {}
+if (requestedClipName) {
+  console.log(`\n🎬 Launching FluencyKaizen Studio for clip: ${requestedClipName}\n`);
+} else {
+  console.log(`\n🎬 Launching FluencyKaizen Studio\n`);
 }
-
-if (!clipName) {
-  console.error("No clips found in output/. Run /process-video first.");
-  process.exit(1);
-}
-
-console.log(`\n🎬 Launching FluencyKaizen Studio for clip: ${clipName}\n`);
 
 async function discoverClipsLocal() {
   const entries: Array<{ name: string; data: any; videoFile: string }> = [];
@@ -341,43 +323,34 @@ Regenerates \`clip-data-all.ts\` so the Remotion preview reflects the latest \`.
 
 const clips = await discoverClipsLocal();
 if (clips.length === 0) {
-  console.error("No clips found in output/. Run /process-video first.");
-  process.exit(1);
-}
+  console.log("No clips found in output/. Starting on the home page.\n");
+} else {
+  console.log(`Found ${clips.length} clip(s): ${clips.map((c) => c.name).join(", ")}\n`);
+  console.log("Setting up...");
+  await ensureVideoSymlinksLocal(clips);
+  await generateAllClipsFileLocal(clips);
+  await generateAllContextPrompts(clips);
 
-console.log(`Found ${clips.length} clip(s): ${clips.map((c) => c.name).join(", ")}\n`);
-console.log("Setting up...");
-await ensureVideoSymlinksLocal(clips);
-await generateAllClipsFileLocal(clips);
-await generateAllContextPrompts(clips);
-
-// Auto-generate TSX + style.json for clips that don't have them yet
-for (const clip of clips) {
-  const tsxPath = resolve(outputDir, clip.name, "ClipComposition.tsx");
-  if (!existsSync(tsxPath)) {
-    console.log(`  Generating TSX for ${clip.name}...`);
-    await generateClipTsx(clip.name, resolve(outputDir, clip.name), projectRoot);
+  // Auto-generate TSX + style.json for clips that don't have them yet
+  for (const clip of clips) {
+    const tsxPath = resolve(outputDir, clip.name, "ClipComposition.tsx");
+    if (!existsSync(tsxPath)) {
+      console.log(`  Generating TSX for ${clip.name}...`);
+      await generateClipTsx(clip.name, resolve(outputDir, clip.name), projectRoot);
+    }
   }
-}
 
-// Symlink TSX/style from output/ → remotion/src/clips/ (instant HMR)
-console.log("  Symlinking TSX files to remotion/src/clips/...");
-for (const clip of clips) {
-  const tsxPath = resolve(outputDir, clip.name, "ClipComposition.tsx");
-  if (existsSync(tsxPath)) {
-    await syncClipFiles(clip.name);
+  // Symlink TSX/style from output/ → remotion/src/clips/ (instant HMR)
+  console.log("  Symlinking TSX files to remotion/src/clips/...");
+  for (const clip of clips) {
+    const tsxPath = resolve(outputDir, clip.name, "ClipComposition.tsx");
+    if (existsSync(tsxPath)) {
+      await syncClipFiles(clip.name);
+    }
   }
-}
-await generateClipCompositions();
+  await generateClipCompositions();
 
-await generatePerCompositionClaude(clips);
-
-// --- Install dependencies if needed ---
-
-if (!existsSync(resolve(wrapperDir, "node_modules"))) {
-  console.log("\nInstalling studio-wrapper dependencies...");
-  await $`cd ${wrapperDir} && bun install`.quiet();
-  console.log("  Dependencies installed");
+  await generatePerCompositionClaude(clips);
 }
 
 // --- Find free ports ---
@@ -402,10 +375,10 @@ function findFreePort(preferred: number): Promise<number> {
   });
 }
 
-const remotionPort = await findFreePort(3000);
-const wrapperPort = await findFreePort(4000);
+const wrapperPort = await findFreePort(3000);
+const remotionPort = await findFreePort(wrapperPort === 3001 ? 3002 : 3001);
 
-// --- Start child processes ---
+// --- Start processes ---
 
 const children: Array<import("bun").Subprocess> = [];
 
@@ -417,16 +390,17 @@ const watcher = Bun.spawn(["bun", resolve(projectRoot, "remotion/watch-clip.ts")
 });
 children.push(watcher);
 
-// 2. Remotion Studio
-console.log(`Starting Remotion Studio on port ${remotionPort}...`);
-const studio = Bun.spawn(["bun", "remotion", "studio", "--no-open", "--port", String(remotionPort)], {
-  cwd: resolve(projectRoot, "remotion"),
-  stdio: ["ignore", "pipe", "inherit"],
-  env: { ...process.env },
-});
-children.push(studio);
+// 2. Remotion Studio — started programmatically using @remotion/studio-server API
+//    No subprocess needed; the studio runs in-process on remotionPort.
+console.log(`Starting Remotion Studio (embedded) on port ${remotionPort}...`);
+const remotionRoot = resolve(projectRoot, "remotion");
 
-// Wait for Studio to be ready
+// Start Remotion Studio in background (it starts its own HTTP server)
+startRemotionStudio({ remotionRoot, port: remotionPort }).catch((err) => {
+  console.error("Remotion Studio error:", err);
+});
+
+// Wait for Remotion Studio HTTP server to be ready (up to 60s)
 console.log("Waiting for Remotion Studio...");
 let studioReady = false;
 for (let i = 0; i < 60; i++) {
@@ -447,9 +421,9 @@ if (!studioReady) {
 }
 console.log("  Remotion Studio is ready");
 
-// 3. Wrapper server
-console.log(`Starting studio wrapper on port ${wrapperPort}...`);
-const wrapper = Bun.spawn(["bun", resolve(wrapperDir, "server.ts")], {
+// 3. Wrapper server (home page + split view + proxy)
+console.log(`Starting wrapper server on port ${wrapperPort}...`);
+const wrapperServer = Bun.spawn(["bun", resolve(projectRoot, "studio-wrapper/server.ts")], {
   cwd: projectRoot,
   stdio: ["ignore", "inherit", "inherit"],
   env: {
@@ -458,21 +432,38 @@ const wrapper = Bun.spawn(["bun", resolve(wrapperDir, "server.ts")], {
     REMOTION_PORT: String(remotionPort),
   },
 });
-children.push(wrapper);
+children.push(wrapperServer);
 
-// Give wrapper a moment to start
-await Bun.sleep(1000);
+console.log("Waiting for wrapper server...");
+let wrapperReady = false;
+for (let i = 0; i < 30; i++) {
+  try {
+    const res = await fetch(`http://localhost:${wrapperPort}`);
+    if (res.ok) {
+      wrapperReady = true;
+      break;
+    }
+  } catch {}
+  await Bun.sleep(500);
+}
+
+if (!wrapperReady) {
+  console.error("Wrapper server failed to start within 15 seconds.");
+  cleanup();
+  process.exit(1);
+}
+console.log("  Wrapper server is ready");
 
 // 4. Open browser (skip if launched from Electron)
 if (process.env.ELECTRON_NO_OPEN !== "1") {
-  console.log(`\n🚀 Opening browser to http://localhost:${wrapperPort}/app\n`);
+  console.log(`\n🚀 Opening browser to http://localhost:${wrapperPort}\n`);
   try {
-    await $`open http://localhost:${wrapperPort}/app`.quiet();
+    await $`open http://localhost:${wrapperPort}`.quiet();
   } catch {
-    console.log(`  Could not open browser automatically. Navigate to http://localhost:${wrapperPort}/app`);
+    console.log(`  Could not open browser automatically. Navigate to http://localhost:${wrapperPort}`);
   }
 } else {
-  console.log(`\n🚀 Studio ready at http://localhost:${wrapperPort}/app\n`);
+  console.log(`\n🚀 Studio ready at http://localhost:${wrapperPort}\n`);
 }
 
 console.log("Press Ctrl+C to stop all processes.\n");
@@ -499,6 +490,6 @@ function cleanup() {
 process.on("SIGINT", cleanup);
 process.on("SIGTERM", cleanup);
 
-// Keep alive — wait for any child to exit
+// Keep alive — wait for any child to exit (watcher)
 await Promise.race(children.map((c) => c.exited));
 cleanup();

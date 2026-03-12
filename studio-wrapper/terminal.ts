@@ -13,6 +13,9 @@ interface TerminalInstance {
 }
 
 const terminals: Record<string, TerminalInstance> = {};
+
+const toRemotionCompositionId = (id: string) =>
+  id.replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
 let activeTabId: string | null = null;
 
 const RECONNECT_BASE_DELAY = 1000;   // 1s initial
@@ -270,7 +273,11 @@ fetch("/api/clips")
 
     // Check URL hash for a specific composition (set by Electron project page)
     const hashComp = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-    const targetComp = hashComp && clipIds.includes(hashComp) ? hashComp : clipIds[0];
+    const targetComp = hashComp
+      ? (clipIds.includes(hashComp)
+        ? hashComp
+        : clipIds.find((id) => toRemotionCompositionId(id) === hashComp))
+      : clipIds[0];
 
     if (targetComp) {
       (window as any).activateCompositionTabs(targetComp);
@@ -278,7 +285,7 @@ fetch("/api/clips")
       // Also navigate the Remotion iframe to this composition
       const frame = document.getElementById("studioFrame") as HTMLIFrameElement | null;
       if (frame) {
-        frame.src = `/${encodeURIComponent(targetComp)}`;
+        frame.src = `/${encodeURIComponent(toRemotionCompositionId(targetComp))}`;
       }
     }
   })

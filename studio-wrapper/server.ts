@@ -6,7 +6,9 @@
  * CLI tools (claude, aider) work correctly with colors, cursor movement, and input.
  *
  * Routes:
- *   GET /              → index.html
+ *   GET /              → project picker (home)
+ *   GET /app/studio    → split-pane studio wrapper
+ *   GET /_studio/*     → Remotion Studio proxy namespace
  *   GET /styles.css    → styles.css
  *   GET /terminal.js   → bundled terminal.ts
  *   GET /node_modules/ → static node_modules assets (xterm CSS)
@@ -15,10 +17,12 @@
  *   WS  /ws/gemini/:compId  → per-composition Gemini (aider)
  */
 
-import { resolve, dirname, extname } from "path";
-import { readFile, readdir, writeFile } from "fs/promises";
-import { watch } from "fs";
+import { resolve, dirname, extname, basename, parse } from "path";
+import { readFile, readdir, writeFile, mkdir, rm } from "fs/promises";
+import { watch, existsSync } from "fs";
 import { execFileSync } from "child_process";
+import type { ClipData, SupportedLanguage } from "../pipeline/types.js";
+import { generateClipCompositions } from "../remotion/watch-clip.js";
 
 /** Check if a command exists on the system PATH */
 function commandExists(cmd: string): boolean {
@@ -37,8 +41,6 @@ const remotionPort = process.env.REMOTION_PORT || "3000";
 
 // Resolve python3 path — check common locations if not on PATH (Electron strips PATH)
 function findPython3(): string {
-  const { existsSync } = require("fs");
-  // Check absolute paths first (Electron GUI apps don't inherit shell PATH)
   const absoluteCandidates = ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/usr/bin/python3"];
   for (const p of absoluteCandidates) {
     if (existsSync(p)) return p;
@@ -52,6 +54,13 @@ function findPython3(): string {
 }
 const python3Path = findPython3();
 const outputDir = resolve(projectRoot, "output");
+
+const LANGUAGE_LABELS: Record<SupportedLanguage, { name: string; nativeName: string }> = {
+  ja: { name: "Japanese", nativeName: "日本語" },
+  zh: { name: "Chinese", nativeName: "中文" },
+  ko: { name: "Korean", nativeName: "한국어" },
+  es: { name: "Spanish", nativeName: "Español" },
+};
 
 // MIME types for static files
 const MIME: Record<string, string> = {
@@ -93,6 +102,306 @@ try {
     }, 50);
   });
 } catch {}
+
+const pipelineClients = new Set<WebSocket>();
+let pipelineProcess: ReturnType<typeof Bun.spawn> | null = null;
+
+type PipelineStatus = "running" | "done" | "error";
+
+interface PipelineState {
+  status: PipelineStatus;
+  fileName: string;
+  compId: string;
+  targetLanguage: SupportedLanguage;
+  startedAt: number;
+  currentStep: string | null;
+  currentMessage: string | null;
+  logs: string[];
+  captions: string[];
+  captionSource: "subtitles" | "transcript" | null;
+  errorMessage: string | null;
+}
+
+let activePipelineState: PipelineState | null = null;
+
+function createPipelineState(fileName: string, compId: string, targetLanguage: SupportedLanguage): PipelineState {
+  return {
+    status: "running",
+    fileName,
+    compId,
+    targetLanguage,
+    startedAt: Date.now(),
+    currentStep: null,
+    currentMessage: null,
+    logs: [],
+    captions: [],
+    captionSource: null,
+    errorMessage: null,
+  };
+}
+
+function getPipelineSnapshot() {
+  if (!activePipelineState) {
+    return null;
+  }
+
+  return {
+    type: "snapshot",
+    ...activePipelineState,
+  };
+}
+
+function appendPipelineLog(text: string) {
+  if (!activePipelineState) {
+    return;
+  }
+
+  activePipelineState.logs.push(text);
+  if (activePipelineState.logs.length > 250) {
+    activePipelineState.logs.splice(0, activePipelineState.logs.length - 250);
+  }
+}
+
+function updatePipelineStep(step: string, message: string) {
+  if (!activePipelineState) {
+    return;
+  }
+
+  if (
+    activePipelineState.currentStep === step &&
+    activePipelineState.currentMessage === message
+  ) {
+    return;
+  }
+
+  activePipelineState.currentStep = step;
+  activePipelineState.currentMessage = message;
+  broadcastPipelineEvent({ type: "step", step, message });
+}
+
+async function readCaptionPreview(compId: string) {
+  const clipPath = resolve(outputDir, compId, "clip.json");
+  try {
+    const clipRaw = await readFile(clipPath, "utf-8");
+    const clipData = JSON.parse(clipRaw) as ClipData;
+    const captions = (clipData.subtitles || [])
+      .map((subtitle) => subtitle.target || subtitle.ja || subtitle.en)
+      .filter((caption): caption is string => Boolean(caption))
+      .slice(0, 4);
+
+    if (captions.length > 0) {
+      return { captions, captionSource: "subtitles" as const };
+    }
+  } catch {}
+
+  const transcriptPath = resolve(outputDir, compId, "audio.json");
+  try {
+    const transcriptRaw = await readFile(transcriptPath, "utf-8");
+    const transcript = JSON.parse(transcriptRaw) as { segments?: Array<{ text?: string }> };
+    const captions = (transcript.segments || [])
+      .map((segment) => (segment.text || "").trim())
+      .filter(Boolean)
+      .slice(0, 4);
+
+    if (captions.length > 0) {
+      return { captions, captionSource: "transcript" as const };
+    }
+  } catch {}
+
+  return null;
+}
+
+async function refreshPipelinePreview() {
+  if (!activePipelineState) {
+    return;
+  }
+
+  const preview = await readCaptionPreview(activePipelineState.compId);
+  const captions = preview?.captions || [];
+  const captionSource = preview?.captionSource || null;
+  const prevCaptions = JSON.stringify(activePipelineState.captions);
+
+  if (
+    prevCaptions === JSON.stringify(captions) &&
+    activePipelineState.captionSource === captionSource
+  ) {
+    return;
+  }
+
+  activePipelineState.captions = captions;
+  activePipelineState.captionSource = captionSource;
+  broadcastPipelineEvent({
+    type: "preview",
+    captions,
+    captionSource,
+  });
+}
+
+function detectPipelineStep(text: string) {
+  if (text.includes("Converting MOV")) {
+    updatePipelineStep("convert", "Converting video format…");
+    return;
+  }
+
+  if (
+    text.includes("Transcribing") ||
+    text.includes("whisper") ||
+    text.includes("Step 1") ||
+    text.includes("audio extraction")
+  ) {
+    updatePipelineStep("transcribe", "Transcribing audio…");
+    return;
+  }
+
+  if (text.includes("cached transcription")) {
+    updatePipelineStep("transcribe", "Using cached transcription");
+    return;
+  }
+
+  if (
+    text.includes("Gemini") ||
+    text.includes("Analyzing") ||
+    text.includes("Step 3")
+  ) {
+    updatePipelineStep("analyze", "Analyzing with AI…");
+    return;
+  }
+
+  if (text.includes("cached analysis")) {
+    updatePipelineStep("analyze", "Using cached analysis");
+    return;
+  }
+
+  if (
+    text.includes("silence") ||
+    text.includes("Step 4") ||
+    text.includes("✂️")
+  ) {
+    updatePipelineStep("silence", "Removing silence gaps…");
+    return;
+  }
+
+  if (text.includes("Saved") || text.includes("💾")) {
+    updatePipelineStep("save", "Saving clip data…");
+    return;
+  }
+
+  if (
+    text.includes("Generating") ||
+    text.includes("TSX") ||
+    text.includes("Step 6")
+  ) {
+    updatePipelineStep("generate", "Generating composition…");
+    return;
+  }
+
+  if (text.includes("Pipeline complete") || text.includes("✨")) {
+    updatePipelineStep("complete", "Pipeline complete!");
+  }
+}
+
+async function pipeProcessOutput(
+  stream: ReadableStream<Uint8Array> | null | undefined,
+  onChunk: (text: string) => void,
+) {
+  if (!stream) {
+    return;
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        const trailing = decoder.decode();
+        if (trailing) {
+          onChunk(trailing);
+        }
+        break;
+      }
+
+      onChunk(decoder.decode(value, { stream: true }));
+    }
+  } catch {}
+}
+
+async function regenerateAllClipsFile() {
+  const dirs = (await readdir(outputDir)).sort();
+  const entries: string[] = [];
+
+  for (const dir of dirs) {
+    try {
+      const raw = await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
+      const data = JSON.parse(raw);
+      const patchedData = { ...data, videoFile: `${dir}/${data.videoFile}` };
+      entries.push(
+        `  ${JSON.stringify(dir)}: ${JSON.stringify(patchedData, null, 2)} as unknown as ClipData`,
+      );
+    } catch {}
+  }
+
+  const content = `import type { ClipData } from "../../pipeline/types";\n\nconst allClips: Record<string, ClipData> = {\n${entries.join(",\n")}\n};\n\nexport default allClips;\n`;
+  await writeFile(clipDataAllPath, content);
+}
+
+async function listClipMetadata() {
+  const dirs = (await readdir(outputDir)).sort();
+  const clips: Array<{
+    id: string;
+    hookTitle: { ja?: string; target?: string; en?: string };
+    duration: string | null;
+    subtitleCount: number;
+    vocabCount: number;
+    targetLanguage: SupportedLanguage;
+    languageName: string;
+    languageNativeName: string;
+  }> = [];
+
+  for (const dir of dirs) {
+    try {
+      const raw = await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
+      const data = JSON.parse(raw) as ClipData;
+      const targetLanguage = (data.targetLanguage || "ja") as SupportedLanguage;
+      const language = LANGUAGE_LABELS[targetLanguage] || LANGUAGE_LABELS.ja;
+      clips.push({
+        id: dir,
+        hookTitle: data.hookTitle || { ja: dir, en: dir },
+        duration: data.clip
+          ? (data.clip.endTime - data.clip.startTime).toFixed(1)
+          : null,
+        subtitleCount: data.subtitles?.length || 0,
+        vocabCount: data.vocabCards?.length || 0,
+        targetLanguage,
+        languageName: language.name,
+        languageNativeName: language.nativeName,
+      });
+    } catch {}
+  }
+
+  return clips;
+}
+
+function broadcastPipelineEvent(data: Record<string, unknown>) {
+  const payload = JSON.stringify(data);
+  for (const client of pipelineClients) {
+    if (client.readyState === 1) {
+      try { client.send(payload); } catch {}
+    }
+  }
+}
+
+async function cleanupExistingClip(compId: string) {
+  const clipOutput = resolve(outputDir, compId);
+  try {
+    await rm(clipOutput, { recursive: true, force: true });
+  } catch {}
+  const clipSymlink = resolve(projectRoot, "remotion/src/clips", compId);
+  try {
+    await rm(clipSymlink, { recursive: true, force: true });
+  } catch {}
+}
 
 // --- Per-composition session management ---
 
@@ -319,32 +628,16 @@ const server = Bun.serve({
       return new Response("WebSocket upgrade failed", { status: 500 });
     }
 
+    if (path === "/ws/pipeline") {
+      const upgraded = server.upgrade(req, { data: { endpoint: "pipeline" } });
+      if (upgraded) return undefined;
+      return new Response("WebSocket upgrade failed", { status: 500 });
+    }
+
     // API: list available clips (with metadata)
     if (path === "/api/clips") {
       try {
-        const dirs = (await readdir(outputDir)).sort();
-        const clips: Array<{
-          id: string;
-          hookTitle: { ja: string; en: string };
-          duration: string | null;
-          subtitleCount: number;
-          vocabCount: number;
-        }> = [];
-        for (const dir of dirs) {
-          try {
-            const raw = await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
-            const data = JSON.parse(raw);
-            clips.push({
-              id: dir,
-              hookTitle: data.hookTitle || { ja: dir, en: dir },
-              duration: data.clip
-                ? (data.clip.endTime - data.clip.startTime).toFixed(1)
-                : null,
-              subtitleCount: data.subtitles?.length || 0,
-              vocabCount: data.vocabCards?.length || 0,
-            });
-          } catch {}
-        }
+        const clips = await listClipMetadata();
         return new Response(JSON.stringify(clips), {
           headers: { "Content-Type": "application/json" },
         });
@@ -352,6 +645,126 @@ const server = Bun.serve({
         return new Response("[]", {
           headers: { "Content-Type": "application/json" },
         });
+      }
+    }
+
+    if (path === "/api/pipeline-status") {
+      return new Response(JSON.stringify(getPipelineSnapshot()), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (path === "/api/import-video" && req.method === "POST") {
+      if (pipelineProcess) {
+        return new Response(
+          JSON.stringify({ error: "A pipeline run is already in progress" }),
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      try {
+        const formData = await req.formData();
+        const uploaded = formData.get("video");
+        if (!(uploaded instanceof File)) {
+          return new Response(
+            JSON.stringify({ error: "No video file provided" }),
+            { status: 400, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        const langCandidate =
+          typeof formData.get("lang") === "string" ? formData.get("lang") : "ja";
+        const supportedLangs = new Set(["ja", "zh", "ko", "es"]);
+        const targetLang = supportedLangs.has(langCandidate) ? langCandidate : "ja";
+
+        const inputDir = resolve(projectRoot, "input");
+        await mkdir(inputDir, { recursive: true });
+
+        const parsed = parse(uploaded.name || `video-${Date.now()}.mp4`);
+        const baseName = parsed.name.replace(/[^a-zA-Z0-9_-]/g, "_") || `video-${Date.now()}`;
+        const extension = parsed.ext || ".mp4";
+        let fileName = `${baseName}${extension}`;
+        let destPath = resolve(inputDir, fileName);
+        let suffix = 0;
+        while (existsSync(destPath)) {
+          suffix += 1;
+          fileName = `${baseName}-${suffix}${extension}`;
+          destPath = resolve(inputDir, fileName);
+        }
+
+        const buffer = Buffer.from(await uploaded.arrayBuffer());
+        await writeFile(destPath, buffer);
+
+        const compId = basename(fileName, extension);
+
+        await cleanupExistingClip(compId);
+
+        try {
+          pipelineProcess = Bun.spawn(["bun", "pipeline/index.ts", destPath, "--lang", targetLang], {
+            cwd: projectRoot,
+            stdio: ["ignore", "pipe", "pipe"],
+            env: { ...process.env },
+          });
+        } catch (err: any) {
+          const message = err?.message || "Failed to start pipeline";
+          broadcastPipelineEvent({ type: "error", message });
+          pipelineProcess = null;
+          return new Response(
+            JSON.stringify({ error: message }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        const child = pipelineProcess;
+        activePipelineState = createPipelineState(fileName, compId, targetLang);
+        broadcastPipelineEvent({ type: "start", fileName, compId });
+        broadcastPipelineEvent(getPipelineSnapshot()!);
+
+        pipeProcessOutput(child.stdout, (text) => {
+          process.stdout.write(text);
+          appendPipelineLog(text);
+          broadcastPipelineEvent({ type: "log", text });
+          detectPipelineStep(text);
+          refreshPipelinePreview().catch(() => undefined);
+        });
+
+        pipeProcessOutput(child.stderr, (text) => {
+          process.stderr.write(text);
+          appendPipelineLog(text);
+          broadcastPipelineEvent({ type: "log", text });
+          detectPipelineStep(text);
+          refreshPipelinePreview().catch(() => undefined);
+        });
+
+        child.exited.then((code) => {
+          if (pipelineProcess === child) pipelineProcess = null;
+          if (code === 0) {
+            if (activePipelineState) {
+              activePipelineState.status = "done";
+            }
+            broadcastPipelineEvent({ type: "done", fileName, compId });
+            setTimeout(() => {
+              activePipelineState = null;
+            }, 1500);
+          } else {
+            const message = `Pipeline exited with code ${code}`;
+            if (activePipelineState) {
+              activePipelineState.status = "error";
+              activePipelineState.errorMessage = message;
+            }
+            broadcastPipelineEvent({ type: "error", message });
+          }
+        });
+
+        return new Response(
+          JSON.stringify({ status: "started" }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ error: err?.message || "Upload failed" }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
       }
     }
 
@@ -366,6 +779,41 @@ const server = Bun.serve({
         });
       } catch {
         return new Response("Clip not found", { status: 404 });
+      }
+    }
+
+    const clipDeleteMatch = path.match(/^\/api\/clips\/(.+)$/);
+    if (clipDeleteMatch && req.method === "DELETE") {
+      const compId = decodeURIComponent(clipDeleteMatch[1]);
+
+      if (activePipelineState?.compId === compId && pipelineProcess) {
+        return new Response(
+          JSON.stringify({ error: "Cannot delete a clip while it is processing" }),
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      try {
+        await rm(resolve(outputDir, compId), { recursive: true, force: true });
+        await rm(resolve(projectRoot, "remotion/src/clips", compId), {
+          recursive: true,
+          force: true,
+        });
+        await rm(resolve(projectRoot, "remotion/public", compId), {
+          recursive: true,
+          force: true,
+        });
+        await regenerateAllClipsFile();
+        await generateClipCompositions();
+        broadcastPipelineEvent({ type: "clip-deleted", compId });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ error: err?.message || "Failed to delete clip" }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
       }
     }
 
@@ -434,12 +882,12 @@ const server = Bun.serve({
       return new Response("Not found", { status: 404 });
     }
 
-    // Serve wrapper's own static files under /app
-    // /app → project picker (browser landing page)
+    // Serve wrapper's own static files
+    // / and /app → project picker (browser landing page)
     // /app/studio → studio split-pane view
-    if (path === "/app" || path.startsWith("/app/")) {
+    if (path === "/" || path === "/app" || path.startsWith("/app/")) {
       let relative: string;
-      if (path === "/app" || path === "/app/") {
+      if (path === "/" || path === "/app" || path === "/app/") {
         relative = "project.html";
       } else if (path === "/app/studio" || path === "/app/studio/") {
         relative = "index.html";
@@ -466,8 +914,13 @@ const server = Bun.serve({
       } catch {}
     }
 
-    // Reverse-proxy everything else to Remotion Studio
-    const remotionPath = path;
+    // Reverse-proxy to Remotion Studio.
+    // /_studio maps to Remotion root while preserving query/hash behavior.
+    const remotionPath = path === "/_studio"
+      ? "/"
+      : path.startsWith("/_studio/")
+        ? path.slice("/_studio".length)
+        : path;
     const remotionUrl = `http://localhost:${remotionPort}${remotionPath}${url.search}`;
 
     // WebSocket upgrade (Remotion HMR)
@@ -524,10 +977,7 @@ const server = Bun.serve({
           }
         </style>
         <script>
-          // Force assets tab in sidebar
           localStorage.setItem('remotion.sidebarPanel', 'assets');
-
-          // Hide the "Compositions" tab button and inject Back to Home button
           var backBtnInjected = false;
           new MutationObserver(function(mutations, obs) {
             var btns = document.querySelectorAll('.css-reset div[role="button"]');
@@ -539,8 +989,6 @@ const server = Bun.serve({
                 break;
               }
             }
-
-            // Inject "Back to Home" button into the top menubar
             if (!backBtnInjected) {
               var menubar = document.querySelector('[role="menubar"]')
                 || document.querySelector('.css-reset > div > div > div');
@@ -558,8 +1006,6 @@ const server = Bun.serve({
                 var btn = document.createElement('button');
                 btn.id = 'fk-back-home';
                 btn.title = 'Back to Home';
-
-                // Create arrow SVG using DOM methods
                 var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.setAttribute('viewBox', '0 0 24 24');
                 var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -567,18 +1013,18 @@ const server = Bun.serve({
                 svg.appendChild(path);
                 btn.appendChild(svg);
                 btn.appendChild(document.createTextNode(' Home'));
-
                 btn.addEventListener('click', function() {
-                  window.parent.postMessage({ type: 'go-home' }, '*');
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'go-home' }, '*');
+                    return;
+                  }
+                  window.location.href = '/';
                 });
                 menubar.insertBefore(btn, menubar.firstChild);
                 backBtnInjected = true;
               }
             }
-
-            if (compositionsHidden && backBtnInjected) {
-              obs.disconnect();
-            }
+            if (compositionsHidden && backBtnInjected) obs.disconnect();
           }).observe(document.body, { childList: true, subtree: true });
         </script>`;
         html = html.replace("</head>", injection + "</head>");
@@ -607,6 +1053,16 @@ const server = Bun.serve({
       // Event stream for clip-data reload notifications
       if (data.endpoint === "events") {
         eventClients.add(ws);
+        return;
+      }
+
+      if (data.endpoint === "pipeline") {
+        pipelineClients.add(ws);
+        if (activePipelineState) {
+          try {
+            ws.send(JSON.stringify(getPipelineSnapshot()));
+          } catch {}
+        }
         return;
       }
 
@@ -726,6 +1182,11 @@ const server = Bun.serve({
       // Event stream client disconnected
       if (data.endpoint === "events") {
         eventClients.delete(ws);
+        return;
+      }
+
+      if (data.endpoint === "pipeline") {
+        pipelineClients.delete(ws);
         return;
       }
 

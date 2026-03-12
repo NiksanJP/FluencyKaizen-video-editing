@@ -15,12 +15,17 @@
     }
 
     .page {
-      max-width: 960px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 48px 32px;
     }
 
-    .header {
+    .header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       margin-bottom: 32px;
     }
 
@@ -37,9 +42,62 @@
       margin-top: 4px;
     }
 
-    .grid {
+    .import-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-select {
+      background: #1e1e1e;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 14px;
+      padding-right: 32px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .lang-select:hover {
+      border-color: #555;
+    }
+
+    .lang-select:focus {
+      border-color: #fff;
+    }
+
+    .import-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .import-btn:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 16px;
     }
 
@@ -53,6 +111,7 @@
       text-decoration: none;
       color: inherit;
       display: block;
+      position: relative;
     }
 
     .card:hover {
@@ -63,6 +122,74 @@
 
     .card:active {
       transform: translateY(0);
+    }
+
+    .card-processing {
+      border-color: #1d4ed8;
+      box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: #666;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
+    .lang-badge,
+    .status-badge {
+      display: inline-block;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10px;
+      color: #c5c5c5;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .status-badge.processing {
+      background: rgba(37, 99, 235, 0.16);
+      border-color: #1d4ed8;
+      color: #93c5fd;
+    }
+
+    .delete-btn {
+      border: 1px solid #3a1f1f;
+      background: #1a1010;
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: #271313;
+      border-color: #5c2626;
     }
 
     .card-title-ja {
@@ -82,6 +209,7 @@
 
     .card-meta {
       display: flex;
+      flex-wrap: wrap;
       gap: 16px;
       font-size: 12px;
       color: #555;
@@ -93,16 +221,44 @@
       gap: 4px;
     }
 
-    .badge {
-      display: inline-block;
-      background: #1e1e1e;
-      border: 1px solid #2a2a2a;
-      border-radius: 6px;
-      padding: 2px 8px;
+    .processing-note {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #202020;
+    }
+
+    .processing-title,
+    .caption-preview-label {
       font-size: 11px;
-      color: #666;
-      font-family: "SF Mono", Monaco, monospace;
-      margin-bottom: 12px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .processing-title {
+      color: #93c5fd;
+      margin-bottom: 8px;
+    }
+
+    .processing-message {
+      font-size: 13px;
+      color: #d4d4d4;
+      margin-bottom: 10px;
+    }
+
+    .caption-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .caption-line {
+      font-size: 12px;
+      color: #bcbcbc;
+      line-height: 1.45;
+      padding-left: 10px;
+      border-left: 2px solid #2a2a2a;
     }
 
     .empty-state {
@@ -127,20 +283,48 @@
       color: #444;
       font-size: 14px;
     }
+
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="header">
-      <h1>FluencyKaizen Studio</h1>
-      <p>Select a composition to open in the studio</p>
+    <div class="header-row">
+      <div class="header">
+        <h1>FluencyKaizen Studio</h1>
+        <p>Select a composition to open in the studio</p>
+      </div>
+      <div class="import-group">
+        <select class="lang-select" id="lang-select">
+          <option value="ja">🇯🇵 日本語 (Japanese)</option>
+          <option value="zh">🇨🇳 中文 (Chinese)</option>
+          <option value="ko">🇰🇷 한국어 (Korean)</option>
+          <option value="es">🇪🇸 Español (Spanish)</option>
+        </select>
+        <button class="import-btn" id="import-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import Video
+        </button>
+      </div>
     </div>
     <div id="content">
       <div class="loading">Loading compositions...</div>
     </div>
   </div>
 
+  <input type="file" id="import-input" accept="video/*" style="display:none" />
+
   <script>
+    var LANGUAGE_LABELS = {
+      ja: "Japanese / 日本語",
+      zh: "Chinese / 中文",
+      ko: "Korean / 한국어",
+      es: "Spanish / Español"
+    };
+
     function el(tag, attrs, children) {
       var node = document.createElement(tag);
       if (attrs) {
@@ -161,47 +345,177 @@
       return node;
     }
 
+    function getLanguageLabel(comp) {
+      if (!comp) return "Unknown";
+      if (comp.languageName && comp.languageNativeName) {
+        return comp.languageName + " / " + comp.languageNativeName;
+      }
+      return LANGUAGE_LABELS[comp.targetLanguage] || (comp.targetLanguage || "Unknown");
+    }
+
+    function renderCaptionPreview(container, captions) {
+      container.textContent = "";
+      for (var i = 0; i < captions.length; i++) {
+        container.appendChild(el("div", { className: "caption-line", textContent: captions[i] }));
+      }
+    }
+
+    var currentPipeline = null;
+    var lastCompositions = [];
+
+    function renderClips(compositions) {
+      lastCompositions = compositions || [];
+      var content = document.getElementById("content");
+      content.textContent = "";
+
+      if ((!lastCompositions.length) && !currentPipeline) {
+        content.appendChild(
+          el("div", { className: "empty-state" }, [
+            el("h2", { textContent: "No compositions found" }),
+            el("p", { textContent: "Import a video to generate your first clip." }),
+          ])
+        );
+        return;
+      }
+
+      var grid = el("div", { className: "cards" });
+      var processingCompId = currentPipeline && currentPipeline.status === "running"
+        ? currentPipeline.compId
+        : null;
+      var hasProcessingCard = false;
+
+      for (var i = 0; i < lastCompositions.length; i++) {
+        var comp = lastCompositions[i];
+        var isProcessing = Boolean(processingCompId && processingCompId === comp.id);
+        if (isProcessing) hasProcessingCard = true;
+
+        var meta = el("div", { className: "card-meta" });
+        if (comp.duration) meta.appendChild(el("span", { textContent: comp.duration + "s" }));
+        meta.appendChild(el("span", { textContent: comp.subtitleCount + " subtitles" }));
+        meta.appendChild(el("span", { textContent: comp.vocabCount + " vocab cards" }));
+
+        var badgeStack = el("div", { className: "badge-stack" }, [
+          el("div", { className: "badge", textContent: comp.id }),
+          el("span", { className: "lang-badge", textContent: getLanguageLabel(comp) })
+        ]);
+
+        if (isProcessing) {
+          badgeStack.appendChild(el("span", {
+            className: "status-badge processing",
+            textContent: "Processing"
+          }));
+        }
+
+        var deleteBtn = el("button", {
+          className: "delete-btn",
+          type: "button",
+          textContent: "Delete",
+          onClick: function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            deleteClip(this.getAttribute("data-comp-id"));
+          }
+        });
+        deleteBtn.setAttribute("data-comp-id", comp.id);
+
+        var children = [
+          el("div", { className: "card-top" }, [badgeStack, deleteBtn]),
+          el("div", {
+            className: "card-title-ja",
+            textContent: comp.hookTitle ? (comp.hookTitle.target || comp.hookTitle.ja || comp.id) : comp.id
+          }),
+          el("div", {
+            className: "card-title-en",
+            textContent: comp.hookTitle ? (comp.hookTitle.en || "") : ""
+          }),
+          meta
+        ];
+
+        if (isProcessing) {
+          var note = el("div", { className: "processing-note" }, [
+            el("div", { className: "processing-title", textContent: "Current progress" }),
+            el("div", {
+              className: "processing-message",
+              textContent: currentPipeline.currentMessage || "Processing in background…"
+            })
+          ]);
+
+          if (currentPipeline.captions && currentPipeline.captions.length) {
+            note.appendChild(el("div", {
+              className: "caption-preview-label",
+              textContent: currentPipeline.captionSource === "subtitles" ? "Caption preview" : "Transcript preview"
+            }));
+            var preview = el("div", { className: "caption-preview" });
+            renderCaptionPreview(preview, currentPipeline.captions);
+            note.appendChild(preview);
+          }
+
+          children.push(note);
+        }
+
+        grid.appendChild(el("a", {
+          className: "card" + (isProcessing ? " card-processing" : ""),
+          href: "/app/studio#" + encodeURIComponent(comp.id)
+        }, children));
+      }
+
+      if (currentPipeline && currentPipeline.status === "running" && !hasProcessingCard) {
+        var note = el("div", { className: "processing-note" }, [
+          el("div", { className: "processing-title", textContent: "Current progress" }),
+          el("div", {
+            className: "processing-message",
+            textContent: currentPipeline.currentMessage || "Processing in background…"
+          })
+        ]);
+
+        if (currentPipeline.captions && currentPipeline.captions.length) {
+          note.appendChild(el("div", {
+            className: "caption-preview-label",
+            textContent: currentPipeline.captionSource === "subtitles" ? "Caption preview" : "Transcript preview"
+          }));
+          var processingPreview = el("div", { className: "caption-preview" });
+          renderCaptionPreview(processingPreview, currentPipeline.captions);
+          note.appendChild(processingPreview);
+        }
+
+        grid.insertBefore(el("div", { className: "card card-processing" }, [
+          el("div", { className: "card-top" }, [
+            el("div", { className: "badge-stack" }, [
+              el("div", { className: "badge", textContent: currentPipeline.compId }),
+              el("span", {
+                className: "lang-badge",
+                textContent: LANGUAGE_LABELS[currentPipeline.targetLanguage] || currentPipeline.targetLanguage
+              }),
+              el("span", { className: "status-badge processing", textContent: "Processing" })
+            ])
+          ]),
+          el("div", { className: "card-title-ja", textContent: currentPipeline.fileName }),
+          el("div", { className: "card-title-en", textContent: "This import is still running" }),
+          note
+        ]), grid.firstChild);
+      }
+
+      content.appendChild(grid);
+    }
+
     async function load() {
       var content = document.getElementById("content");
       try {
-        var res = await fetch("/api/clips");
-        var compositions = await res.json();
-
-        content.textContent = "";
-
-        if (compositions.length === 0) {
-          content.appendChild(
-            el("div", { className: "empty-state" }, [
-              el("h2", { textContent: "No compositions found" }),
-              el("p", { textContent: "Run /process-video to generate your first clip." }),
-            ])
-          );
-          return;
+        var responses = await Promise.all([
+          fetch("/api/clips"),
+          fetch("/api/pipeline-status")
+        ]);
+        var compositions = await responses[0].json();
+        var pipelineState = await responses[1].json();
+        if (pipelineState && pipelineState.status === "running") {
+          currentPipeline = pipelineState;
+          setPipelineBusy(true);
+          restorePipelineOverlay(pipelineState);
+        } else {
+          currentPipeline = null;
+          setPipelineBusy(false);
         }
-
-        var grid = el("div", { className: "grid" });
-
-        for (var i = 0; i < compositions.length; i++) {
-          var comp = compositions[i];
-          var meta = el("div", { className: "card-meta" });
-          if (comp.duration) meta.appendChild(el("span", { textContent: comp.duration + "s" }));
-          meta.appendChild(el("span", { textContent: comp.subtitleCount + " subtitles" }));
-          meta.appendChild(el("span", { textContent: comp.vocabCount + " vocab cards" }));
-
-          var card = el("a", {
-            className: "card",
-            href: "/app/studio#" + encodeURIComponent(comp.id),
-          }, [
-            el("div", { className: "badge", textContent: comp.id }),
-            el("div", { className: "card-title-ja", textContent: comp.hookTitle ? comp.hookTitle.ja : comp.id }),
-            el("div", { className: "card-title-en", textContent: comp.hookTitle ? comp.hookTitle.en : "" }),
-            meta,
-          ]);
-
-          grid.appendChild(card);
-        }
-
-        content.appendChild(grid);
+        renderClips(compositions);
       } catch (err) {
         content.textContent = "";
         content.appendChild(
@@ -213,6 +527,169 @@
       }
     }
 
+    async function deleteClip(compId) {
+      if (!compId) return;
+      if (!window.confirm('Delete project "' + compId + '"?')) return;
+
+      try {
+        var response = await fetch("/api/clips/" + encodeURIComponent(compId), {
+          method: "DELETE"
+        });
+        if (!response.ok) {
+          var payload = await response.json().catch(function () { return {}; });
+          throw new Error(payload.error || "Delete failed");
+        }
+        await load();
+      } catch (err) {
+        alert(err.message || "Delete failed");
+      }
+    }
+
+    var fileInput = document.getElementById("import-input");
+    var importBtn = document.getElementById("import-btn");
+    var langSelect = document.getElementById("lang-select");
+
+    importBtn.addEventListener("click", function () {
+      fileInput.value = "";
+      fileInput.click();
+    });
+
+    var pipelineBusy = false;
+
+    function setPipelineBusy(value) {
+      pipelineBusy = value;
+      importBtn.disabled = value;
+    }
+
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      startImport(file);
+    });
+
+    async function startImport(file) {
+      if (pipelineBusy) return;
+      setPipelineBusy(true);
+      try {
+        var form = new FormData();
+        form.append("video", file);
+        form.append("lang", langSelect.value);
+        var response = await fetch("/api/import-video", {
+          method: "POST",
+          body: form,
+        });
+        if (!response.ok) {
+          var payload = await response.json().catch(function () { return {}; });
+          throw new Error(payload.error || payload.message || "Import failed (" + response.status + ")");
+        }
+      } catch (err) {
+        setPipelineBusy(false);
+        alert(err.message || "Import failed");
+      } finally {
+        fileInput.value = "";
+      }
+    }
+
+    function handlePipelineEvent(data) {
+      if (data.type === "snapshot") {
+        if (data.status === "running") {
+          currentPipeline = data;
+          setPipelineBusy(true);
+          renderClips(lastCompositions);
+        }
+        return;
+      }
+
+      if (data.type === "start") {
+        currentPipeline = {
+          status: "running",
+          fileName: data.fileName || "",
+          compId: data.compId || "",
+          targetLanguage: langSelect.value,
+          currentStep: null,
+          currentMessage: "Starting pipeline…",
+          captions: [],
+          captionSource: null,
+          logs: [],
+          errorMessage: null
+        };
+        renderClips(lastCompositions);
+        return;
+      }
+
+      if (data.type === "step") {
+        if (currentPipeline) {
+          currentPipeline.currentStep = data.step || null;
+          currentPipeline.currentMessage = data.message || null;
+          renderClips(lastCompositions);
+        }
+        return;
+      }
+
+      if (data.type === "log") {
+        if (currentPipeline) {
+          currentPipeline.logs = currentPipeline.logs || [];
+          currentPipeline.logs.push(data.text || "");
+        }
+        return;
+      }
+
+      if (data.type === "preview") {
+        if (currentPipeline) {
+          currentPipeline.captions = data.captions || [];
+          currentPipeline.captionSource = data.captionSource || null;
+          renderClips(lastCompositions);
+        }
+        return;
+      }
+
+      if (data.type === "done") {
+        currentPipeline = null;
+        setPipelineBusy(false);
+        load();
+        return;
+      }
+
+      if (data.type === "error") {
+        currentPipeline = null;
+        setPipelineBusy(false);
+        renderClips(lastCompositions);
+        return;
+      }
+
+      if (data.type === "clip-deleted") {
+        load();
+      }
+    }
+
+    var pipelineSocket = null;
+    var pipelineReconnectTimer = null;
+
+    function connectPipelineSocket() {
+      if (pipelineSocket && pipelineSocket.readyState === WebSocket.OPEN) return;
+      if (pipelineReconnectTimer) {
+        clearTimeout(pipelineReconnectTimer);
+        pipelineReconnectTimer = null;
+      }
+      var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      pipelineSocket = new WebSocket(protocol + "//" + window.location.host + "/ws/pipeline");
+      pipelineSocket.addEventListener("message", function (event) {
+        try {
+          var payload = JSON.parse(event.data);
+          handlePipelineEvent(payload);
+        } catch (err) {}
+      });
+      pipelineSocket.addEventListener("close", function () {
+        pipelineSocket = null;
+        pipelineReconnectTimer = setTimeout(function () {
+          connectPipelineSocket();
+          load();
+        }, 1000);
+      });
+      pipelineSocket.addEventListener("error", function () {});
+    }
+
+    connectPipelineSocket();
     load();
   </script>
 </body>

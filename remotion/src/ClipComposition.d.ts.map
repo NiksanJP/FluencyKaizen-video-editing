@@ -1,0 +1,1 @@
+{"version":3,"file":"ClipComposition.d.ts","sourceRoot":"","sources":["ClipComposition.tsx"],"names":[],"mappings":"AAAA,OAAO,KAA2C,MAAM,OAAO,CAAC;AAEhE,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,sBAAsB,CAAC;AAOrD,UAAU,oBAAoB;IAC5B,QAAQ,CAAC,EAAE,QAAQ,CAAC;IACpB,QAAQ,CAAC,EAAE,MAAM,CAAC;CACnB;AAED;;;;;;;;;;GAUG;AACH,eAAO,MAAM,eAAe,EAAE,KAAK,CAAC,EAAE,CAAC,oBAAoB,CAwF1D,CAAC"}

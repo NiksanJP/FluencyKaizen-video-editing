@@ -12,7 +12,7 @@
     <!-- Left: Remotion Studio -->
     <div class="preview-panel" id="previewPanel">
       <div class="loading-overlay" id="loadingOverlay">Loading Remotion Studio...</div>
-      <iframe id="studioFrame" src="/"></iframe>
+      <iframe id="studioFrame" src="/_studio"></iframe>
     </div>
 
     <!-- Draggable splitter -->
@@ -35,45 +35,12 @@
 
   <script type="module" src="/terminal.js"></script>
   <script>
-    // Hide loading overlay when iframe loads & hide Compositions tab
+    // Hide loading overlay when iframe loads
+    // Studio customizations (hide Compositions, Back to Home) are injected by server.ts proxy
     const frame = document.getElementById('studioFrame');
     const overlay = document.getElementById('loadingOverlay');
     frame.addEventListener('load', () => {
       overlay.classList.add('hidden');
-
-      // Hide the Compositions tab in Remotion Studio sidebar, keep only Assets
-      try {
-        const doc = frame.contentDocument;
-        if (doc) {
-          // Inject CSS to hide the compositions tab button
-          const style = doc.createElement('style');
-          style.textContent = `
-            /* Hide the Compositions tab in the left sidebar */
-            [role="tab"]:first-child {
-              display: none !important;
-            }
-          `;
-          doc.head.appendChild(style);
-
-          // Also try to click the Assets tab so it's active by default
-          const tryClickAssets = () => {
-            const tabs = doc.querySelectorAll('[role="tab"]');
-            for (const tab of tabs) {
-              if (tab.textContent.trim().toLowerCase().includes('asset')) {
-                tab.click();
-                return true;
-              }
-            }
-            return false;
-          };
-
-          // Remotion Studio renders asynchronously, retry a few times
-          let attempts = 0;
-          const interval = setInterval(() => {
-            if (tryClickAssets() || ++attempts > 20) clearInterval(interval);
-          }, 500);
-        }
-      } catch(e) { /* cross-origin fallback */ }
     });
 
     // Listen for "go-home" message from Remotion iframe
@@ -84,7 +51,7 @@
           window.studio.goBack();
         } else {
           // Browser mode: navigate to the project picker
-          window.location.href = '/app';
+          window.location.href = '/';
         }
       }
     });
@@ -121,12 +88,50 @@
     }
 
     // Poll iframe URL for composition changes
-    const IGNORE_IDS = new Set(['blank', 'assets', 'outputs', 'render', 'bundle']);
+    const IGNORE_IDS = new Set(['blank', 'assets', 'outputs', 'render', 'bundle', '_studio']);
     let lastCompId = null;
     let knownClips = null;
     fetch('/api/clips').then(r => r.json()).then(clips => {
       knownClips = new Set(clips.map(c => typeof c === 'string' ? c : c.id));
     }).catch(() => {});
+
+    function getDesiredCompositionId() {
+      const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : '';
+      return hash ? decodeURIComponent(hash) : '';
+    }
+
+    let desiredCompositionId = getDesiredCompositionId();
+
+    function getStudioUrlForComposition(compId) {
+      return compId ? `/_studio/${encodeURIComponent(compId)}` : '/_studio';
+    }
+
+    function syncFrameToDesiredComposition(force) {
+      desiredCompositionId = getDesiredCompositionId();
+      if (!desiredCompositionId) {
+        if (force) {
+          frame.src = '/_studio';
+        }
+        return;
+      }
+
+      try {
+        const currentHref = frame.contentWindow.location.href;
+        const currentCompId = getCompositionIdFromStudioHref(currentHref);
+        if (force || currentCompId !== desiredCompositionId) {
+          frame.contentWindow.location.replace(getStudioUrlForComposition(desiredCompositionId));
+        }
+      } catch {
+        if (force || !frame.src.endsWith(`/${encodeURIComponent(desiredCompositionId)}`)) {
+          frame.src = getStudioUrlForComposition(desiredCompositionId);
+        }
+      }
+    }
+
+    syncFrameToDesiredComposition(true);
+    window.addEventListener('hashchange', () => syncFrameToDesiredComposition(true));
 
     setInterval(() => {
       try {
@@ -136,9 +141,15 @@
           // Only activate if it matches a known clip (when list is available)
           if (knownClips && !knownClips.has(compId)) return;
           lastCompId = compId;
+          if (window.location.hash !== `#${encodeURIComponent(compId)}`) {
+            history.replaceState(null, '', `#${encodeURIComponent(compId)}`);
+          }
           if (window.activateCompositionTabs) {
             window.activateCompositionTabs(compId);
           }
+        }
+        if (desiredCompositionId && compId !== desiredCompositionId) {
+          syncFrameToDesiredComposition(false);
         }
       } catch(e) {
         // cross-origin or not loaded yet

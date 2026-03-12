@@ -43,45 +43,8 @@ ipcMain.handle("open-composition", async (_event, compId) => {
     await waitForServer(studioPort, 30);
   }
 
-  mainWindow.loadURL(`http://localhost:${studioPort}/app/studio#${encodeURIComponent(compId)}`);
-
-  mainWindow.webContents.on("did-finish-load", function injectStyles() {
-    mainWindow.webContents.insertCSS(`
-      body { padding-top: 38px; box-sizing: border-box; }
-      .container { height: calc(100vh - 38px) !important; }
-    `);
-
-    // Hide Compositions tab in Remotion Studio iframe, keep only Assets
-    mainWindow.webContents.executeJavaScript(`
-      (function() {
-        const frame = document.getElementById('studioFrame');
-        if (!frame) return;
-        function hideCompTab() {
-          try {
-            const doc = frame.contentDocument;
-            if (!doc) return;
-            const style = doc.createElement('style');
-            style.textContent = '[role="tab"]:first-child { display: none !important; }';
-            doc.head.appendChild(style);
-            const tabs = doc.querySelectorAll('[role="tab"]');
-            for (const tab of tabs) {
-              if (tab.textContent.trim().toLowerCase().includes('asset')) {
-                tab.click();
-                return true;
-              }
-            }
-            return false;
-          } catch(e) { return false; }
-        }
-        let attempts = 0;
-        const iv = setInterval(() => {
-          if (hideCompTab() || ++attempts > 20) clearInterval(iv);
-        }, 500);
-      })();
-    `).catch(() => {});
-
-    mainWindow.webContents.removeListener("did-finish-load", injectStyles);
-  });
+  const remotionCompId = String(compId).replace(/[^a-zA-Z0-9\-\u3000-\u9FFF]/g, "-");
+  mainWindow.loadURL(`http://localhost:${studioPort}/${encodeURIComponent(remotionCompId)}`);
 });
 
 ipcMain.handle("go-back-to-projects", () => {
@@ -96,6 +59,12 @@ ipcMain.handle("import-video", async (_event, lang) => {
   if (pipelineProcess) {
     return { error: "A pipeline is already running" };
   }
+
+  const send = (data) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("pipeline-progress", data);
+    }
+  };
 
   const result = await dialog.showOpenDialog(mainWindow, {
     title: "Import Video",
@@ -113,18 +82,16 @@ ipcMain.handle("import-video", async (_event, lang) => {
   const fileName = basename(videoPath);
   const inputDir = resolve(projectRoot, "input");
 
+  // Show progress immediately
+  send({ type: "start", fileName });
+  send({ type: "step", step: "copy", message: "Copying video file…" });
+
   // Copy video to input/ directory
   await mkdir(inputDir, { recursive: true });
   const destPath = resolve(inputDir, fileName);
   await copyFile(videoPath, destPath);
 
-  const send = (data) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("pipeline-progress", data);
-    }
-  };
-
-  send({ type: "start", fileName });
+  send({ type: "step", step: "pipeline", message: "Starting pipeline…" });
 
   return new Promise((resolvePromise) => {
     const targetLang = lang || "ja";
@@ -134,10 +101,34 @@ ipcMain.handle("import-video", async (_event, lang) => {
       env: { ...process.env },
     });
 
+    // Detect pipeline steps from stdout markers
+    const detectStep = (text) => {
+      if (text.includes("Converting MOV")) {
+        send({ type: "step", step: "convert", message: "Converting video format…" });
+      } else if (text.includes("Transcribing") || text.includes("whisper") || text.includes("Step 1") || text.includes("audio extraction")) {
+        send({ type: "step", step: "transcribe", message: "Transcribing audio…" });
+      } else if (text.includes("cached transcription")) {
+        send({ type: "step", step: "transcribe", message: "Using cached transcription" });
+      } else if (text.includes("Gemini") || text.includes("Analyzing") || text.includes("Step 3")) {
+        send({ type: "step", step: "analyze", message: "Analyzing with AI…" });
+      } else if (text.includes("cached analysis")) {
+        send({ type: "step", step: "analyze", message: "Using cached analysis" });
+      } else if (text.includes("silence") || text.includes("Step 4") || text.includes("✂️")) {
+        send({ type: "step", step: "silence", message: "Removing silence gaps…" });
+      } else if (text.includes("Saved") || text.includes("💾")) {
+        send({ type: "step", step: "save", message: "Saving clip data…" });
+      } else if (text.includes("Generating") || text.includes("TSX") || text.includes("Step 6")) {
+        send({ type: "step", step: "generate", message: "Generating composition…" });
+      } else if (text.includes("Pipeline complete") || text.includes("✨")) {
+        send({ type: "step", step: "complete", message: "Pipeline complete!" });
+      }
+    };
+
     pipelineProcess.stdout.on("data", (chunk) => {
       const text = chunk.toString();
       process.stdout.write(text);
       send({ type: "log", text });
+      detectStep(text);
     });
 
     pipelineProcess.stderr.on("data", (chunk) => {
@@ -218,7 +209,7 @@ function startStudio() {
       if (
         !resolved &&
         (text.includes("Opening browser") ||
-          text.includes("Studio wrapper running"))
+          text.includes("Studio ready at"))
       ) {
         if (wrapperPort) {
           resolved = true;

@@ -7,10 +7,12 @@
     "studio": "remotion studio",
     "render": "remotion render",
     "build": "tsc",
-    "dev": "remotion studio"
+    "dev": "remotion studio",
+    "editor": "vite --config vite.editor.config.ts"
   },
   "devDependencies": {
     "@remotion/cli": "^4.0.429",
+    "@remotion/studio": "^4.0.429",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

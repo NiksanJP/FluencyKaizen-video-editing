@@ -1,0 +1,119 @@
+{
+  "videoFile": "video_001.mp4",
+  "hookTitle": {
+    "ja": "ビジネス英語をマスター！究極の「針を動かす人」になろう！",
+    "en": "Master Business English: Be the Ultimate Needle Mover!"
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 31.5
+  },
+  "subtitles": [
+    {
+      "startTime": 0,
+      "endTime": 3.5,
+      "en": "So you're going to have to show up on the 30th at Summerslam",
+      "ja": "だから、30日のサマースラムにあなたは**現れなければならない**。",
+      "highlights": [
+        "現れなければならない"
+      ]
+    },
+    {
+      "startTime": 3.5,
+      "endTime": 7.5,
+      "en": "and become Roman Reigns like never before, the greatest performance in the history of",
+      "ja": "そしてこれまでにないロマン・レインズになる。それはキャリア**史上最高のパフォーマンス**だ。",
+      "highlights": [
+        "史上最高のパフォーマンス"
+      ]
+    },
+    {
+      "startTime": 7.5,
+      "endTime": 11.5,
+      "en": "Roman Reigns' career. That's both violent, the most diabolical,",
+      "ja": "ロマン・レインズのキャリア史上、最も暴力的で、最も悪魔的な、",
+      "highlights": []
+    },
+    {
+      "startTime": 11.5,
+      "endTime": 15.5,
+      "en": "the most dangerous, a beast slayer, a conqueror, a conqueror,",
+      "ja": "最も危険な、獣を倒す者、**征服者**、**勝利者**となるのだ。",
+      "highlights": [
+        "征服者",
+        "勝利者"
+      ]
+    },
+    {
+      "startTime": 15.5,
+      "endTime": 19.5,
+      "en": "the go-to GOAT, so that at the end of the match, they say,",
+      "ja": "**頼れる****GOAT**（史上最高）となり、試合の終わりに皆がこう言うだろう、",
+      "highlights": [
+        "頼れる",
+        "GOAT"
+      ]
+    },
+    {
+      "startTime": 19.5,
+      "endTime": 25.5,
+      "en": "'Ladies and gentlemen, your winner, the ultimate needle mover,",
+      "ja": "『皆様、**本日の勝者**は、究極の**変革者**、",
+      "highlights": [
+        "本日の勝者",
+        "変革者"
+      ]
+    },
+    {
+      "startTime": 25.5,
+      "endTime": 31.5,
+      "en": "the head of the table, the Tribal Chief!'",
+      "ja": "**組織のトップ**、トライバル・チーフだ！』と。",
+      "highlights": [
+        "組織のトップ"
+      ]
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 1.5,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "show up",
+      "literal": "姿を現す、出席する",
+      "nuance": "予定の場所に現れる、出席するという意味。会議やイベント、仕事に「顔を出す」ことを指すビジネスでもよく使われる表現です。"
+    },
+    {
+      "triggerTime": 5.5,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "the greatest performance",
+      "literal": "最高のパフォーマンス",
+      "nuance": "「最も優れた成果、演技、業績」を意味します。ビジネスでは、プロジェクトの成功や個人の業績評価で使われます。"
+    },
+    {
+      "triggerTime": 17,
+      "duration": 3.5,
+      "category": "スラング/ビジネス英語",
+      "phrase": "GOAT (Greatest Of All Time)",
+      "literal": "史上最高の人物/もの",
+      "nuance": "「Greatest Of All Time」の頭文字を取った略語で、特定の分野で最も優れていると認められる人や物を指します。ビジネスでは、トップランカーや伝説的な功績を称える際に使われます。"
+    },
+    {
+      "triggerTime": 21,
+      "duration": 3.5,
+      "category": "ビジネススラング",
+      "phrase": "ultimate needle mover",
+      "literal": "究極の針を動かす者",
+      "nuance": "「needle mover」は、グラフの針（指標）を大きく動かす、つまり「状況を大きく好転させる要因」や「重要な変化をもたらす人/物事」を指すビジネススラングです。「ultimate」は究極の、という意味を強調します。"
+    },
+    {
+      "triggerTime": 25.5,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "the head of the table",
+      "literal": "テーブルの頭",
+      "nuance": "比喩的に「リーダー」「意思決定者」「家族や組織の長」を意味します。会議や交渉の場で最も権威のある席に座る人物を指すことから来ています。"
+    }
+  ]
+}

@@ -11,11 +11,12 @@
  */
 
 import { watch, existsSync, lstatSync } from "fs";
-import { readdir, readFile, writeFile, mkdir, symlink, unlink } from "fs/promises";
+import { readdir, readFile, writeFile, mkdir, symlink, unlink, copyFile } from "fs/promises";
 import { resolve, dirname, relative } from "path";
 
 const projectRoot = resolve(dirname(import.meta.dir));
 const outputDir = resolve(projectRoot, "output");
+const publicDir = resolve(projectRoot, "remotion/public");
 const clipDataAllPath = resolve(projectRoot, "remotion/src/clip-data-all.ts");
 const clipCompositionsPath = resolve(projectRoot, "remotion/src/clip-compositions.ts");
 const clipsDir = resolve(projectRoot, "remotion/src/clips");
@@ -32,6 +33,13 @@ async function regenerateAllClips() {
       try {
         const raw = await readFile(clipPath, "utf-8");
         const data = JSON.parse(raw);
+        // Keep remotion/public in sync so OffthreadVideo can load media for new clips.
+        if (data.videoFile) {
+          const source = resolve(outputDir, dir, data.videoFile);
+          const target = resolve(publicDir, dir, data.videoFile);
+          await mkdir(dirname(target), { recursive: true });
+          await copyFile(source, target);
+        }
         const patchedData = { ...data, videoFile: `${dir}/${data.videoFile}` };
         entries.push(`  ${JSON.stringify(dir)}: ${JSON.stringify(patchedData, null, 2)} as unknown as ClipData`);
       } catch {}
