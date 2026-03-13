@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
+import { Audio, OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../pipeline/types";
 import { resolveHookSegment } from "../pipeline/hook";
 import { BilingualCaption } from "./components/BilingualCaption";
@@ -26,6 +26,7 @@ interface ClipCompositionProps {
  */
 export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: propClipData, clipName }) => {
   const { durationInFrames, fps } = useVideoConfig();
+  const transitionLeadFrames = Math.max(1, Math.round(fps * 0.18));
 
   // Read fresh data from clip-data-all on every render (HMR updates this import).
   // Fall back to the prop for single-clip mode or when name is unavailable.
@@ -122,6 +123,13 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {/* Hook title with branding */}
       <HookTitle title={clipData.hookTitle} />
 
+      {/* Transition sting lands just before the duplicated hook ends. */}
+      {hookDurationInFrames > 0 ? (
+        <Sequence from={Math.max(0, hookDurationInFrames - transitionLeadFrames)}>
+          <Audio src={staticFile("transition.mp3")} volume={0.7} />
+        </Sequence>
+      ) : null}
+
       {/* Bilingual captions for the duplicated hook */}
       {hookDurationInFrames > 0 ? (
         <Sequence from={0} durationInFrames={hookDurationInFrames}>
@@ -151,7 +159,10 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
           from={Math.max(0, hookDurationInFrames + Math.floor((card.triggerTime - clipData.clip.startTime) * fps))}
           durationInFrames={Math.floor(card.duration * fps)}
         >
-          <VocabCard card={card} top={vocabTop} />
+          <>
+            <Audio src={staticFile("pop.mp3")} volume={0.85} />
+            <VocabCard card={card} top={vocabTop} />
+          </>
         </Sequence>
       ))}
     </div>

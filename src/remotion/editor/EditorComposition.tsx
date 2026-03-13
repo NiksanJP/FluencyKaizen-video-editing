@@ -5,7 +5,7 @@
  * This lets @remotion/player re-render live whenever the user edits clip data.
  */
 import React, { useState, useCallback } from "react";
-import { OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
+import { Audio, OffthreadVideo, Sequence, useVideoConfig, staticFile } from "remotion";
 import type { ClipData } from "../../pipeline/types";
 import { resolveHookSegment } from "../../pipeline/hook";
 import { BilingualCaption } from "../components/BilingualCaption";
@@ -21,6 +21,7 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
   clipData,
 }) => {
   const { durationInFrames, fps } = useVideoConfig();
+  const transitionLeadFrames = Math.max(1, Math.round(fps * 0.18));
   const [vocabTop, setVocabTop] = useState(
     styleConfig.caption.top + 160
   );
@@ -88,6 +89,12 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
 
       <HookTitle title={clipData.hookTitle} />
 
+      {hookDurationInFrames > 0 ? (
+        <Sequence from={Math.max(0, hookDurationInFrames - transitionLeadFrames)}>
+          <Audio src={staticFile("transition.mp3")} volume={0.7} />
+        </Sequence>
+      ) : null}
+
       <Sequence from={hookDurationInFrames} durationInFrames={Math.max(1, durationInFrames - hookDurationInFrames)}>
         <BilingualCaption
           subtitles={clipData.subtitles}
@@ -105,7 +112,10 @@ export const EditorComposition: React.FC<EditorCompositionProps> = ({
           const dur = Math.floor(card.duration * fps);
           return (
             <Sequence key={idx} from={Math.max(0, hookDurationInFrames + from)} durationInFrames={Math.max(1, dur)}>
-              <VocabCard card={card} top={vocabTop} />
+              <>
+                <Audio src={staticFile("pop.mp3")} volume={0.85} />
+                <VocabCard card={card} top={vocabTop} />
+              </>
             </Sequence>
           );
         })}

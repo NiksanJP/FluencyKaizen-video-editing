@@ -4759,6 +4759,897 @@ const allClips: Record<string, ClipData> = {
       "reason": "Long silence after goodbye."
     }
   ]
+} as unknown as ClipData,
+  "CleanShot_2026-03-12_at_20_18_04-5": {
+  "videoFile": "CleanShot_2026-03-12_at_20_18_04-5/clip_trimmed.mp4",
+  "socialTitle": "업무가 너무 많을 때 쓰는 비즈니스 영어 표현 💼 'under my plate' 정확히 언제 쓰는 걸까요? #비즈니스영어 #직장인영어 #영어회화",
+  "hookTitle": {
+    "target": "비즈니스 영어에서 \"under my plate\" 사용법",
+    "en": "\"under my plate\" Means...",
+    "highlights": [
+      "under my plate",
+      "사용법"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 43.9
+  },
+  "hook": {
+    "startTime": 23.36999999999999,
+    "endTime": 26.369999999999987,
+    "reason": "Introduces a common business idiom 'under my plate' immediately, setting up the learning context."
+  },
+  "subtitles": [
+    {
+      "startTime": 0.040000000000000924,
+      "endTime": 0.7800000000000011,
+      "en": "Hey, Nick.",
+      "target": "닉, 안녕.",
+      "highlights": [
+        "닉",
+        "안녕"
+      ],
+      "enHighlights": [
+        "Hey",
+        "Nick"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 0.9400000000000013,
+      "endTime": 1.8800000000000008,
+      "en": "Just catching you before",
+      "target": "막 가려던 참이었는데",
+      "highlights": [
+        "가려던 참"
+      ],
+      "enHighlights": [
+        "catching you before"
+      ],
+      "emoji": "🏃",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 1.7800000000000011,
+      "endTime": 2.3200000000000003,
+      "en": "you head out.",
+      "target": "나가기 전에.",
+      "highlights": [
+        "나가기 전에"
+      ],
+      "enHighlights": [
+        "head out"
+      ],
+      "emoji": "🚪",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 2.66,
+      "endTime": 3.34,
+      "en": "Did you want to confirm",
+      "target": "확인하고 싶은 게 있었나요?",
+      "highlights": [
+        "확인하고 싶은"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "🤔",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 3.379999999999999,
+      "endTime": 4.060000000000002,
+      "en": "something from",
+      "target": "회의에서 뭔가",
+      "highlights": [
+        "회의에서"
+      ],
+      "enHighlights": [
+        "from"
+      ],
+      "emoji": "📝",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 3.960000000000001,
+      "endTime": 4.379999999999999,
+      "en": "the meeting?",
+      "target": "확인해 드릴까요?",
+      "highlights": [
+        "확인해 드릴까요"
+      ],
+      "enHighlights": [
+        "meeting"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 4.379999999999999,
+      "endTime": 5.159999999999997,
+      "en": "Hey, Alex.",
+      "target": "알렉스, 안녕.",
+      "highlights": [
+        "알렉스",
+        "안녕"
+      ],
+      "enHighlights": [
+        "Hey",
+        "Alex"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 5.479999999999997,
+      "endTime": 6.68,
+      "en": "Thanks for reaching out.",
+      "target": "연락줘서 고마워요.",
+      "highlights": [
+        "연락줘서"
+      ],
+      "enHighlights": [
+        "reaching out"
+      ],
+      "emoji": "🙏",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 7.02,
+      "endTime": 8,
+      "en": "Yeah, I wanted to.",
+      "target": "네, 그러려고 했어요.",
+      "highlights": [
+        "그러려고 했어요"
+      ],
+      "enHighlights": [
+        "wanted to"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 8.34,
+      "endTime": 9.299999999999997,
+      "en": "How are you before that?",
+      "target": "그 전에 잘 지냈어요?",
+      "highlights": [
+        "잘 지냈어요"
+      ],
+      "enHighlights": [
+        "How are you"
+      ],
+      "emoji": "😊",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 9.419999999999995,
+      "endTime": 10.339999999999993,
+      "en": "I'm doing well.",
+      "target": "잘 지내요.",
+      "highlights": [
+        "잘 지내요"
+      ],
+      "enHighlights": [
+        "doing well"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 10.419999999999995,
+      "endTime": 10.719999999999995,
+      "en": "Thanks.",
+      "target": "고마워요.",
+      "highlights": [
+        "고마워요"
+      ],
+      "enHighlights": [
+        "Thanks"
+      ],
+      "emoji": "🙏",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 11.019999999999992,
+      "endTime": 11.919999999999995,
+      "en": "Just trying to keep",
+      "target": "그냥 계속 추진하고 있어요.",
+      "highlights": [
+        "계속 추진"
+      ],
+      "enHighlights": [
+        "keep"
+      ],
+      "emoji": "🚀",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 11.739999999999995,
+      "endTime": 12.239999999999995,
+      "en": "things moving.",
+      "target": "일이 잘 진행되게 하려고요.",
+      "highlights": [
+        "일이 잘 진행"
+      ],
+      "enHighlights": [
+        "things moving"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 12.639999999999993,
+      "endTime": 13.579999999999995,
+      "en": "You wanted to confirm",
+      "target": "확인하고 싶다고 하셨죠?",
+      "highlights": [
+        "확인하고 싶은"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "🕵️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 13.619999999999994,
+      "endTime": 14.659999999999993,
+      "en": "that competitor research",
+      "target": "경쟁사 리서치 관련해서요.",
+      "highlights": [
+        "경쟁사 리서치"
+      ],
+      "enHighlights": [
+        "competitor research"
+      ],
+      "emoji": "📊",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 14.719999999999995,
+      "endTime": 15.459999999999994,
+      "en": "action item.",
+      "target": "액션 아이템 말이예요.",
+      "highlights": [
+        "액션 아이템"
+      ],
+      "enHighlights": [
+        "action item"
+      ],
+      "emoji": "📝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 15.819999999999993,
+      "endTime": 16.61999999999999,
+      "en": "Yeah, yeah, exactly.",
+      "target": "네, 맞아요.",
+      "highlights": [
+        "맞아요"
+      ],
+      "enHighlights": [
+        "exactly"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 16.61999999999999,
+      "endTime": 18.419999999999987,
+      "en": "So yeah, what I want",
+      "target": "그래서 제가 말하고 싶은 건,",
+      "highlights": [
+        "말하고 싶은 건"
+      ],
+      "enHighlights": [
+        "want"
+      ],
+      "emoji": "🗣️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 18.239999999999988,
+      "endTime": 19.19999999999999,
+      "en": "to tell you, I'm quite",
+      "target": "제가 꽤 바쁘다는 거예요.",
+      "highlights": [
+        "꽤 바쁘다는"
+      ],
+      "enHighlights": [
+        "quite busy"
+      ],
+      "emoji": "😥",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 19.099999999999987,
+      "endTime": 21.039999999999985,
+      "en": "busy and I do understand",
+      "target": "그리고 맡겨주신 업무를",
+      "highlights": [
+        "맡겨주신 업무"
+      ],
+      "enHighlights": [
+        "understand"
+      ],
+      "emoji": "💼",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 21.219999999999985,
+      "endTime": 22.419999999999987,
+      "en": "the task, the research",
+      "target": "리서치 업무 말이예요.",
+      "highlights": [
+        "리서치 업무"
+      ],
+      "enHighlights": [
+        "research"
+      ],
+      "emoji": "🔍",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 22.43999999999999,
+      "endTime": 23.099999999999987,
+      "en": "task you gave me.",
+      "target": "잘 이해하고 있어요.",
+      "highlights": [
+        "잘 이해하고"
+      ],
+      "enHighlights": [
+        "gave me"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 23.099999999999987,
+      "endTime": 24.81999999999999,
+      "en": "The main thing I want to",
+      "target": "제가 말씀드리고 싶은 주요한",
+      "highlights": [
+        "주요한"
+      ],
+      "enHighlights": [
+        "main thing"
+      ],
+      "emoji": "🎯",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 24.619999999999987,
+      "endTime": 25.899999999999988,
+      "en": "tell you is I have too",
+      "target": "요점은 너무 많은 업무가",
+      "highlights": [
+        "많은 업무"
+      ],
+      "enHighlights": [
+        "too much"
+      ],
+      "emoji": "🤯",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 25.699999999999985,
+      "endTime": 26.639999999999983,
+      "en": "much under my plate.",
+      "target": "제게 쌓여 있다는 겁니다.",
+      "highlights": [
+        "쌓여 있다는"
+      ],
+      "enHighlights": [
+        "under my plate"
+      ],
+      "emoji": "⛰️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 26.91999999999999,
+      "endTime": 27.979999999999993,
+      "en": "So I'm going to be...",
+      "target": "그래서 이 업무는",
+      "highlights": [
+        "이 업무는"
+      ],
+      "enHighlights": [
+        "working"
+      ],
+      "emoji": "🗓️",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 28.05999999999999,
+      "endTime": 28.41999999999999,
+      "en": "on this tomorrow.",
+      "target": "내일 처리할 거예요.",
+      "highlights": [
+        "내일 처리"
+      ],
+      "enHighlights": [
+        "tomorrow"
+      ],
+      "emoji": "➡️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 28.41999999999999,
+      "endTime": 29.179999999999982,
+      "en": "And I will ping you",
+      "target": "그리고 내일 끝나면",
+      "highlights": [
+        "내일 끝나면"
+      ],
+      "enHighlights": [
+        "ping you"
+      ],
+      "emoji": "💬",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 29.439999999999987,
+      "endTime": 30.219999999999988,
+      "en": "once I'm done tomorrow.",
+      "target": "연락드릴게요.",
+      "highlights": [
+        "연락드릴게요"
+      ],
+      "enHighlights": [
+        "done tomorrow"
+      ],
+      "emoji": "📞",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 30.339999999999986,
+      "endTime": 31.399999999999988,
+      "en": "That works for me.",
+      "target": "좋아요.",
+      "highlights": [
+        "좋아요"
+      ],
+      "enHighlights": [
+        "works for me"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 31.779999999999983,
+      "endTime": 32.499999999999986,
+      "en": "Thanks for the update,",
+      "target": "업데이트 고마워요,",
+      "highlights": [
+        "업데이트 고마워요"
+      ],
+      "enHighlights": [
+        "update"
+      ],
+      "emoji": "🆕",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 32.51999999999998,
+      "endTime": 32.81999999999999,
+      "en": "Nick.",
+      "target": "닉.",
+      "highlights": [
+        "닉"
+      ],
+      "enHighlights": [
+        "Nick"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 33.219999999999985,
+      "endTime": 34.29999999999998,
+      "en": "Efficiency is key.",
+      "target": "효율성이 중요하죠.",
+      "highlights": [
+        "효율성",
+        "중요하죠"
+      ],
+      "enHighlights": [
+        "Efficiency",
+        "key"
+      ],
+      "emoji": "🔑",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 34.599999999999994,
+      "endTime": 35.17999999999999,
+      "en": "I'll look for your",
+      "target": "내일 연락 기다릴게요.",
+      "highlights": [
+        "연락 기다릴게요"
+      ],
+      "enHighlights": [
+        "look for"
+      ],
+      "emoji": "📩",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 35.099999999999994,
+      "endTime": 35.579999999999984,
+      "en": "ping tomorrow.",
+      "target": "핑 보내주세요.",
+      "highlights": [
+        "핑"
+      ],
+      "enHighlights": [
+        "ping"
+      ],
+      "emoji": "🔔",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 35.95999999999998,
+      "endTime": 36.89999999999998,
+      "en": "Okay, no worries,",
+      "target": "알겠어요, 알렉스.",
+      "highlights": [
+        "알겠어요"
+      ],
+      "enHighlights": [
+        "no worries"
+      ],
+      "emoji": "👌",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 37.03999999999998,
+      "endTime": 37.339999999999975,
+      "en": "Alex.",
+      "target": "걱정 마세요.",
+      "highlights": [
+        "걱정 마세요"
+      ],
+      "enHighlights": [
+        "Alex"
+      ],
+      "emoji": "😌",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 37.53999999999998,
+      "endTime": 38.459999999999965,
+      "en": "I will ping you tomorrow.",
+      "target": "내일 연락드릴게요.",
+      "highlights": [
+        "내일 연락"
+      ],
+      "enHighlights": [
+        "ping you tomorrow"
+      ],
+      "emoji": "💬",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 38.63999999999997,
+      "endTime": 38.75999999999998,
+      "en": "See you.",
+      "target": "봐요.",
+      "highlights": [
+        "봐요"
+      ],
+      "enHighlights": [
+        "See you"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 38.87999999999998,
+      "endTime": 39.579999999999984,
+      "en": "Sounds good.",
+      "target": "좋아요.",
+      "highlights": [
+        "좋아요"
+      ],
+      "enHighlights": [
+        "Sounds good"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 39.95999999999998,
+      "endTime": 40.67999999999998,
+      "en": "Have a productive day.",
+      "target": "생산적인 하루 보내세요.",
+      "highlights": [
+        "생산적인 하루"
+      ],
+      "enHighlights": [
+        "productive day"
+      ],
+      "emoji": "🚀",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 40.97999999999999,
+      "endTime": 41.55999999999999,
+      "en": "You too.",
+      "target": "너도요.",
+      "highlights": [
+        "너도요"
+      ],
+      "enHighlights": [
+        "You too"
+      ],
+      "emoji": "😉",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 41.72,
+      "endTime": 42.099999999999994,
+      "en": "Bye-bye.",
+      "target": "안녕.",
+      "highlights": [
+        "안녕"
+      ],
+      "enHighlights": [
+        "Bye-bye"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-suffix"
+    },
+    {
+      "startTime": 42.22000000000001,
+      "endTime": 43.24000000000001,
+      "en": "Take care, Nick.",
+      "target": "잘 가, 닉.",
+      "highlights": [
+        "잘 가",
+        "닉"
+      ],
+      "enHighlights": [
+        "Take care",
+        "Nick"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 43.420000000000016,
+      "endTime": 43.88000000000001,
+      "en": "Have a great day.",
+      "target": "좋은 하루 보내.",
+      "highlights": [
+        "좋은 하루"
+      ],
+      "enHighlights": [
+        "great day"
+      ],
+      "emoji": "✨",
+      "emojiPlacement": "target-suffix"
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 0.9400000000000013,
+      "duration": 3.5,
+      "category": "사내영어",
+      "phrase": "catching you before you head out",
+      "literal": "나가기 전에 널 잡았어",
+      "nuance": "상대방이 자리를 뜨기 전에 말을 걸거나 용건을 처리하려는 상황에서 사용합니다. '잠깐 붙잡다', '가기 전에 얘기 좀 하자'는 의미로 쓰입니다."
+    },
+    {
+      "triggerTime": 5.879999999999999,
+      "duration": 3.5,
+      "category": "비즈니스영어",
+      "phrase": "reaching out",
+      "literal": "손을 뻗다",
+      "nuance": "주로 이메일이나 메시지, 전화 등으로 연락을 취하거나 도움을 요청할 때 사용하는 비즈니스 표현입니다. '연락하다', '접촉하다'의 의미."
+    },
+    {
+      "triggerTime": 11.499999999999993,
+      "duration": 3.5,
+      "category": "사내영어",
+      "phrase": "keep things moving",
+      "literal": "일을 계속 움직이게 하다",
+      "nuance": "어떤 프로젝트나 업무가 정체되지 않고 순조롭게 진행되도록 할 때 사용하는 표현입니다. '계속 진행하다', '탄력을 유지하다'는 의미."
+    },
+    {
+      "triggerTime": 14.719999999999995,
+      "duration": 3.5,
+      "category": "사내영어",
+      "phrase": "action item",
+      "literal": "행동 항목",
+      "nuance": "회의나 논의 후 특정인이 수행해야 할 구체적인 과제나 업무를 지칭하는 비즈니스 용어입니다. '실행 과제', '처리 항목'으로 번역됩니다."
+    },
+    {
+      "triggerTime": 25.919999999999984,
+      "duration": 3.5,
+      "category": "사내영어",
+      "phrase": "under my plate",
+      "literal": "내 접시 아래에",
+      "nuance": "처리해야 할 업무나 책임이 너무 많아서 감당하기 어렵다는 의미의 비유적인 표현입니다. '할 일이 너무 많다', '감당하기 힘들다'는 뜻."
+    },
+    {
+      "triggerTime": 28.879999999999985,
+      "duration": 3.5,
+      "category": "사내영어",
+      "phrase": "ping you",
+      "literal": "너에게 핑을 보내다",
+      "nuance": "이메일, 채팅, 메신저 등으로 간략하게 연락을 취하거나 알림을 보낼 때 사용되는 비즈니스 용어입니다. '연락하다', '알려주다'는 의미."
+    }
+  ],
+  "boringCuts": [
+    {
+      "startTime": 17.08,
+      "endTime": 18.3,
+      "reason": "Long pause after a question."
+    },
+    {
+      "startTime": 23.22,
+      "endTime": 26.22,
+      "reason": "Excessive pause before response."
+    },
+    {
+      "startTime": 33.66,
+      "endTime": 34.88,
+      "reason": "Pause after confirmation."
+    },
+    {
+      "startTime": 41.36,
+      "endTime": 43.18,
+      "reason": "Unnecessary pause after explanation."
+    },
+    {
+      "startTime": 49.04,
+      "endTime": 50.52,
+      "reason": "Pause before giving next action."
+    },
+    {
+      "startTime": 52.32,
+      "endTime": 55.32,
+      "reason": "Long pause, anticipating a response."
+    },
+    {
+      "startTime": 65.18,
+      "endTime": 68.18,
+      "reason": "Long pause at the end of the conversation segment."
+    }
+  ],
+  "videoDuration": 43.9,
+  "targetLanguage": "ko",
+  "silenceGaps": [
+    {
+      "originalStart": 17.14,
+      "originalEnd": 18.18,
+      "duration": 1.0399999999999991
+    },
+    {
+      "originalStart": 23.66,
+      "originalEnd": 26.340000000000003,
+      "duration": 2.6800000000000033
+    },
+    {
+      "originalStart": 41.76,
+      "originalEnd": 43.06,
+      "duration": 1.3000000000000043
+    },
+    {
+      "originalStart": 46.88,
+      "originalEnd": 47.42,
+      "duration": 0.5399999999999991
+    },
+    {
+      "originalStart": 49.6,
+      "originalEnd": 50.400000000000006,
+      "duration": 0.8000000000000043
+    },
+    {
+      "originalStart": 53.42,
+      "originalEnd": 56.14,
+      "duration": 2.719999999999999
+    },
+    {
+      "originalStart": 61.76,
+      "originalEnd": 62.260000000000005,
+      "duration": 0.5000000000000071
+    },
+    {
+      "originalStart": 65.56,
+      "originalEnd": 68.44,
+      "duration": 2.8799999999999955
+    },
+    {
+      "originalStart": 70.54,
+      "originalEnd": 71.11999999999999,
+      "duration": 0.5799999999999841
+    },
+    {
+      "originalStart": 72.36000000000001,
+      "originalEnd": 75.32,
+      "duration": 2.9599999999999795
+    }
+  ],
+  "appliedCuts": [
+    {
+      "originalStart": 17.08,
+      "originalEnd": 18.3,
+      "duration": 1.2200000000000024,
+      "type": "retention",
+      "reason": "Long pause after a question."
+    },
+    {
+      "originalStart": 23.22,
+      "originalEnd": 26.340000000000003,
+      "duration": 3.1200000000000045,
+      "type": "retention",
+      "reason": "Excessive pause before response."
+    },
+    {
+      "originalStart": 33.66,
+      "originalEnd": 34.88,
+      "duration": 1.220000000000006,
+      "type": "retention",
+      "reason": "Pause after confirmation."
+    },
+    {
+      "originalStart": 41.36,
+      "originalEnd": 43.18,
+      "duration": 1.8200000000000003,
+      "type": "retention",
+      "reason": "Unnecessary pause after explanation."
+    },
+    {
+      "originalStart": 46.88,
+      "originalEnd": 47.42,
+      "duration": 0.5399999999999991,
+      "type": "silence"
+    },
+    {
+      "originalStart": 49.04,
+      "originalEnd": 50.52,
+      "duration": 1.480000000000004,
+      "type": "retention",
+      "reason": "Pause before giving next action."
+    },
+    {
+      "originalStart": 52.32,
+      "originalEnd": 56.14,
+      "duration": 3.8200000000000003,
+      "type": "retention",
+      "reason": "Long pause, anticipating a response."
+    },
+    {
+      "originalStart": 61.76,
+      "originalEnd": 62.260000000000005,
+      "duration": 0.5000000000000071,
+      "type": "silence"
+    },
+    {
+      "originalStart": 65.18,
+      "originalEnd": 68.44,
+      "duration": 3.259999999999991,
+      "type": "retention",
+      "reason": "Long pause at the end of the conversation segment."
+    },
+    {
+      "originalStart": 70.54,
+      "originalEnd": 71.11999999999999,
+      "duration": 0.5799999999999841,
+      "type": "silence"
+    },
+    {
+      "originalStart": 72.36000000000001,
+      "originalEnd": 75.32,
+      "duration": 2.9599999999999795,
+      "type": "silence"
+    }
+  ]
 } as unknown as ClipData
 };
 
