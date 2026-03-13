@@ -63,6 +63,10 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
   const hookEndFrame = Math.max(hookStartFrame + 1, Math.floor(hook.endTime * fps));
   const hookDurationInFrames = Math.max(0, hookEndFrame - hookStartFrame);
   const bodyDurationInFrames = Math.max(1, durationInFrames - hookDurationInFrames);
+  const hookSubtitles = clipData.subtitles.filter(
+    (subtitle) =>
+      subtitle.endTime > hook.startTime && subtitle.startTime < hook.endTime
+  );
 
   const videoStyle: React.CSSProperties = {
     position: "absolute",
@@ -118,7 +122,19 @@ export const ClipComposition: React.FC<ClipCompositionProps> = ({ clipData: prop
       {/* Hook title with branding */}
       <HookTitle title={clipData.hookTitle} />
 
-      {/* Bilingual captions — positioned at absolute timestamps */}
+      {/* Bilingual captions for the duplicated hook */}
+      {hookDurationInFrames > 0 ? (
+        <Sequence from={0} durationInFrames={hookDurationInFrames}>
+          <BilingualCaption
+            subtitles={hookSubtitles}
+            clipStart={hook.startTime}
+            targetLanguage={clipData.targetLanguage}
+            onCaptionBottom={handleCaptionBottom}
+          />
+        </Sequence>
+      ) : null}
+
+      {/* Bilingual captions — positioned at absolute timestamps for the main body */}
       <Sequence from={hookDurationInFrames} durationInFrames={Math.max(1, durationInFrames - hookDurationInFrames)}>
         <BilingualCaption
           subtitles={clipData.subtitles}

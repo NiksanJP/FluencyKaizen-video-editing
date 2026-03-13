@@ -32,6 +32,50 @@ interface CutGap extends SilenceGap {
   reason?: string;
 }
 
+const MAX_WORD_DURATION_FOR_NORMALIZATION = 1.5;
+const MAX_WORD_END_PULLBACK = 0.25;
+const PREVIOUS_SPEECH_TAIL_PADDING = 0.18;
+const NEXT_SPEECH_LEAD_PADDING = 0.12;
+
+function getGapPadding(padding: number) {
+  return {
+    // Keep a little more audio after the previous word to avoid clipped endings.
+    previousTail: Math.max(padding, PREVIOUS_SPEECH_TAIL_PADDING),
+    // Keep a small lead-in before the next word so the join feels natural.
+    nextLead: Math.max(padding, NEXT_SPEECH_LEAD_PADDING),
+  };
+}
+
+function getConservativeWordEnd(
+  current: { start: number; end: number },
+  next: { start: number; end: number },
+  threshold: number,
+  padding: number
+): number {
+  const { previousTail, nextLead } = getGapPadding(padding);
+  const actualGap = next.start - current.end;
+  if (actualGap > threshold) {
+    return current.end;
+  }
+
+  const wordDuration = current.end - current.start;
+  if (wordDuration <= MAX_WORD_DURATION_FOR_NORMALIZATION) {
+    return current.end;
+  }
+
+  const cappedEnd = current.start + MAX_WORD_DURATION_FOR_NORMALIZATION;
+  const pullback = Math.min(current.end - cappedEnd, MAX_WORD_END_PULLBACK);
+  if (pullback <= 0) {
+    return current.end;
+  }
+
+  const conservativeEnd = current.end - pullback;
+  const cuttableGap = next.start - conservativeEnd;
+  const minimumGapToCut = threshold + previousTail + nextLead;
+
+  return cuttableGap > minimumGapToCut ? conservativeEnd : current.end;
+}
+
 // ---------------------------------------------------------------------------
 // Core detection
 // ---------------------------------------------------------------------------
@@ -48,16 +92,9 @@ export function detectSilenceGaps(
   padding = 0.1
 ): SilenceGap[] {
   const inClip = words.filter((w) => w.end > clipStart && w.start < clipEnd);
+  const { previousTail, nextLead } = getGapPadding(padding);
 
   if (inClip.length < 2) return [];
-
-  // Normalize stretched word endings — Whisper sometimes assigns the silent period
-  // after a word to that word's end timestamp, hiding the gap from inter-word detection.
-  const MAX_WORD_DURATION = 1.5; // seconds
-  const normalized = inClip.map((w) => ({
-    start: w.start,
-    end: Math.min(w.end, w.start + MAX_WORD_DURATION),
-  }));
 
   const gaps: SilenceGap[] = [];
 
@@ -65,20 +102,21 @@ export function detectSilenceGaps(
   const firstWordStart = inClip[0].start;
   if (firstWordStart - clipStart > threshold) {
     const gapStart = clipStart;
-    const gapEnd = Math.min(firstWordStart - padding, clipEnd);
+    const gapEnd = Math.min(firstWordStart - nextLead, clipEnd);
     if (gapEnd > gapStart) {
       gaps.push({ originalStart: gapStart, originalEnd: gapEnd, duration: gapEnd - gapStart });
     }
   }
 
-  // Inter-word gaps (use normalized end times to expose hidden silence)
-  for (let i = 0; i < normalized.length - 1; i++) {
-    const wordEnd = normalized[i].end;
+  // Inter-word gaps. Whisper occasionally stretches a word into following silence,
+  // so we only pull the end back slightly when there is strong evidence of hidden gap.
+  for (let i = 0; i < inClip.length - 1; i++) {
+    const wordEnd = getConservativeWordEnd(inClip[i], inClip[i + 1], threshold, padding);
     const nextStart = inClip[i + 1].start;
     const gapDuration = nextStart - wordEnd;
     if (gapDuration > threshold) {
-      const gapStart = wordEnd + padding;
-      const gapEnd = nextStart - padding;
+      const gapStart = wordEnd + previousTail;
+      const gapEnd = nextStart - nextLead;
       if (gapEnd > gapStart) {
         gaps.push({
           originalStart: gapStart,
@@ -89,10 +127,11 @@ export function detectSilenceGaps(
     }
   }
 
-  // Trailing silence (last word → clipEnd); use normalized end to catch hidden trailing silence
-  const lastWordEnd = normalized[normalized.length - 1].end;
+  // Trailing silence (last word → clipEnd). Use the actual word end here so we never
+  // invent silence at the end of a sentence and cut the speaker off.
+  const lastWordEnd = inClip[inClip.length - 1].end;
   if (clipEnd - lastWordEnd > threshold) {
-    const gapStart = lastWordEnd + padding;
+    const gapStart = lastWordEnd + previousTail;
     const gapEnd = clipEnd;
     if (gapEnd > gapStart) {
       gaps.push({ originalStart: gapStart, originalEnd: gapEnd, duration: gapEnd - gapStart });

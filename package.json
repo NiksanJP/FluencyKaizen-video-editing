@@ -21,7 +21,8 @@
     "start": "electron .",
     "studio": "bun src/studio/index.ts",
     "pipeline": "bun src/pipeline/index.ts",
-    "render": "remotion render src/remotion/index.tsx",
+    "prerender": "bun src/remotion/prepare-render.ts",
+    "render": "remotion render src/remotion/index.tsx --public-dir=src/remotion/public --bundle-cache=false",
     "lint": "tsc --noEmit -p tsconfig.json",
     "clean": "rimraf dist .tmp"
   },

@@ -13,6 +13,8 @@ import {BACKGROUND} from '../helpers/colors';
 import {useMobileLayout} from '../helpers/mobile-layout';
 import {SHOW_BROWSER_RENDERING} from '../helpers/show-browser-rendering';
 import {VisualControlsTabActivatedContext} from '../visual-controls/VisualControls';
+import {CaptionsPanel} from './CaptionsPanel';
+import {CaptionsTab} from './CaptionsTab';
 import {GlobalPropsEditorUpdateButton} from './GlobalPropsEditorUpdateButton';
 import {DataEditor} from './RenderModal/DataEditor';
 import {deepEqual} from './RenderModal/SchemaEditor/deep-equal';
@@ -21,7 +23,11 @@ import {RendersTab} from './RendersTab';
 import {Tab, Tabs} from './Tabs';
 import {VisualControlsContent} from './VisualControls/VisualControlsContent';
 
-type OptionsSidebarPanel = 'input-props' | 'renders' | 'visual-controls';
+type OptionsSidebarPanel =
+	| 'input-props'
+	| 'renders'
+	| 'captions'
+	| 'visual-controls';
 
 const localStorageKey = 'remotion.sidebarPanel';
 
@@ -33,6 +39,10 @@ const getSelectedPanel = (renderingAvailable: boolean): OptionsSidebarPanel => {
 	const panel = localStorage.getItem(localStorageKey);
 	if (panel === 'renders') {
 		return 'renders';
+	}
+
+	if (panel === 'captions') {
+		return 'captions';
 	}
 
 	if (panel === 'visual-controls') {
@@ -95,6 +105,11 @@ export const OptionsPanel: React.FC<{
 	const onRendersSelected = useCallback(() => {
 		setPanel('renders');
 		persistSelectedOptionsSidebarPanel('renders');
+	}, []);
+
+	const onCaptionsSelected = useCallback(() => {
+		setPanel('captions');
+		persistSelectedOptionsSidebarPanel('captions');
 	}, []);
 
 	const onVisualControlsSelected = useCallback(() => {
@@ -214,6 +229,10 @@ export const OptionsPanel: React.FC<{
 							selected={panel === 'renders'}
 						/>
 					) : null}
+					<CaptionsTab
+						onClick={onCaptionsSelected}
+						selected={panel === 'captions'}
+					/>
 				</Tabs>
 			</div>
 			{panel === 'input-props' ? (
@@ -230,6 +249,8 @@ export const OptionsPanel: React.FC<{
 						readOnlyStudio={readOnlyStudio}
 					/>
 				) : null
+			) : panel === 'captions' ? (
+				<CaptionsPanel currentDefaultProps={currentDefaultProps} />
 			) : panel === 'visual-controls' && visualControlsTabActivated ? (
 				<VisualControlsContent />
 			) : !renderingAvailable ? null : (

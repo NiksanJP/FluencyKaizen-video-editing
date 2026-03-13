@@ -1,0 +1,1 @@
+../../../../../output/CleanShot_2026-03-12_at_20_18_04-4/components/BilingualCaption.tsx

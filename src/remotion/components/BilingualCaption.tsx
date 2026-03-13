@@ -118,7 +118,14 @@ const CaptionContent: React.FC<{ subtitle: SubtitleSegment; targetLanguage?: str
           maxWidth: "100%",
         }}
       >
-        <HighlightedText text={subtitle.en} highlights={subtitle.enHighlights ?? []} />
+        <CaptionLine
+          text={subtitle.en}
+          highlights={subtitle.enHighlights ?? []}
+          emoji={subtitle.emoji}
+          placement={subtitle.emojiPlacement}
+          prefixPlacement="en-prefix"
+          suffixPlacement="en-suffix"
+        />
       </div>
 
       {/* Target language caption with highlights */}
@@ -135,8 +142,41 @@ const CaptionContent: React.FC<{ subtitle: SubtitleSegment; targetLanguage?: str
           maxWidth: "100%",
         }}
       >
-        <HighlightedText text={targetText} highlights={subtitle.highlights} />
+        <CaptionLine
+          text={targetText}
+          highlights={subtitle.highlights}
+          emoji={subtitle.emoji}
+          placement={subtitle.emojiPlacement}
+          prefixPlacement="target-prefix"
+          suffixPlacement="target-suffix"
+        />
       </div>
     </div>
+  );
+};
+
+const emojiStyle: React.CSSProperties = {
+  display: "inline-block",
+  marginLeft: 8,
+  marginRight: 8,
+};
+
+const CaptionLine: React.FC<{
+  text: string;
+  highlights: string[];
+  emoji?: string;
+  placement?: SubtitleSegment["emojiPlacement"];
+  prefixPlacement: SubtitleSegment["emojiPlacement"];
+  suffixPlacement: SubtitleSegment["emojiPlacement"];
+}> = ({ text, highlights, emoji, placement, prefixPlacement, suffixPlacement }) => {
+  const shouldShowPrefix = emoji && placement === prefixPlacement;
+  const shouldShowSuffix = emoji && placement === suffixPlacement;
+
+  return (
+    <>
+      {shouldShowPrefix ? <span style={emojiStyle}>{emoji}</span> : null}
+      <HighlightedText text={text} highlights={highlights} />
+      {shouldShowSuffix ? <span style={emojiStyle}>{emoji}</span> : null}
+    </>
   );
 };

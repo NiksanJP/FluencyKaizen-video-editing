@@ -35,6 +35,7 @@ export async function analyzeWithGemini(
         type: SchemaType.OBJECT,
         properties: {
           videoFile: { type: SchemaType.STRING },
+          socialTitle: { type: SchemaType.STRING },
           hookTitle: {
             type: SchemaType.OBJECT,
             properties: {
@@ -81,8 +82,19 @@ export async function analyzeWithGemini(
                   type: SchemaType.ARRAY,
                   items: { type: SchemaType.STRING },
                 },
+                emoji: { type: SchemaType.STRING },
+                emojiPlacement: { type: SchemaType.STRING },
               },
-              required: ["startTime", "endTime", "en", "target", "highlights", "enHighlights"],
+              required: [
+                "startTime",
+                "endTime",
+                "en",
+                "target",
+                "highlights",
+                "enHighlights",
+                "emoji",
+                "emojiPlacement",
+              ],
             },
           },
           vocabCards: {
@@ -116,6 +128,7 @@ export async function analyzeWithGemini(
         },
         required: [
           "videoFile",
+          "socialTitle",
           "hookTitle",
           "clip",
           "hook",
@@ -168,6 +181,9 @@ ${transcriptText}
    - Provide ${langConfig.name} translation of what was said
    - Identify 1-2 key business words/phrases in the ${langConfig.name} line for highlighting (yellow color) → put in \`highlights\`
    - Identify the same 1-2 corresponding business words/phrases as they appear in the English line → put in \`enHighlights\` (must be exact substrings of the English text)
+   - Add exactly one tasteful emoji that matches the spoken meaning or tone → put it in \`emoji\`
+   - Tell us where the emoji should render by setting \`emojiPlacement\` to one of: \`en-prefix\`, \`en-suffix\`, \`target-prefix\`, \`target-suffix\`
+   - The emoji must feel accurate to what is being said, not random decoration
 ${hasWordTimestamps ? `
    ⚠️ WORD-LEVEL TIMESTAMPS: Each word in the transcript has a bracketed timestamp (e.g. "hello[1.24] world[1.56]").
    - Use these EXACT timestamps for subtitle startTime (first word's timestamp) and endTime (last word's timestamp + ~0.3s).
@@ -194,6 +210,9 @@ ${hasWordTimestamps ? `
    - Set hook.startTime and hook.endTime to a segment that is between ${HOOK_MIN_SECONDS.toFixed(1)} and ${HOOK_MAX_SECONDS.toFixed(1)} seconds
    - Default target duration is around ${HOOK_DEFAULT_SECONDS.toFixed(1)} seconds
    - This segment should maximize curiosity and watch-through: strong claim, surprising line, tension, question, or strong business phrase payoff
+   - The hook must make sense as a standalone opener even without captions: choose a complete thought, not just the final keyword or half a clause
+   - If the key phrase is an idiom, include enough lead-in words so listeners understand who is saying what about it
+   - Prefer 2.0-3.0 seconds unless the transcript makes that impossible
    - Do NOT choose dead air, greetings, filler, or setup-only lines
    - Do NOT choose a segment that conflicts with your boringCuts
    - Add a short \`hook.reason\` explaining why this specific moment should improve retention
@@ -231,10 +250,19 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
    - Add a clear reason for each cut.
    - Optional confidence from 0 to 1.
 
+7. **Social Title For Posting**:
+   Create one post-ready social title/caption for Instagram and TikTok.
+   - Must include 1-2 emojis
+   - Must include 0 to 3 hashtags total, never more than 3
+   - Keep it punchy and educational, focused on the same English phrase/value as the hook
+   - Make it feel native to short-form social posts, not like a formal lesson title
+   - Return it as a single string in \`socialTitle\`
+
 ## Output Schema (MUST be valid JSON)
 \`\`\`json
 {
   "videoFile": "${videoFileName}",
+  "socialTitle": "string with emojis and max 3 hashtags",
   "hookTitle": {
     "target": "string (${langConfig.name} title)",
     "en": "string",
@@ -256,7 +284,9 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
       "en": "string",
       "target": "string (${langConfig.name} translation)",
       "highlights": ["${langConfig.name} word1", "${langConfig.name} word2"],
-      "enHighlights": ["English word1", "English phrase2"]
+      "enHighlights": ["English word1", "English phrase2"],
+      "emoji": "string",
+      "emojiPlacement": "target-suffix"
     }
   ],
   "vocabCards": [
@@ -285,10 +315,12 @@ ${targetLanguage === "ja" ? `   - Good: "💼ビジネス英語でParkの使い�
 - Each subtitle segment should be 2-4 seconds
 - \`highlights\` words must actually appear in the target language text; \`enHighlights\` words must actually appear in the English text
 - Hook duration must be between ${HOOK_MIN_SECONDS.toFixed(1)} and ${HOOK_MAX_SECONDS.toFixed(1)} seconds
+- Hook audio should be understandable on its own and should not begin or end mid-thought if a better nearby cut exists
 - \`boringCuts\` may be empty, but if present every cut must be 0.3-3.0s and inside the clip window
 - **hookTitle.target must be ≤ ${limits.hookTitle.target} characters** — count each character as 1, no exceptions
 - **hookTitle.en must be ≤ ${limits.hookTitle.en} characters** — keep it short and punchy
 - **Each subtitle en must be ≤ ${limits.subtitle.en} characters** — use exact words spoken, split at natural pauses
+- **socialTitle must include emojis and no more than 3 hashtags**
 - Return ONLY valid JSON, no markdown code blocks, no explanations
 - All timestamps are in seconds (can be floats like 1.5)
 
@@ -377,6 +409,23 @@ function enforceCharacterLimits(data: ClipData, targetLanguage: SupportedLanguag
   const limits = getLimits(targetLanguage);
   let truncationCount = 0;
 
+  if (typeof data.socialTitle !== "string") {
+    data.socialTitle = "";
+  }
+
+  if (!/\p{Extended_Pictographic}/u.test(data.socialTitle)) {
+    data.socialTitle = `✨ ${data.socialTitle}`.trim();
+  }
+
+  const hashtags = data.socialTitle.match(/#[\p{L}\p{N}_]+/gu) ?? [];
+  if (hashtags.length > 3) {
+    let hashtagsSeen = 0;
+    data.socialTitle = data.socialTitle.replace(/#[\p{L}\p{N}_]+/gu, (tag) => {
+      hashtagsSeen += 1;
+      return hashtagsSeen <= 3 ? tag : "";
+    }).replace(/\s{2,}/g, " ").trim();
+  }
+
   // Resolve the target title text (target field, falling back to ja for backward compat)
   const targetTitle = data.hookTitle.target || data.hookTitle.ja || "";
 
@@ -420,6 +469,19 @@ function enforceCharacterLimits(data: ClipData, targetLanguage: SupportedLanguag
 
   for (let i = 0; i < data.subtitles.length; i++) {
     const sub = data.subtitles[i];
+    if (typeof sub.emoji !== "string" || sub.emoji.trim().length === 0) {
+      sub.emoji = "✨";
+    }
+
+    if (
+      sub.emojiPlacement !== "en-prefix" &&
+      sub.emojiPlacement !== "en-suffix" &&
+      sub.emojiPlacement !== "target-prefix" &&
+      sub.emojiPlacement !== "target-suffix"
+    ) {
+      sub.emojiPlacement = "target-suffix";
+    }
+
     if (sub.en.length > limits.subtitle.en) {
       console.warn(`⚠️  Subtitle ${i} EN truncated: "${sub.en}" (${sub.en.length} chars)`);
       const trimmed = sub.en.slice(0, limits.subtitle.en - 3);
@@ -605,6 +667,8 @@ function validateClipData(data: unknown): asserts data is ClipData {
   const clip = data as Partial<ClipData>;
 
   if (!clip.videoFile) throw new Error("Missing videoFile");
+  if (typeof clip.socialTitle !== "string")
+    throw new Error("Missing socialTitle");
   if ((!clip.hookTitle?.target && !clip.hookTitle?.ja) || !clip.hookTitle?.en)
     throw new Error("Missing hookTitle (need target or ja, and en)");
   if (typeof clip.clip?.startTime !== "number" ||
@@ -634,7 +698,9 @@ function validateClipData(data: unknown): asserts data is ClipData {
         typeof sub.en !== "string" ||
         (typeof sub.target !== "string" && typeof sub.ja !== "string") ||
         !Array.isArray(sub.highlights) ||
-        !Array.isArray(sub.enHighlights)) {
+        !Array.isArray(sub.enHighlights) ||
+        typeof sub.emoji !== "string" ||
+        typeof sub.emojiPlacement !== "string") {
       throw new Error(`Invalid subtitle segment: ${JSON.stringify(sub)}`);
     }
   }

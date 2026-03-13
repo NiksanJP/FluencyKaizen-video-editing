@@ -258,6 +258,36 @@ function SubtitleRow({
             />
           </div>
 
+          <div style={S.row}>
+            <div style={S.col}>
+              <div style={S.label}>Emoji</div>
+              <input
+                style={S.input}
+                value={sub.emoji ?? ""}
+                onChange={(e) => onUpdate({ ...sub, emoji: e.target.value })}
+                placeholder="e.g. 💼"
+              />
+            </div>
+            <div style={S.col}>
+              <div style={S.label}>Emoji Placement</div>
+              <select
+                style={S.input}
+                value={sub.emojiPlacement ?? "target-suffix"}
+                onChange={(e) =>
+                  onUpdate({
+                    ...sub,
+                    emojiPlacement: e.target.value as SubtitleSegment["emojiPlacement"],
+                  })
+                }
+              >
+                <option value="en-prefix">English prefix</option>
+                <option value="en-suffix">English suffix</option>
+                <option value="target-prefix">Target prefix</option>
+                <option value="target-suffix">Target suffix</option>
+              </select>
+            </div>
+          </div>
+
           {/* JA Highlights */}
           <div style={{ marginBottom: 8 }}>
             <div style={S.label}>JA Highlights</div>
@@ -489,6 +519,8 @@ export const EditPanel: React.FC<Props> = ({
                     ja: "",
                     highlights: [],
                     enHighlights: [],
+                    emoji: "✨",
+                    emojiPlacement: "target-suffix",
                   });
                   return d;
                 })
@@ -567,6 +599,19 @@ export const EditPanel: React.FC<Props> = ({
         {/* ---- Hook Title ---- */}
         {tab === "hook" && (
           <div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={S.label}>Social Post Title</div>
+              <input
+                style={S.input}
+                value={clipData.socialTitle ?? ""}
+                onChange={(e) =>
+                  onUpdateClip((d) => {
+                    d.socialTitle = e.target.value;
+                    return d;
+                  })
+                }
+              />
+            </div>
             <div style={{ marginBottom: 12 }}>
               <div style={S.label}>Target Language Title</div>
               <input

@@ -48,6 +48,7 @@ export interface ClipData {
   videoFile: string;
   videoDuration: number; // full source video length in seconds
   targetLanguage?: SupportedLanguage; // target language code (default: "ja")
+  socialTitle?: string; // post-ready social caption/title with emojis + up to 3 hashtags
   hookTitle: {
     ja?: string;           // backward compat — legacy Japanese title
     target?: string;       // target language title (new)
@@ -74,6 +75,8 @@ export interface SubtitleSegment {
   target?: string;          // target language text (new)
   highlights: string[];      // target language words to highlight (legacy / ja alias)
   enHighlights: string[];    // English words/phrases to highlight
+  emoji?: string;            // optional emoji selected by Gemini for this caption
+  emojiPlacement?: "en-prefix" | "en-suffix" | "target-prefix" | "target-suffix";
 }
 
 export interface VocabCard {

@@ -9,6 +9,7 @@
 import { createRequire } from "module";
 import { dirname, resolve } from "path";
 import { existsSync } from "fs";
+import { Config } from "@remotion/cli/config";
 import { StudioServerInternals } from "@remotion/studio-server";
 import type { RenderJob } from "@remotion/studio-shared";
 
@@ -19,6 +20,36 @@ const remotionCliQueuePath = resolve(
   dirname(remotionCliPkgPath),
   "dist/render-queue/queue.js",
 );
+const REMOTION_PUBLIC_DIR = "src/remotion/public";
+
+const hasCliFlag = (flag: string) => {
+  return process.argv.some((arg, index) => {
+    if (arg === flag) {
+      return true;
+    }
+
+    if (arg.startsWith(`${flag}=`)) {
+      return true;
+    }
+
+    return index > 0 && process.argv[index - 1] === flag;
+  });
+};
+
+const ensureCliFlag = (flag: string, value: string) => {
+  if (!hasCliFlag(flag)) {
+    process.argv.push(`${flag}=${value}`);
+  }
+};
+
+// The Remotion render queue snapshots CLI flags during module evaluation.
+// Mirror the embedded Studio config into process.argv before requiring it so
+// queued renders bundle the correct public directory instead of defaulting to ./public.
+Config.setPublicDir(REMOTION_PUBLIC_DIR);
+Config.setCachingEnabled(false);
+ensureCliFlag("--public-dir", REMOTION_PUBLIC_DIR);
+ensureCliFlag("--bundle-cache", "false");
+
 const renderQueue = _require(remotionCliQueuePath) as {
   getRenderQueue: () => RenderJob[];
   addJob: (args: {
@@ -73,7 +104,7 @@ export async function startRemotionStudio({
     experimentalVisualModeEnabled: false,
     maxTimelineTracks: null,
     remotionRoot,
-    relativePublicDir: "src/remotion/public",
+    relativePublicDir: REMOTION_PUBLIC_DIR,
     webpackOverride: (config: unknown) => config as any,
     poll: null,
     getRenderDefaults: () => ({

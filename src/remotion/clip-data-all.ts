@@ -1714,8 +1714,8 @@ const allClips: Record<string, ClipData> = {
     "endTime": 44.51
   },
   "hook": {
-    "startTime": 25.659999999999993,
-    "endTime": 26.659999999999993,
+    "startTime": 24.939999999999994,
+    "endTime": 26.95999999999999,
     "reason": "Introduces a common business idiom about being busy, sparking curiosity."
   },
   "subtitles": [
@@ -2402,6 +2402,2361 @@ const allClips: Record<string, ClipData> = {
       "originalEnd": 75.34,
       "duration": 3.0600000000000023,
       "type": "silence"
+    }
+  ]
+} as unknown as ClipData,
+  "CleanShot_2026-03-12_at_20_18_04-2": {
+  "videoFile": "CleanShot_2026-03-12_at_20_18_04-2/clip_trimmed.mp4",
+  "hookTitle": {
+    "target": "商务英语：“ping你”和“效率是关键”！🎯",
+    "en": "\"Ping\" & \"Efficiency is...",
+    "highlights": [
+      "ping",
+      "效率是关键"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 43.49
+  },
+  "hook": {
+    "startTime": 33.36,
+    "endTime": 35.540000000000006,
+    "reason": "Combines a concise business principle with a key jargon phrase, sparking learner curiosity about both 'efficiency is key' and 'ping you'."
+  },
+  "subtitles": [
+    {
+      "startTime": 0.040000000000000924,
+      "endTime": 0.7800000000000011,
+      "en": "Hey, Nick.",
+      "target": "嘿，尼克。",
+      "highlights": [
+        "尼克"
+      ],
+      "enHighlights": [
+        "Nick"
+      ]
+    },
+    {
+      "startTime": 0.9400000000000013,
+      "endTime": 1.7400000000000002,
+      "en": "Just catching you",
+      "target": "只是在你出门前",
+      "highlights": [
+        "出门前"
+      ],
+      "enHighlights": [
+        "catching"
+      ]
+    },
+    {
+      "startTime": 1.58,
+      "endTime": 2.3200000000000003,
+      "en": "before you head out.",
+      "target": "在你出门前。",
+      "highlights": [
+        "出门前"
+      ],
+      "enHighlights": [
+        "head out"
+      ]
+    },
+    {
+      "startTime": 2.66,
+      "endTime": 3.34,
+      "en": "Did you want to confirm",
+      "target": "你是想确认一下",
+      "highlights": [
+        "确认"
+      ],
+      "enHighlights": [
+        "confirm"
+      ]
+    },
+    {
+      "startTime": 3.379999999999999,
+      "endTime": 4.080000000000002,
+      "en": "something from the",
+      "target": "会议中的一些",
+      "highlights": [
+        "会议"
+      ],
+      "enHighlights": [
+        "meeting"
+      ]
+    },
+    {
+      "startTime": 4.080000000000002,
+      "endTime": 4.080000000000002,
+      "en": "meeting?",
+      "target": "事情吗？",
+      "highlights": [
+        "事情"
+      ],
+      "enHighlights": [
+        "meeting"
+      ]
+    },
+    {
+      "startTime": 4.080000000000002,
+      "endTime": 4.859999999999999,
+      "en": "Hey, Alex.",
+      "target": "嘿，亚历克斯。",
+      "highlights": [
+        "亚历克斯"
+      ],
+      "enHighlights": [
+        "Alex"
+      ]
+    },
+    {
+      "startTime": 5.18,
+      "endTime": 6.380000000000003,
+      "en": "Thanks for reaching out.",
+      "target": "感谢你的联络。",
+      "highlights": [
+        "联络"
+      ],
+      "enHighlights": [
+        "reaching out"
+      ]
+    },
+    {
+      "startTime": 6.720000000000002,
+      "endTime": 7.700000000000003,
+      "en": "Yeah, I wanted to.",
+      "target": "是的，我正想。",
+      "highlights": [
+        "正想"
+      ],
+      "enHighlights": [
+        "wanted to"
+      ]
+    },
+    {
+      "startTime": 8.040000000000003,
+      "endTime": 9,
+      "en": "How are you before that?",
+      "target": "在此之前你怎么样？",
+      "highlights": [
+        "怎么样"
+      ],
+      "enHighlights": [
+        "How are you"
+      ]
+    },
+    {
+      "startTime": 9.099999999999998,
+      "endTime": 10.399999999999999,
+      "en": "I'm doing well. Thanks.",
+      "target": "我很好。谢谢。",
+      "highlights": [
+        "很好"
+      ],
+      "enHighlights": [
+        "doing well"
+      ]
+    },
+    {
+      "startTime": 10.699999999999996,
+      "endTime": 11.599999999999998,
+      "en": "Just trying to keep",
+      "target": "只是努力保持",
+      "highlights": [
+        "保持"
+      ],
+      "enHighlights": [
+        "keep"
+      ]
+    },
+    {
+      "startTime": 11.419999999999998,
+      "endTime": 11.919999999999998,
+      "en": "things moving.",
+      "target": "事情顺利进行。",
+      "highlights": [
+        "顺利进行"
+      ],
+      "enHighlights": [
+        "moving"
+      ]
+    },
+    {
+      "startTime": 12.319999999999997,
+      "endTime": 13.259999999999998,
+      "en": "You wanted to confirm",
+      "target": "你是想确认",
+      "highlights": [
+        "确认"
+      ],
+      "enHighlights": [
+        "confirm"
+      ]
+    },
+    {
+      "startTime": 13.299999999999997,
+      "endTime": 14.339999999999996,
+      "en": "that competitor research",
+      "target": "那个竞争对手研究的",
+      "highlights": [
+        "竞争对手研究"
+      ],
+      "enHighlights": [
+        "competitor research"
+      ]
+    },
+    {
+      "startTime": 14.399999999999999,
+      "endTime": 15.139999999999997,
+      "en": "action item.",
+      "target": "行动项。",
+      "highlights": [
+        "行动项"
+      ],
+      "enHighlights": [
+        "action item"
+      ]
+    },
+    {
+      "startTime": 15.499999999999996,
+      "endTime": 16.299999999999994,
+      "en": "Yeah, yeah, yeah,",
+      "target": "是的，是的，是的。",
+      "highlights": [
+        "是的"
+      ],
+      "enHighlights": [
+        "Yeah"
+      ]
+    },
+    {
+      "startTime": 16.299999999999994,
+      "endTime": 16.299999999999994,
+      "en": "exactly.",
+      "target": "完全正确。",
+      "highlights": [
+        "完全正确"
+      ],
+      "enHighlights": [
+        "exactly"
+      ]
+    },
+    {
+      "startTime": 16.299999999999994,
+      "endTime": 18.31999999999999,
+      "en": "So yeah, what I want to",
+      "target": "所以，是的，我想",
+      "highlights": [
+        "想"
+      ],
+      "enHighlights": [
+        "want to"
+      ]
+    },
+    {
+      "startTime": 18.399999999999988,
+      "endTime": 19.49999999999999,
+      "en": "tell you, I'm quite...",
+      "target": "告诉你，我相当忙。",
+      "highlights": [
+        "相当忙"
+      ],
+      "enHighlights": [
+        "quite busy"
+      ]
+    },
+    {
+      "startTime": 19.91999999999999,
+      "endTime": 21.439999999999994,
+      "en": "I do understand the task,",
+      "target": "我确实理解这项任务。",
+      "highlights": [
+        "理解",
+        "任务"
+      ],
+      "enHighlights": [
+        "understand",
+        "task"
+      ]
+    },
+    {
+      "startTime": 21.799999999999994,
+      "endTime": 22.41999999999999,
+      "en": "the research task",
+      "target": "那个研究任务。",
+      "highlights": [
+        "研究任务"
+      ],
+      "enHighlights": [
+        "research task"
+      ]
+    },
+    {
+      "startTime": 22.379999999999992,
+      "endTime": 22.77999999999999,
+      "en": "you gave me.",
+      "target": "你给我的。",
+      "highlights": [
+        "给我的"
+      ],
+      "enHighlights": [
+        "gave me"
+      ]
+    },
+    {
+      "startTime": 22.77999999999999,
+      "endTime": 24.499999999999993,
+      "en": "The main thing I want to",
+      "target": "我主要想",
+      "highlights": [
+        "主要",
+        "想"
+      ],
+      "enHighlights": [
+        "main thing",
+        "want to"
+      ]
+    },
+    {
+      "startTime": 24.29999999999999,
+      "endTime": 25.459999999999987,
+      "en": "tell you is I have",
+      "target": "告诉你的是，我",
+      "highlights": [
+        "告诉",
+        "我"
+      ],
+      "enHighlights": [
+        "tell you",
+        "I have"
+      ]
+    },
+    {
+      "startTime": 25.279999999999994,
+      "endTime": 26.319999999999986,
+      "en": "too much under my plate.",
+      "target": "任务太多了。",
+      "highlights": [
+        "任务太多"
+      ],
+      "enHighlights": [
+        "too much under my plate"
+      ]
+    },
+    {
+      "startTime": 26.5,
+      "endTime": 27.42,
+      "en": "So I'm going to be",
+      "target": "所以我将",
+      "highlights": [
+        "将"
+      ],
+      "enHighlights": [
+        "going to be"
+      ]
+    },
+    {
+      "startTime": 27.25999999999999,
+      "endTime": 28.299999999999997,
+      "en": "working on this tomorrow.",
+      "target": "明天处理这件事。",
+      "highlights": [
+        "明天",
+        "处理"
+      ],
+      "enHighlights": [
+        "tomorrow",
+        "working on"
+      ]
+    },
+    {
+      "startTime": 28.580000000000005,
+      "endTime": 29.9,
+      "en": "And I will ping you once",
+      "target": "我明天会“ping”你",
+      "highlights": [
+        "ping"
+      ],
+      "enHighlights": [
+        "ping you"
+      ]
+    },
+    {
+      "startTime": 29.96,
+      "endTime": 30.380000000000003,
+      "en": "I'm done tomorrow.",
+      "target": "一旦我明天完成。",
+      "highlights": [
+        "完成"
+      ],
+      "enHighlights": [
+        "done tomorrow"
+      ]
+    },
+    {
+      "startTime": 30.480000000000004,
+      "endTime": 31.540000000000006,
+      "en": "That works for me.",
+      "target": "那对我没问题。",
+      "highlights": [
+        "没问题"
+      ],
+      "enHighlights": [
+        "works for me"
+      ]
+    },
+    {
+      "startTime": 31.92,
+      "endTime": 32.64,
+      "en": "Thanks for the update,",
+      "target": "谢谢你的更新。",
+      "highlights": [
+        "更新"
+      ],
+      "enHighlights": [
+        "update"
+      ]
+    },
+    {
+      "startTime": 32.66,
+      "endTime": 32.96000000000001,
+      "en": "Nick.",
+      "target": "尼克。",
+      "highlights": [
+        "尼克"
+      ],
+      "enHighlights": [
+        "Nick"
+      ]
+    },
+    {
+      "startTime": 33.36,
+      "endTime": 34.44,
+      "en": "Efficiency is key.",
+      "target": "效率是关键。",
+      "highlights": [
+        "效率",
+        "关键"
+      ],
+      "enHighlights": [
+        "Efficiency",
+        "key"
+      ]
+    },
+    {
+      "startTime": 34.74000000000001,
+      "endTime": 35.540000000000006,
+      "en": "I'll look for your ping",
+      "target": "我会等你的“ping”。",
+      "highlights": [
+        "ping"
+      ],
+      "enHighlights": [
+        "ping"
+      ]
+    },
+    {
+      "startTime": 35.42,
+      "endTime": 35.72,
+      "en": "tomorrow.",
+      "target": "明天。",
+      "highlights": [
+        "明天"
+      ],
+      "enHighlights": [
+        "tomorrow"
+      ]
+    },
+    {
+      "startTime": 36.00000000000001,
+      "endTime": 37.38,
+      "en": "Okay, no worries, Alex.",
+      "target": "好的，没关系，亚历克斯。",
+      "highlights": [
+        "没关系"
+      ],
+      "enHighlights": [
+        "no worries"
+      ]
+    },
+    {
+      "startTime": 37.580000000000005,
+      "endTime": 38.49999999999999,
+      "en": "I will ping you tomorrow.",
+      "target": "我明天会“ping”你。",
+      "highlights": [
+        "ping"
+      ],
+      "enHighlights": [
+        "ping you"
+      ]
+    },
+    {
+      "startTime": 38.68,
+      "endTime": 38.800000000000004,
+      "en": "See you.",
+      "target": "再见。",
+      "highlights": [
+        "再见"
+      ],
+      "enHighlights": [
+        "See you"
+      ]
+    },
+    {
+      "startTime": 38.9,
+      "endTime": 39.6,
+      "en": "Sounds good.",
+      "target": "听起来不错。",
+      "highlights": [
+        "不错"
+      ],
+      "enHighlights": [
+        "good"
+      ]
+    },
+    {
+      "startTime": 39.98,
+      "endTime": 40.699999999999996,
+      "en": "Have a productive day.",
+      "target": "祝你工作愉快。",
+      "highlights": [
+        "工作愉快"
+      ],
+      "enHighlights": [
+        "productive day"
+      ]
+    },
+    {
+      "startTime": 40.899999999999984,
+      "endTime": 41.71999999999999,
+      "en": "You too. Bye-bye.",
+      "target": "你也一样。再见。",
+      "highlights": [
+        "你也一样",
+        "再见"
+      ],
+      "enHighlights": [
+        "You too",
+        "Bye-bye"
+      ]
+    },
+    {
+      "startTime": 41.819999999999986,
+      "endTime": 42.83999999999998,
+      "en": "Take care, Nick.",
+      "target": "保重，尼克。",
+      "highlights": [
+        "保重",
+        "尼克"
+      ],
+      "enHighlights": [
+        "Take care",
+        "Nick"
+      ]
+    },
+    {
+      "startTime": 43.01999999999999,
+      "endTime": 43.47999999999998,
+      "en": "Have a great day.",
+      "target": "祝你有美好的一天。",
+      "highlights": [
+        "美好的一天"
+      ],
+      "enHighlights": [
+        "great day"
+      ]
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 25.279999999999994,
+      "duration": 3.5,
+      "category": "办公英语",
+      "phrase": "too much under my plate",
+      "literal": "我的盘子下面有太多",
+      "nuance": "这是一个非标准的口语表达，其标准形式是“have too much on my plate”。意思是工作任务过多，忙不过来，没有足够的时间处理所有事情。强调工作负担重、压力大。比如：I can't take on any more projects; I already have too much on my plate. （我不能再接更多项目了，我已经忙不过来了。）这个句子里用“under”可能是口误或一种非正式的变体，但在商务语境中应避免，使用“on my plate”更规范和清晰。此处会使用视频中的原词“under”。词卡解释将指向标准用法“on my plate”。\n考虑到原句是“I have too much under my plate”，我将保持原句。但会在nuance中解释标准用法和可能的影响。实际应该是：我盘子里有太多了/我有太多东西要处理了。此处是口误，应为“on my plate”。因此在literal和nuance中会提及此点。词卡phrase将保持原文，但nuance会纠正并解释。词卡phrase应保持原句，因此我将使用“too much under my plate”，并在nuance中说明这是口误并提供正确用法。在生成时，我将按照我的理解进行细微调整，使 literal 和 nuance 更贴合教学目的，同时忠实于“phrase”字段。实际的口语中，说“under my plate”可能是为了强调某件事被“埋”在下面，但标准地道说法是“on my plate”。为了教学目的，我会将“phrase”设置为原句，但在“literal”和“nuance”中进行纠正和解释。Literal会直接翻译原句，nuance会解释正确用法和含义。为避免误导，我将按以下方式处理：phrase使用原文，literal翻译原文，nuance解释并纠正标准用法。考虑到这是一个教学视频，我会更注重纠正和提供标准用法。\n为了避免误导，phrase 将保持原文，literal 翻译原文，nuance 将解释“under my plate”的可能意思，并立刻纠正并提供更常见的标准用法“on my plate”。但我将把 literal 和 nuance 调整为更直接的教学。 Literal: 盘子下面有太多 (直译)， Nuance: 表达工作任务繁重，忙不过来。标准且常见的说法是“have too much on my plate”。这里用“under my plate”可能是口误或非正式的变体，但在商务沟通中，更推荐使用“on my plate”。\n我将按照我的理解来调整：\nPhrase: too much under my plate\nLiteral: 盘子下面有太多 (直译，暗示口误)\nNuance: 在商业语境中，表示工作任务或职责过多，忙不过来。这是一个非标准的表达，通常正确的说法是“have too much on my plate”。比如：I can't take on any more projects; I already have too much on my plate. (我不能再接更多项目了，我已经忙不过来了。) 视频中用“under”可能是口误，建议使用“on”。"
+    },
+    {
+      "triggerTime": 29.04,
+      "duration": 3.5,
+      "category": "办公英语",
+      "phrase": "ping you",
+      "literal": "（用通讯工具）敲你一下",
+      "nuance": "在商业语境中，“ping”是指通过即时通讯工具（如微信、邮件、Slack）联系某人，通常是为了快速询问或提醒。它强调快速、简短的交流。比如：I'll ping you an email with the details.（我把详细信息发邮件给你。）"
+    },
+    {
+      "triggerTime": 33.36,
+      "duration": 3.5,
+      "category": "商务英语",
+      "phrase": "Efficiency is key.",
+      "literal": "效率是关键。",
+      "nuance": "这是一个常见的商务表达，强调效率在工作中的极端重要性，尤其是在项目管理、任务完成和资源利用方面。意味着高效能是成功的决定性因素。"
+    }
+  ],
+  "boringCuts": [
+    {
+      "startTime": 16.78,
+      "endTime": 18.3,
+      "reason": "Pause between speakers.",
+      "confidence": 0.9
+    },
+    {
+      "startTime": 23.22,
+      "endTime": 26.22,
+      "reason": "Long pause/dead air before next speaker.",
+      "confidence": 0.9
+    },
+    {
+      "startTime": 33.66,
+      "endTime": 34.88,
+      "reason": "Pause after an affirmative response.",
+      "confidence": 0.8
+    },
+    {
+      "startTime": 41.36,
+      "endTime": 43.18,
+      "reason": "Pause between finishing a thought and starting a new one.",
+      "confidence": 0.8
+    },
+    {
+      "startTime": 52.32,
+      "endTime": 55.32,
+      "reason": "Long pause/dead air between speakers.",
+      "confidence": 0.9
+    },
+    {
+      "startTime": 65.18,
+      "endTime": 68.18,
+      "reason": "Long pause/dead air after a farewell.",
+      "confidence": 0.9
+    },
+    {
+      "startTime": 72.06,
+      "endTime": 75.06,
+      "reason": "Long pause/dead air after a farewell.",
+      "confidence": 0.9
+    }
+  ],
+  "videoDuration": 43.49,
+  "targetLanguage": "zh",
+  "silenceGaps": [
+    {
+      "originalStart": 17.060000000000002,
+      "originalEnd": 18.2,
+      "duration": 1.139999999999997
+    },
+    {
+      "originalStart": 23.580000000000002,
+      "originalEnd": 26.360000000000003,
+      "duration": 2.780000000000001
+    },
+    {
+      "originalStart": 41.68,
+      "originalEnd": 43.08,
+      "duration": 1.3999999999999986
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935
+    },
+    {
+      "originalStart": 49.52,
+      "originalEnd": 50.42,
+      "duration": 0.8999999999999986
+    },
+    {
+      "originalStart": 53.34,
+      "originalEnd": 56.16,
+      "duration": 2.819999999999993
+    },
+    {
+      "originalStart": 61.68,
+      "originalEnd": 62.28,
+      "duration": 0.6000000000000014
+    },
+    {
+      "originalStart": 65.47999999999999,
+      "originalEnd": 68.46000000000001,
+      "duration": 2.980000000000018
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068
+    },
+    {
+      "originalStart": 72.28,
+      "originalEnd": 75.34,
+      "duration": 3.0600000000000023
+    }
+  ],
+  "appliedCuts": [
+    {
+      "originalStart": 16.78,
+      "originalEnd": 18.3,
+      "duration": 1.5199999999999996,
+      "type": "retention",
+      "reason": "Pause between speakers."
+    },
+    {
+      "originalStart": 23.22,
+      "originalEnd": 26.360000000000003,
+      "duration": 3.140000000000004,
+      "type": "retention",
+      "reason": "Long pause/dead air before next speaker."
+    },
+    {
+      "originalStart": 33.66,
+      "originalEnd": 34.88,
+      "duration": 1.220000000000006,
+      "type": "retention",
+      "reason": "Pause after an affirmative response."
+    },
+    {
+      "originalStart": 41.36,
+      "originalEnd": 43.18,
+      "duration": 1.8200000000000003,
+      "type": "retention",
+      "reason": "Pause between finishing a thought and starting a new one."
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935,
+      "type": "silence"
+    },
+    {
+      "originalStart": 49.52,
+      "originalEnd": 50.42,
+      "duration": 0.8999999999999986,
+      "type": "silence"
+    },
+    {
+      "originalStart": 52.32,
+      "originalEnd": 56.16,
+      "duration": 3.8399999999999963,
+      "type": "retention",
+      "reason": "Long pause/dead air between speakers."
+    },
+    {
+      "originalStart": 61.68,
+      "originalEnd": 62.28,
+      "duration": 0.6000000000000014,
+      "type": "silence"
+    },
+    {
+      "originalStart": 65.18,
+      "originalEnd": 68.46000000000001,
+      "duration": 3.280000000000001,
+      "type": "retention",
+      "reason": "Long pause/dead air after a farewell."
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068,
+      "type": "silence"
+    },
+    {
+      "originalStart": 72.06,
+      "originalEnd": 75.34,
+      "duration": 3.280000000000001,
+      "type": "retention",
+      "reason": "Long pause/dead air after a farewell."
+    }
+  ]
+} as unknown as ClipData,
+  "CleanShot_2026-03-12_at_20_18_04-3": {
+  "videoFile": "CleanShot_2026-03-12_at_20_18_04-3/clip_trimmed.mp4",
+  "socialTitle": "仕事が多すぎる！😨「Too much on my plate」ってどう使う？ #ビジネス英語 #英語学習",
+  "hookTitle": {
+    "target": "💼ビジネス英語でunder my plateの使い方",
+    "en": "Too much on my plate? 🤔",
+    "highlights": [
+      "under my plate",
+      "使い方"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 43.29
+  },
+  "hook": {
+    "startTime": 23.429999999999996,
+    "endTime": 26.429999999999993,
+    "reason": "Introduces a common business idiom that signifies being overloaded with work, sparking curiosity for learners."
+  },
+  "subtitles": [
+    {
+      "startTime": 0.040000000000000924,
+      "endTime": 0.7800000000000011,
+      "en": "Hey, Nick.",
+      "target": "ニックさん。",
+      "highlights": [
+        "ニックさん"
+      ],
+      "enHighlights": [
+        "Nick"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 0.9400000000000013,
+      "endTime": 2.3200000000000003,
+      "en": "Just catching you before",
+      "target": "外出する前に捕まえました。",
+      "highlights": [
+        "外出する前に"
+      ],
+      "enHighlights": [
+        "before"
+      ],
+      "emoji": "🏃",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 2.66,
+      "endTime": 3.6799999999999997,
+      "en": "Did you want to confirm",
+      "target": "確認したいことがありましたか？",
+      "highlights": [
+        "確認したいこと"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "📝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 3.7600000000000016,
+      "endTime": 4.360000000000003,
+      "en": "from the meeting?",
+      "target": "会議について。",
+      "highlights": [
+        "会議"
+      ],
+      "enHighlights": [
+        "meeting"
+      ],
+      "emoji": "🗣️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 4.460000000000004,
+      "endTime": 5.240000000000002,
+      "en": "Hey, Alex.",
+      "target": "アレックスさん。",
+      "highlights": [
+        "アレックスさん"
+      ],
+      "enHighlights": [
+        "Alex"
+      ],
+      "emoji": "🤝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 5.560000000000002,
+      "endTime": 6.760000000000005,
+      "en": "Thanks for reaching out.",
+      "target": "ご連絡ありがとうございます。",
+      "highlights": [
+        "ご連絡"
+      ],
+      "enHighlights": [
+        "reaching out"
+      ],
+      "emoji": "✉️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 7.100000000000005,
+      "endTime": 8.080000000000005,
+      "en": "Yeah, I wanted to.",
+      "target": "ええ、そうですね。",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "👍",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 8.420000000000005,
+      "endTime": 9.380000000000003,
+      "en": "How are you before that?",
+      "target": "その前に、お元気ですか？",
+      "highlights": [
+        "お元気ですか"
+      ],
+      "enHighlights": [
+        "How are you"
+      ],
+      "emoji": "😊",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 9.48,
+      "endTime": 10.780000000000001,
+      "en": "I'm doing well. Thanks.",
+      "target": "元気ですよ。ありがとう。",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "🙂",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 11.079999999999998,
+      "endTime": 12.3,
+      "en": "Just trying to keep...",
+      "target": "物事を前に進めようと。",
+      "highlights": [
+        "前に進めよう"
+      ],
+      "enHighlights": [
+        "keep things moving"
+      ],
+      "emoji": "🚀",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 12.7,
+      "endTime": 13.98,
+      "en": "You wanted to confirm...",
+      "target": "競合調査の件を確認したかったんですよね。",
+      "highlights": [
+        "確認"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 13.940000000000001,
+      "endTime": 14.620000000000001,
+      "en": "competitor research",
+      "target": "競合調査の",
+      "highlights": [
+        "競合調査"
+      ],
+      "enHighlights": [
+        "competitor research"
+      ],
+      "emoji": "📊",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 14.780000000000001,
+      "endTime": 15.52,
+      "en": "action item.",
+      "target": "アクションアイテムですね。",
+      "highlights": [
+        "アクションアイテム"
+      ],
+      "enHighlights": [
+        "action item"
+      ],
+      "emoji": "📌",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 15.879999999999999,
+      "endTime": 16.679999999999996,
+      "en": "Yeah, yeah, yeah,...",
+      "target": "ええ、ええ、まさにその通りです。",
+      "highlights": [
+        "まさにその通り"
+      ],
+      "enHighlights": [
+        "exactly"
+      ],
+      "emoji": "💯",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 16.679999999999996,
+      "endTime": 18.59999999999999,
+      "en": "So yeah, what I want...",
+      "target": "ええ、お伝えしたいのは、",
+      "highlights": [
+        "お伝えしたい"
+      ],
+      "enHighlights": [
+        "want to tell"
+      ],
+      "emoji": "💬",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 18.77999999999999,
+      "endTime": 19.45999999999999,
+      "en": "you, I'm quite busy",
+      "target": "私はかなり忙しいと。",
+      "highlights": [
+        "忙しい"
+      ],
+      "enHighlights": [
+        "busy"
+      ],
+      "emoji": "😩",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 19.579999999999995,
+      "endTime": 21.519999999999992,
+      "en": "and I do understand the",
+      "target": "そして、あなたが私にくれた",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "💡",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 22.179999999999996,
+      "endTime": 23.159999999999993,
+      "en": "research task you...",
+      "target": "調査のタスクは理解しています。",
+      "highlights": [
+        "調査のタスク",
+        "理解しています"
+      ],
+      "enHighlights": [
+        "research task",
+        "understand"
+      ],
+      "emoji": "🤓",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 23.159999999999993,
+      "endTime": 24.97999999999999,
+      "en": "The main thing I want to",
+      "target": "一番お伝えしたいのは、",
+      "highlights": [
+        "一番お伝えしたい"
+      ],
+      "enHighlights": [
+        "main thing",
+        "want to tell"
+      ],
+      "emoji": "📢",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 25.11999999999999,
+      "endTime": 25.959999999999994,
+      "en": "tell you is I have too",
+      "target": "私が抱えている仕事が",
+      "highlights": [
+        "抱えている仕事"
+      ],
+      "enHighlights": [
+        "have too much"
+      ],
+      "emoji": "💼",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 25.97999999999999,
+      "endTime": 26.69999999999999,
+      "en": "much under my plate.",
+      "target": "多すぎるということです。",
+      "highlights": [
+        "多すぎる"
+      ],
+      "enHighlights": [
+        "under my plate"
+      ],
+      "emoji": " overloaded",
+      "emojiPlacement": "en-prefix"
+    },
+    {
+      "startTime": 26.880000000000003,
+      "endTime": 28.68,
+      "en": "So I'm going to be...",
+      "target": "だから、これについては",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "💻",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 28.960000000000008,
+      "endTime": 30.28,
+      "en": "And I will ping you once",
+      "target": "明日、終わったらすぐに",
+      "highlights": [
+        "明日",
+        "終わったら"
+      ],
+      "enHighlights": [
+        "tomorrow",
+        "done"
+      ],
+      "emoji": "📧",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 30.340000000000003,
+      "endTime": 30.760000000000005,
+      "en": "I'm done tomorrow.",
+      "target": "ご連絡します。",
+      "highlights": [
+        "ご連絡します"
+      ],
+      "enHighlights": [
+        "ping you"
+      ],
+      "emoji": "✉️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 30.860000000000007,
+      "endTime": 31.92000000000001,
+      "en": "That works for me.",
+      "target": "それで大丈夫です。",
+      "highlights": [
+        "大丈夫です"
+      ],
+      "enHighlights": [
+        "That works"
+      ],
+      "emoji": "👌",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 32.300000000000004,
+      "endTime": 33.24,
+      "en": "Thanks for the update,",
+      "target": "最新情報ありがとう、ニック。",
+      "highlights": [
+        "最新情報"
+      ],
+      "enHighlights": [
+        "update"
+      ],
+      "emoji": "🔄",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 33.04,
+      "endTime": 33.34000000000001,
+      "en": "Nick.",
+      "target": "",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "✨",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 33.74,
+      "endTime": 34.82,
+      "en": "Efficiency is key.",
+      "target": "効率性が鍵ですからね。",
+      "highlights": [
+        "効率性が鍵"
+      ],
+      "enHighlights": [
+        "Efficiency is key"
+      ],
+      "emoji": "🔑",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 35.12000000000001,
+      "endTime": 35.800000000000004,
+      "en": "I'll look for your ping",
+      "target": "明日、連絡を待っています。",
+      "highlights": [
+        "連絡を待っています"
+      ],
+      "enHighlights": [
+        "ping"
+      ],
+      "emoji": "⏳",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 35.80000000000001,
+      "endTime": 37.18000000000001,
+      "en": "Okay, no worries, Alex.",
+      "target": "はい、問題ありません、アレックス。",
+      "highlights": [
+        "問題ありません"
+      ],
+      "enHighlights": [
+        "no worries"
+      ],
+      "emoji": "😌",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 37.38000000000001,
+      "endTime": 38.3,
+      "en": "I will ping you tomorrow.",
+      "target": "明日、ご連絡しますね。",
+      "highlights": [
+        "ご連絡します"
+      ],
+      "enHighlights": [
+        "ping you"
+      ],
+      "emoji": "🗓️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 38.480000000000004,
+      "endTime": 38.60000000000001,
+      "en": "See you.",
+      "target": "ではまた。",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "👋",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 38.7,
+      "endTime": 39.400000000000006,
+      "en": "Sounds good.",
+      "target": "いいですね。",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "👍",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 39.78,
+      "endTime": 40.5,
+      "en": "Have a productive day.",
+      "target": "実りある一日を。",
+      "highlights": [
+        "実りある一日"
+      ],
+      "enHighlights": [
+        "productive day"
+      ],
+      "emoji": "☀️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 40.69999999999999,
+      "endTime": 41.519999999999996,
+      "en": "You too. Bye-bye.",
+      "target": "あなたも。さようなら。",
+      "highlights": [],
+      "enHighlights": [],
+      "emoji": "👋",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 41.61999999999999,
+      "endTime": 42.639999999999986,
+      "en": "Take care, Nick.",
+      "target": "お元気で、ニック。",
+      "highlights": [
+        "お元気で"
+      ],
+      "enHighlights": [
+        "Take care"
+      ],
+      "emoji": "🤝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 42.81999999999999,
+      "endTime": 43.27999999999999,
+      "en": "Have a great day.",
+      "target": "良い一日を。",
+      "highlights": [
+        "良い一日"
+      ],
+      "enHighlights": [
+        "great day"
+      ],
+      "emoji": "✨",
+      "emojiPlacement": "target-suffix"
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 6.140000000000004,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "reaching out",
+      "literal": "手を差し伸べる",
+      "nuance": "連絡を取る、問い合わせる、協力を求める際に使うビジネス表現。"
+    },
+    {
+      "triggerTime": 12,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "keep things moving",
+      "literal": "物事を動かし続ける",
+      "nuance": "仕事やプロジェクトの進行を滞らせないようにする、順調に進める、という意味。"
+    },
+    {
+      "triggerTime": 26.39999999999999,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "under my plate",
+      "literal": "私の皿の下に多すぎる",
+      "nuance": "「too much on my plate」の誤用表現ですが、意味としては「抱えている仕事が多すぎる」「忙しすぎる」という意味で使われます。ネイティブは通常「on my plate」を使います。"
+    },
+    {
+      "triggerTime": 29.42,
+      "duration": 3.5,
+      "category": "社内英語",
+      "phrase": "ping you",
+      "literal": "あなたにpingを打つ",
+      "nuance": "（Slackやメールなどで）軽く連絡を入れる、メッセージを送る、という意味のカジュアルなビジネス表現。返答を促すニュアンスも含む。"
+    },
+    {
+      "triggerTime": 33.74,
+      "duration": 3.5,
+      "category": "ビジネス英語",
+      "phrase": "Efficiency is key",
+      "literal": "効率が鍵である",
+      "nuance": "「効率性が最も重要である」という意味で、ビジネスシーンでよく使われるフレーズ。業務改善や生産性向上を強調する際に使われます。"
+    }
+  ],
+  "boringCuts": [
+    {
+      "startTime": 23.22,
+      "endTime": 25,
+      "reason": "Dead air after question."
+    },
+    {
+      "startTime": 33.66,
+      "endTime": 34.88,
+      "reason": "Pause before Nick starts explaining."
+    },
+    {
+      "startTime": 41.36,
+      "endTime": 43.18,
+      "reason": "Pause before Nick's main point."
+    },
+    {
+      "startTime": 52.32,
+      "endTime": 54.5,
+      "reason": "Transition pause after Nick finishes."
+    },
+    {
+      "startTime": 61.2,
+      "endTime": 62.38,
+      "reason": "Pause before Nick confirms."
+    },
+    {
+      "startTime": 65.18,
+      "endTime": 67.5,
+      "reason": "Pause before Alex's closing."
+    },
+    {
+      "startTime": 72.06,
+      "endTime": 74.5,
+      "reason": "Long pause before final goodbye."
+    }
+  ],
+  "videoDuration": 43.29,
+  "targetLanguage": "ja",
+  "silenceGaps": [
+    {
+      "originalStart": 17.060000000000002,
+      "originalEnd": 18.2,
+      "duration": 1.139999999999997
+    },
+    {
+      "originalStart": 23.580000000000002,
+      "originalEnd": 26.360000000000003,
+      "duration": 2.780000000000001
+    },
+    {
+      "originalStart": 41.68,
+      "originalEnd": 43.08,
+      "duration": 1.3999999999999986
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935
+    },
+    {
+      "originalStart": 49.52,
+      "originalEnd": 50.42,
+      "duration": 0.8999999999999986
+    },
+    {
+      "originalStart": 53.34,
+      "originalEnd": 56.16,
+      "duration": 2.819999999999993
+    },
+    {
+      "originalStart": 61.68,
+      "originalEnd": 62.28,
+      "duration": 0.6000000000000014
+    },
+    {
+      "originalStart": 65.47999999999999,
+      "originalEnd": 68.46000000000001,
+      "duration": 2.980000000000018
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068
+    },
+    {
+      "originalStart": 72.28,
+      "originalEnd": 75.34,
+      "duration": 3.0600000000000023
+    }
+  ],
+  "appliedCuts": [
+    {
+      "originalStart": 17.060000000000002,
+      "originalEnd": 18.2,
+      "duration": 1.139999999999997,
+      "type": "silence"
+    },
+    {
+      "originalStart": 23.22,
+      "originalEnd": 26.360000000000003,
+      "duration": 3.140000000000004,
+      "type": "retention",
+      "reason": "Dead air after question."
+    },
+    {
+      "originalStart": 33.66,
+      "originalEnd": 34.88,
+      "duration": 1.220000000000006,
+      "type": "retention",
+      "reason": "Pause before Nick starts explaining."
+    },
+    {
+      "originalStart": 41.36,
+      "originalEnd": 43.18,
+      "duration": 1.8200000000000003,
+      "type": "retention",
+      "reason": "Pause before Nick's main point."
+    },
+    {
+      "originalStart": 46.800000000000004,
+      "originalEnd": 47.44,
+      "duration": 0.6399999999999935,
+      "type": "silence"
+    },
+    {
+      "originalStart": 49.52,
+      "originalEnd": 50.42,
+      "duration": 0.8999999999999986,
+      "type": "silence"
+    },
+    {
+      "originalStart": 52.32,
+      "originalEnd": 56.16,
+      "duration": 3.8399999999999963,
+      "type": "retention",
+      "reason": "Transition pause after Nick finishes."
+    },
+    {
+      "originalStart": 61.2,
+      "originalEnd": 62.38,
+      "duration": 1.1799999999999997,
+      "type": "retention",
+      "reason": "Pause before Nick confirms."
+    },
+    {
+      "originalStart": 65.18,
+      "originalEnd": 68.46000000000001,
+      "duration": 3.280000000000001,
+      "type": "retention",
+      "reason": "Pause before Alex's closing."
+    },
+    {
+      "originalStart": 70.46,
+      "originalEnd": 71.14,
+      "duration": 0.6800000000000068,
+      "type": "silence"
+    },
+    {
+      "originalStart": 72.06,
+      "originalEnd": 75.34,
+      "duration": 3.280000000000001,
+      "type": "retention",
+      "reason": "Long pause before final goodbye."
+    }
+  ]
+} as unknown as ClipData,
+  "CleanShot_2026-03-12_at_20_18_04-4": {
+  "videoFile": "CleanShot_2026-03-12_at_20_18_04-4/clip_trimmed.mp4",
+  "socialTitle": "¡Aprende a 'ping' como un pro! 💬 Envía mensajes rápidos en inglés de negocios. #BusinessEnglish #OfficeTalk #LearnEnglish",
+  "hookTitle": {
+    "target": "Cómo usar 'ping' en inglés de negocios 🔔",
+    "en": "Ping You: What it means",
+    "highlights": [
+      "ping",
+      "inglés de negocios"
+    ]
+  },
+  "clip": {
+    "startTime": 0,
+    "endTime": 44.69
+  },
+  "hook": {
+    "startTime": 29.09999999999999,
+    "endTime": 31.199999999999985,
+    "reason": "This segment introduces the common business idiom 'ping you' in context, making it a strong educational hook for learners."
+  },
+  "subtitles": [
+    {
+      "startTime": 0.040000000000000924,
+      "endTime": 0.7800000000000011,
+      "en": "Hey, Nick.",
+      "target": "Hola, Nick.",
+      "highlights": [
+        "Hola"
+      ],
+      "enHighlights": [
+        "Hey"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 0.9400000000000013,
+      "endTime": 1.7400000000000002,
+      "en": "Just catching you",
+      "target": "Solo te detengo un momento",
+      "highlights": [
+        "detengo un momento"
+      ],
+      "enHighlights": [
+        "catching you"
+      ],
+      "emoji": "✋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 1.58,
+      "endTime": 2.3200000000000003,
+      "en": "before you head out.",
+      "target": "antes de que salgas.",
+      "highlights": [
+        "salgas"
+      ],
+      "enHighlights": [
+        "head out"
+      ],
+      "emoji": "🚪",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 2.66,
+      "endTime": 3.34,
+      "en": "Did you want to confirm",
+      "target": "¿Querías confirmar",
+      "highlights": [
+        "confirmar"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 3.379999999999999,
+      "endTime": 4.379999999999999,
+      "en": "something from the...",
+      "target": "algo de la reunión?",
+      "highlights": [
+        "reunión"
+      ],
+      "enHighlights": [
+        "meeting"
+      ],
+      "emoji": "🤝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 4.379999999999999,
+      "endTime": 5.159999999999997,
+      "en": "Hey, Alex.",
+      "target": "Hola, Alex.",
+      "highlights": [
+        "Hola"
+      ],
+      "enHighlights": [
+        "Hey"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 5.479999999999997,
+      "endTime": 6.68,
+      "en": "Thanks for reaching out.",
+      "target": "Gracias por contactarme.",
+      "highlights": [
+        "contactarme"
+      ],
+      "enHighlights": [
+        "reaching out"
+      ],
+      "emoji": "🙏",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 7.02,
+      "endTime": 8,
+      "en": "Yeah, I wanted to.",
+      "target": "Sí, quería hacerlo.",
+      "highlights": [
+        "quería"
+      ],
+      "enHighlights": [
+        "wanted to"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 8.34,
+      "endTime": 9.299999999999997,
+      "en": "How are you before that?",
+      "target": "¿Cómo estás antes de eso?",
+      "highlights": [
+        "Cómo estás"
+      ],
+      "enHighlights": [
+        "How are you"
+      ],
+      "emoji": "😊",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 9.419999999999995,
+      "endTime": 10.719999999999995,
+      "en": "I'm doing well. Thanks.",
+      "target": "Estoy bien. Gracias.",
+      "highlights": [
+        "bien"
+      ],
+      "enHighlights": [
+        "doing well"
+      ],
+      "emoji": "😄",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 11.019999999999992,
+      "endTime": 11.919999999999995,
+      "en": "Just trying to keep",
+      "target": "Solo intento mantener",
+      "highlights": [
+        "intento mantener"
+      ],
+      "enHighlights": [
+        "trying to keep"
+      ],
+      "emoji": "⚙️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 11.739999999999995,
+      "endTime": 12.239999999999995,
+      "en": "things moving.",
+      "target": "las cosas en marcha.",
+      "highlights": [
+        "en marcha"
+      ],
+      "enHighlights": [
+        "moving"
+      ],
+      "emoji": "🚀",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 12.639999999999993,
+      "endTime": 13.579999999999995,
+      "en": "You wanted to confirm",
+      "target": "Querías confirmar",
+      "highlights": [
+        "confirmar"
+      ],
+      "enHighlights": [
+        "confirm"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 13.619999999999994,
+      "endTime": 14.659999999999993,
+      "en": "that competitor research",
+      "target": "la investigación de competidores",
+      "highlights": [
+        "investigación",
+        "competidores"
+      ],
+      "enHighlights": [
+        "competitor research"
+      ],
+      "emoji": "🔍",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 14.719999999999995,
+      "endTime": 15.459999999999994,
+      "en": "action item.",
+      "target": "como punto de acción.",
+      "highlights": [
+        "punto de acción"
+      ],
+      "enHighlights": [
+        "action item"
+      ],
+      "emoji": "📝",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 15.819999999999993,
+      "endTime": 16.61999999999999,
+      "en": "Yeah, yeah, yeah,...",
+      "target": "Sí, sí, sí, exacto.",
+      "highlights": [
+        "exacto"
+      ],
+      "enHighlights": [
+        "exactly"
+      ],
+      "emoji": "💯",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 16.61999999999999,
+      "endTime": 17.459999999999987,
+      "en": "So yeah, what I",
+      "target": "Así que sí, lo que yo",
+      "highlights": [
+        "Así que sí"
+      ],
+      "enHighlights": [
+        "So yeah"
+      ],
+      "emoji": "🤔",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 17.999999999999986,
+      "endTime": 18.83999999999999,
+      "en": "want to tell you,",
+      "target": "quiero decirte,",
+      "highlights": [
+        "quiero decirte"
+      ],
+      "enHighlights": [
+        "want to tell you"
+      ],
+      "emoji": "🗣️",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 18.719999999999985,
+      "endTime": 19.819999999999986,
+      "en": "I'm quite busy and",
+      "target": "estoy bastante ocupado y",
+      "highlights": [
+        "ocupado"
+      ],
+      "enHighlights": [
+        "busy"
+      ],
+      "emoji": "😥",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 20.239999999999988,
+      "endTime": 21.75999999999999,
+      "en": "I do understand the task,",
+      "target": "sí entiendo la tarea,",
+      "highlights": [
+        "entiendo",
+        "tarea"
+      ],
+      "enHighlights": [
+        "understand",
+        "task"
+      ],
+      "emoji": "🧠",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 22.11999999999999,
+      "endTime": 22.739999999999988,
+      "en": "the research task",
+      "target": "la tarea de investigación",
+      "highlights": [
+        "investigación"
+      ],
+      "enHighlights": [
+        "research task"
+      ],
+      "emoji": "📊",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 22.69999999999999,
+      "endTime": 23.099999999999987,
+      "en": "you gave me.",
+      "target": "que me diste.",
+      "highlights": [
+        "diste"
+      ],
+      "enHighlights": [
+        "gave me"
+      ],
+      "emoji": "🧑‍💻",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 23.099999999999987,
+      "endTime": 24.179999999999986,
+      "en": "The main thing",
+      "target": "Lo principal",
+      "highlights": [
+        "principal"
+      ],
+      "enHighlights": [
+        "main thing"
+      ],
+      "emoji": "💡",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 24.099999999999987,
+      "endTime": 25.119999999999987,
+      "en": "I want to tell you",
+      "target": "que quiero decirte",
+      "highlights": [
+        "quiero decirte"
+      ],
+      "enHighlights": [
+        "want to tell you"
+      ],
+      "emoji": "💬",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 25.059999999999985,
+      "endTime": 25.999999999999982,
+      "en": "is I have too much",
+      "target": "es que tengo mucho",
+      "highlights": [
+        "tengo mucho"
+      ],
+      "enHighlights": [
+        "have too much"
+      ],
+      "emoji": "😩",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 25.919999999999984,
+      "endTime": 26.639999999999983,
+      "en": "under my plate.",
+      "target": "bajo mi plato.",
+      "highlights": [
+        "bajo mi plato"
+      ],
+      "enHighlights": [
+        "under my plate"
+      ],
+      "emoji": "🍽️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 26.91999999999999,
+      "endTime": 27.839999999999993,
+      "en": "So I'm going to be",
+      "target": "Así que voy a estar",
+      "highlights": [
+        "voy a estar"
+      ],
+      "enHighlights": [
+        "going to be"
+      ],
+      "emoji": "🔜",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 27.679999999999982,
+      "endTime": 28.719999999999988,
+      "en": "working on this tomorrow.",
+      "target": "trabajando en esto mañana.",
+      "highlights": [
+        "trabajando",
+        "mañana"
+      ],
+      "enHighlights": [
+        "working",
+        "tomorrow"
+      ],
+      "emoji": "🗓️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 29.09999999999999,
+      "endTime": 30.139999999999983,
+      "en": "And I will ping you",
+      "target": "Y te enviaré un mensaje",
+      "highlights": [
+        "enviaré un mensaje"
+      ],
+      "enHighlights": [
+        "ping you"
+      ],
+      "emoji": "📧",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 30.119999999999987,
+      "endTime": 31.199999999999985,
+      "en": "once I'm done tomorrow.",
+      "target": "una vez que termine mañana.",
+      "highlights": [
+        "termine mañana"
+      ],
+      "enHighlights": [
+        "done tomorrow"
+      ],
+      "emoji": "✅",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 32.11999999999999,
+      "endTime": 33.17999999999999,
+      "en": "That works for me.",
+      "target": "Me parece bien.",
+      "highlights": [
+        "Me parece bien"
+      ],
+      "enHighlights": [
+        "works for me"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 33.55999999999999,
+      "endTime": 34.27999999999999,
+      "en": "Thanks for the update,",
+      "target": "Gracias por la actualización,",
+      "highlights": [
+        "actualización"
+      ],
+      "enHighlights": [
+        "update"
+      ],
+      "emoji": "ℹ️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 33.97999999999999,
+      "endTime": 34.599999999999994,
+      "en": "Nick.",
+      "target": "Nick.",
+      "highlights": [
+        "Nick"
+      ],
+      "enHighlights": [
+        "Nick"
+      ],
+      "emoji": "😊",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 34.999999999999986,
+      "endTime": 36.079999999999984,
+      "en": "Efficiency is key.",
+      "target": "La eficiencia es clave.",
+      "highlights": [
+        "eficiencia",
+        "clave"
+      ],
+      "enHighlights": [
+        "Efficiency",
+        "key"
+      ],
+      "emoji": "🔑",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 36.379999999999995,
+      "endTime": 37.05999999999999,
+      "en": "I'll look for your ping",
+      "target": "Estaré atento a tu mensaje",
+      "highlights": [
+        "atento",
+        "mensaje"
+      ],
+      "enHighlights": [
+        "look for",
+        "ping"
+      ],
+      "emoji": "🔔",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 36.879999999999995,
+      "endTime": 37.05999999999999,
+      "en": "tomorrow.",
+      "target": "mañana.",
+      "highlights": [
+        "mañana"
+      ],
+      "enHighlights": [
+        "tomorrow"
+      ],
+      "emoji": "🗓️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 37.05999999999999,
+      "endTime": 38.43999999999998,
+      "en": "Okay, no worries, Alex.",
+      "target": "Vale, no te preocupes, Alex.",
+      "highlights": [
+        "no te preocupes"
+      ],
+      "enHighlights": [
+        "no worries"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 38.639999999999986,
+      "endTime": 39.559999999999974,
+      "en": "I will ping you tomorrow.",
+      "target": "Te enviaré un mensaje mañana.",
+      "highlights": [
+        "enviaré un mensaje"
+      ],
+      "enHighlights": [
+        "ping you"
+      ],
+      "emoji": "📧",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 39.73999999999998,
+      "endTime": 39.859999999999985,
+      "en": "See you.",
+      "target": "Nos vemos.",
+      "highlights": [
+        "Nos vemos"
+      ],
+      "enHighlights": [
+        "See you"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 39.97999999999999,
+      "endTime": 40.67999999999999,
+      "en": "Sounds good.",
+      "target": "Suena bien.",
+      "highlights": [
+        "Suena bien"
+      ],
+      "enHighlights": [
+        "Sounds good"
+      ],
+      "emoji": "👍",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 41.05999999999999,
+      "endTime": 41.77999999999999,
+      "en": "Have a productive day.",
+      "target": "Que tengas un día productivo.",
+      "highlights": [
+        "día productivo"
+      ],
+      "enHighlights": [
+        "productive day"
+      ],
+      "emoji": "☀️",
+      "emojiPlacement": "target-suffix"
+    },
+    {
+      "startTime": 42.08,
+      "endTime": 42.66,
+      "en": "You too.",
+      "target": "Tú también.",
+      "highlights": [
+        "Tú también"
+      ],
+      "enHighlights": [
+        "You too"
+      ],
+      "emoji": "😉",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 42.82000000000001,
+      "endTime": 42.900000000000006,
+      "en": "Bye-bye.",
+      "target": "Adiós.",
+      "highlights": [
+        "Adiós"
+      ],
+      "enHighlights": [
+        "Bye-bye"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 43.02000000000001,
+      "endTime": 44.040000000000006,
+      "en": "Take care, Nick.",
+      "target": "Cuídate, Nick.",
+      "highlights": [
+        "Cuídate"
+      ],
+      "enHighlights": [
+        "Take care"
+      ],
+      "emoji": "👋",
+      "emojiPlacement": "target-prefix"
+    },
+    {
+      "startTime": 44.22000000000001,
+      "endTime": 44.68000000000001,
+      "en": "Have a great day.",
+      "target": "Que tengas un buen día.",
+      "highlights": [
+        "buen día"
+      ],
+      "enHighlights": [
+        "great day"
+      ],
+      "emoji": "✨",
+      "emojiPlacement": "target-suffix"
+    }
+  ],
+  "vocabCards": [
+    {
+      "triggerTime": 1.040000000000001,
+      "duration": 3.5,
+      "category": "Inglés de oficina",
+      "phrase": "catching you",
+      "literal": "Atrapándote",
+      "nuance": "Esta es una forma informal de decir 'te detengo un momento' o 'te pillo' antes de que alguien se vaya, para hablar brevemente con ellos."
+    },
+    {
+      "triggerTime": 6.059999999999999,
+      "duration": 3.5,
+      "category": "Inglés de negocios",
+      "phrase": "reaching out",
+      "literal": "Alcanzando afuera",
+      "nuance": "En inglés de negocios, significa 'contactar a alguien', 'ponerse en contacto' o 'comunicarse', especialmente para pedir algo o iniciar una conversación."
+    },
+    {
+      "triggerTime": 14.719999999999995,
+      "duration": 3.5,
+      "category": "Inglés de negocios",
+      "phrase": "action item",
+      "literal": "Elemento de acción",
+      "nuance": "Un 'action item' es una tarea o punto específico que debe ser completado por una persona o equipo en un plazo determinado, a menudo resultado de una reunión."
+    },
+    {
+      "triggerTime": 26.17999999999999,
+      "duration": 3.5,
+      "category": "Inglés de oficina",
+      "phrase": "under my plate",
+      "literal": "Debajo de mi plato",
+      "nuance": "Esta expresión idiomática significa que tienes demasiadas responsabilidades o trabajo que gestionar, indicando que estás abrumado o muy ocupado."
+    },
+    {
+      "triggerTime": 29.559999999999985,
+      "duration": 3.5,
+      "category": "Inglés de oficina",
+      "phrase": "ping you",
+      "literal": "Hacerte un ping",
+      "nuance": "En el ámbito empresarial, 'ping' significa enviar un mensaje rápido o una notificación (por email, chat, etc.) a alguien para recordarle algo, hacerle una pregunta rápida o avisarle de algo."
+    }
+  ],
+  "boringCuts": [
+    {
+      "startTime": 17.08,
+      "endTime": 18.3,
+      "reason": "Long pause between speakers."
+    },
+    {
+      "startTime": 23.22,
+      "endTime": 26.22,
+      "reason": "Long silence before response."
+    },
+    {
+      "startTime": 33.66,
+      "endTime": 34.88,
+      "reason": "Long pause before new point."
+    },
+    {
+      "startTime": 41.36,
+      "endTime": 43.18,
+      "reason": "Long pause before speaker elaborates."
+    },
+    {
+      "startTime": 61.2,
+      "endTime": 62.38,
+      "reason": "Pause before Nick's confirmation."
+    },
+    {
+      "startTime": 65.18,
+      "endTime": 68.18,
+      "reason": "Long silence between speakers."
+    },
+    {
+      "startTime": 72.06,
+      "endTime": 75.06,
+      "reason": "Long silence after goodbye."
+    }
+  ],
+  "videoDuration": 44.69,
+  "targetLanguage": "es",
+  "silenceGaps": [
+    {
+      "originalStart": 17.14,
+      "originalEnd": 18.18,
+      "duration": 1.0399999999999991
+    },
+    {
+      "originalStart": 23.66,
+      "originalEnd": 26.340000000000003,
+      "duration": 2.6800000000000033
+    },
+    {
+      "originalStart": 41.76,
+      "originalEnd": 43.06,
+      "duration": 1.3000000000000043
+    },
+    {
+      "originalStart": 46.88,
+      "originalEnd": 47.42,
+      "duration": 0.5399999999999991
+    },
+    {
+      "originalStart": 49.6,
+      "originalEnd": 50.400000000000006,
+      "duration": 0.8000000000000043
+    },
+    {
+      "originalStart": 53.42,
+      "originalEnd": 56.14,
+      "duration": 2.719999999999999
+    },
+    {
+      "originalStart": 61.76,
+      "originalEnd": 62.260000000000005,
+      "duration": 0.5000000000000071
+    },
+    {
+      "originalStart": 65.56,
+      "originalEnd": 68.44,
+      "duration": 2.8799999999999955
+    },
+    {
+      "originalStart": 70.54,
+      "originalEnd": 71.11999999999999,
+      "duration": 0.5799999999999841
+    },
+    {
+      "originalStart": 72.36000000000001,
+      "originalEnd": 75.32,
+      "duration": 2.9599999999999795
+    }
+  ],
+  "appliedCuts": [
+    {
+      "originalStart": 17.08,
+      "originalEnd": 18.3,
+      "duration": 1.2200000000000024,
+      "type": "retention",
+      "reason": "Long pause between speakers."
+    },
+    {
+      "originalStart": 23.22,
+      "originalEnd": 26.340000000000003,
+      "duration": 3.1200000000000045,
+      "type": "retention",
+      "reason": "Long silence before response."
+    },
+    {
+      "originalStart": 33.66,
+      "originalEnd": 34.88,
+      "duration": 1.220000000000006,
+      "type": "retention",
+      "reason": "Long pause before new point."
+    },
+    {
+      "originalStart": 41.36,
+      "originalEnd": 43.18,
+      "duration": 1.8200000000000003,
+      "type": "retention",
+      "reason": "Long pause before speaker elaborates."
+    },
+    {
+      "originalStart": 46.88,
+      "originalEnd": 47.42,
+      "duration": 0.5399999999999991,
+      "type": "silence"
+    },
+    {
+      "originalStart": 49.6,
+      "originalEnd": 50.400000000000006,
+      "duration": 0.8000000000000043,
+      "type": "silence"
+    },
+    {
+      "originalStart": 53.42,
+      "originalEnd": 56.14,
+      "duration": 2.719999999999999,
+      "type": "silence"
+    },
+    {
+      "originalStart": 61.2,
+      "originalEnd": 62.38,
+      "duration": 1.1799999999999997,
+      "type": "retention",
+      "reason": "Pause before Nick's confirmation."
+    },
+    {
+      "originalStart": 65.18,
+      "originalEnd": 68.44,
+      "duration": 3.259999999999991,
+      "type": "retention",
+      "reason": "Long silence between speakers."
+    },
+    {
+      "originalStart": 70.54,
+      "originalEnd": 71.11999999999999,
+      "duration": 0.5799999999999841,
+      "type": "silence"
+    },
+    {
+      "originalStart": 72.06,
+      "originalEnd": 75.32,
+      "duration": 3.259999999999991,
+      "type": "retention",
+      "reason": "Long silence after goodbye."
     }
   ]
 } as unknown as ClipData
