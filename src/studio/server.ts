@@ -18,7 +18,7 @@
  */
 
 import { resolve, dirname, extname, basename, parse } from "path";
-import { readFile, readdir, writeFile, mkdir, rm } from "fs/promises";
+import { readFile, readdir, stat, writeFile, mkdir, rm } from "fs/promises";
 import { watch, existsSync } from "fs";
 import { execFileSync } from "child_process";
 import type { ClipData, SupportedLanguage } from "../pipeline/types.js";
@@ -361,7 +361,21 @@ async function regenerateAllClipsFile() {
 }
 
 async function listClipMetadata() {
-  const dirs = (await readdir(outputDir)).sort();
+  const dirs = await readdir(outputDir);
+  const dirsWithMtime = await Promise.all(
+    dirs.map(async (dir) => {
+      const dirPath = resolve(outputDir, dir);
+      try {
+        const s = await stat(dirPath);
+        return { dir, mtime: s.mtimeMs };
+      } catch {
+        return { dir, mtime: 0 };
+      }
+    }),
+  );
+  // Sort by mtime descending (newer first)
+  dirsWithMtime.sort((a, b) => b.mtime - a.mtime);
+
   const clips: Array<{
     id: string;
     hookTitle: { ja?: string; target?: string; en?: string };
@@ -373,7 +387,7 @@ async function listClipMetadata() {
     languageNativeName: string;
   }> = [];
 
-  for (const dir of dirs) {
+  for (const { dir } of dirsWithMtime) {
     try {
       const raw = await readFile(resolve(outputDir, dir, "clip.json"), "utf-8");
       const data = JSON.parse(raw) as ClipData;

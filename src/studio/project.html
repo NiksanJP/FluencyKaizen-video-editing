@@ -92,18 +92,25 @@
     }
 
     .import-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       background: #fff;
       color: #0a0a0a;
       border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 14px;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
       transition: background 0.15s, transform 0.1s;
+    }
+
+    .import-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
     }
 
     .import-btn:disabled {
@@ -268,6 +275,15 @@
       flex-direction: column;
       gap: 6px;
       margin-top: 10px;
+      max-height: 2.9em;
+      overflow: hidden;
+    }
+
+    .caption-preview .caption-line {
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .caption-line {
@@ -377,8 +393,9 @@
 
     function renderCaptionPreview(container, captions) {
       container.textContent = "";
-      for (var i = 0; i < captions.length; i++) {
-        container.appendChild(el("div", { className: "caption-line", textContent: captions[i] }));
+      var toShow = captions.length > 2 ? captions.slice(-2) : captions;
+      for (var i = 0; i < toShow.length; i++) {
+        container.appendChild(el("div", { className: "caption-line", textContent: toShow[i] }));
       }
     }
 

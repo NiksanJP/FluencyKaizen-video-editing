@@ -233,7 +233,7 @@ function createEditorTab(compId: string) {
   const tab = document.createElement("div");
   tab.className = "tab editor";
   tab.setAttribute("data-target", editorId);
-  tab.textContent = `${compId}\u00B7Edit`;
+  tab.textContent = "Edit";
   tab.addEventListener("click", () => switchTab(editorId));
   tabBar.appendChild(tab);
 
@@ -259,8 +259,8 @@ function createEditorTab(compId: string) {
   // Create tabs lazily on first selection
   if (!terminals[claudeId]) {
     createEditorTab(compId);
-    createTabAndTerminal(claudeId, `${compId}\u00B7Claude`, `/ws/claude/${compId}`, "claude");
-    createTabAndTerminal(geminiId, `${compId}\u00B7Gemini`, `/ws/gemini/${compId}`, "gemini");
+    createTabAndTerminal(claudeId, "Claude", `/ws/claude/${compId}`, "claude");
+    createTabAndTerminal(geminiId, "Gemini", `/ws/gemini/${compId}`, "gemini");
   }
 
   // Switch to Editor tab by default

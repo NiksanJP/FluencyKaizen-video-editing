@@ -1,112 +1,59 @@
-# Skills Directory
-
-All available slash commands for the FluencyKaizen video automation pipeline.
+# Skills Directory — 14 Domain Skills
 
 ## Quick Reference
 
-| Command | Description | Agent | Requires Approval |
-|---------|-------------|-------|-------------------|
-| [/process-video](./process-video.md) | Run full pipeline | Pipeline Orchestrator | No |
-| [/render](./render.md) | Render to MP4 | Remotion Composer | Yes |
-| [/edit-clip](./edit-clip.md) | Natural language editing | Clip Editor | No |
-| [/preview](./preview.md) | Studio preview | Remotion Composer | No |
-| [/validate-clip](./validate-clip.md) | Schema validation | Schema Validator | No |
-| [/list-clips](./list-clips.md) | Show all clips | Documentation Curator | No |
-| [/setup-env](./setup-env.md) | Verify dependencies | Setup Manager | No |
-| [/test-pipeline](./test-pipeline.md) | Run tests | Test Coordinator | No |
-| [/clean-output](./clean-output.md) | Remove temp files | Setup Manager | Yes |
+| Skill | Domain | Key Files |
+|-------|--------|-----------|
+| [remotion](./remotion.md) | Remotion 4.0.434 rendering, compositions, animations | `src/remotion/**` |
+| [react-components](./react-components.md) | React 18 hooks, functional components | All `.tsx` files |
+| [pipeline](./pipeline.md) | Video processing pipeline | `src/pipeline/**` |
+| [studio-server](./studio-server.md) | Bun HTTP server, WebSocket, API routes | `src/studio/**` |
+| [editor](./editor.md) | Clip editing UI, @remotion/player | `src/remotion/editor/**` |
+| [electron](./electron.md) | Electron 33 wrapper, IPC | `src/main/**` |
+| [ffmpeg](./ffmpeg.md) | Audio/video processing commands | Pipeline + silence removal |
+| [gemini-api](./gemini-api.md) | Gemini 2.5 Flash, structured output | `src/pipeline/analyze.ts` |
+| [whisper](./whisper.md) | Local Whisper CLI, word timestamps | `src/pipeline/transcribe.ts` |
+| [typescript](./typescript.md) | TS 5 + Bun, ESNext modules | All `tsconfig` files |
+| [testing](./testing.md) | Bun test runner, unit tests | `*.test.ts` files |
+| [styling](./styling.md) | style.json system, dark theme | `style.json`, components |
+| [i18n](./i18n.md) | Multi-language support (ja/zh/ko/es) | `types.ts`, `config.ts` |
+| [deployment](./deployment.md) | Build targets, packaging | `package.json` scripts |
 
-## Command Categories
+## Categories
 
-### Pipeline Processing
-- `/process-video` — Full transcription, analysis, and clip generation
+### Video Production
+- `remotion` — Rendering engine and composition system
+- `ffmpeg` — Audio/video processing CLI
+- `whisper` — Speech-to-text transcription
+- `gemini-api` — AI analysis and translation
 
-### Editing & Validation
-- `/edit-clip` — Natural language edits
-- `/validate-clip` — Schema compliance checks
+### Application
+- `react-components` — UI component patterns
+- `pipeline` — End-to-end video processing
+- `studio-server` — Backend server and API
+- `editor` — Clip editing interface
+- `electron` — Desktop application wrapper
 
-### Rendering & Preview
-- `/preview` — Interactive Remotion Studio
-- `/render` — MP4 rendering
-
-### Utility
-- `/list-clips` — Show all generated clips
-- `/setup-env` — Initialize environment
-- `/test-pipeline` — Run all tests
-- `/clean-output` — Clean temp files
-
-## Usage Patterns
-
-### Typical Workflow
-
-```bash
-# 1. Process a video
-/process-video input/video.mp4
-
-# 2. Preview the result (optional)
-/preview video
-
-# 3. Make edits (optional)
-/edit-clip video
-
-# 4. Render to MP4
-/render video
-
-# 5. Clean up temp files (optional)
-/clean-output video
-```
-
-### Quick Validation
-
-```bash
-# Validate a clip
-/validate-clip video
-
-# List all clips
-/list-clips
-
-# Run full test suite
-/test-pipeline
-```
-
-### Environment Management
-
-```bash
-# Verify system setup
-/setup-env
-
-# Clean all output
-/clean-output
-```
+### Infrastructure
+- `typescript` — Type system and compilation
+- `testing` — Test runner and patterns
+- `styling` — Visual design system
+- `i18n` — Internationalization
+- `deployment` — Build and packaging
 
 ## Plugins
 
-In addition to slash commands, the following plugins are available:
-
-| Plugin | Description | Commands |
-|--------|-------------|----------|
-| remotion-studio | Video composition framework | `remotion studio`, `remotion render` |
-| bun-runtime | TypeScript runtime | `bun run`, `bun install` |
-| gemini-api | Content analysis | `generateContent`, `countTokens` |
-| ffmpeg-processor | Audio/video processing | `ffmpeg`, `ffprobe` |
-| whisper-transcriber | Speech-to-text | `whisper` |
-| typescript-compiler | Type checking | `tsc`, `tsc --watch` |
-
-## Help & Documentation
-
-For detailed help on any command:
-
-```bash
-/help [command]
-
-# Examples:
-/help process-video
-/help rendering
-/help troubleshooting
-```
+| Plugin | Description |
+|--------|-------------|
+| Remotion Studio | `remotion studio`, `remotion render` |
+| Bun Runtime | `bun run`, `bun install`, `bun test` |
+| Gemini API | `@google/generative-ai` |
+| FFmpeg | `ffmpeg`, `ffprobe` |
+| Whisper | `whisper` (local CLI) |
+| TypeScript | `tsc`, `tsc --watch` |
 
 ## See Also
 
-- [Agents](../agents/INDEX.md) — Agent responsibilities
-- [Config](../config/INDEX.md) — Settings and integrations
+- [Agents](../agents/INDEX.md) — 42 specialized agents
+- [Commands](../commands/) — Slash command definitions
 - [CLAUDE.md](../CLAUDE.md) — Project overview

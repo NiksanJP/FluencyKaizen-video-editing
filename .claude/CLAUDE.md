@@ -2,157 +2,80 @@
 
 ## Project Purpose
 
-Automated short-form video production pipeline for "Business English for Japanese speakers" content channel. The creator uploads raw 10-minute bilingual (EN/JP) videos and receives professionally edited 30-60s clips with:
-- Synchronized bilingual captions (Japanese + English)
-- Inline vocabulary highlighting
-- Pop-up vocabulary cards for business phrases
-- Persistent hook title at top
+Automated short-form video production pipeline for multilingual business English content. Processes raw videos into 30-60s clips with bilingual captions, vocabulary highlighting, pop-up vocab cards, and hook titles.
 
-## Architecture Overview
+**Supported languages**: Japanese (ja), Chinese (zh), Korean (ko), Spanish (es)
+
+## Architecture
 
 ```
 input/[raw.mp4]
-  ↓ (ffmpeg extract audio)
-[audio.wav]
-  ↓ (whisper transcribe)
-[transcript.json + timestamps]
-  ↓ (gemini analyze + translate)
-[clip.json]
-  ↓ (remotion render)
-output/[clip]/render.mp4
+  ↓ ffmpeg extract audio → output/[name]/audio.wav
+  ↓ Whisper transcribe   → output/[name]/audio.json
+  ↓ Gemini 2.5 Flash     → output/[name]/clip.json
+  ↓ silence removal       → output/[name]/clip_trimmed.mp4
+  ↓ Remotion render       → output/[name]/render.mp4
 ```
 
-## Clip JSON Schema
+**Four layers**: Pipeline (Bun CLI) → Remotion (React video) → Studio (Bun HTTP, port 3210) → Electron (desktop)
+
+## ClipData Schema (source: `src/pipeline/types.ts`)
 
 ```typescript
 interface ClipData {
-  videoFile: string;            // source filename in input/
-  hookTitle: { ja: string; en: string };
-  clip: { startTime: number; endTime: number };  // seconds
+  videoFile: string; videoDuration: number;
+  targetLanguage?: SupportedLanguage; // "ja" | "zh" | "ko" | "es"
+  socialTitle?: string;
+  hookTitle: { ja?: string; target?: string; en: string; highlights?: string[] };
+  clip: { startTime: number; endTime: number };
+  hook?: HookSegment;
   subtitles: SubtitleSegment[];
   vocabCards: VocabCard[];
-}
-
-interface SubtitleSegment {
-  startTime: number;
-  endTime: number;
-  en: string;                   // English text
-  ja: string;                   // Japanese text
-  highlights: string[];         // words to color yellow in ja line
-}
-
-interface VocabCard {
-  triggerTime: number;          // seconds - when card appears
-  duration: number;             // seconds - how long it stays
-  category: string;             // e.g. "ビジネス英語"
-  phrase: string;               // e.g. "Don't quote me on this"
-  literal: string;              // literal translation
-  nuance: string;               // contextual meaning in Japanese
+  boringCuts?: RetentionCut[];
+  silenceGaps?: SilenceGap[];
+  appliedCuts?: AppliedCut[];
 }
 ```
 
-## Key Commands
+SubtitleSegment includes: en, ja?, target?, highlights, enHighlights, emoji?, emojiPlacement?
+VocabCard includes: triggerTime, duration, category, phrase, literal, nuance
 
-### `/process-video <filename>`
-Runs the full pipeline on a video file in `input/`:
-```bash
-bun pipeline/index.ts input/example.mp4
-```
-Output: `output/example/clip.json` + `output/example/transcript.json`
+All timestamps in **seconds** (float).
 
-### `/render`
-Renders the current clip.json to MP4:
-```bash
-cd remotion && bun remotion render ClipComposition output/[name]/render.mp4
-```
-
-### `/edit-clip`
-Edit clip.json via natural language. Say "move the clip start 5 seconds later" or "change the hook title to..." and Claude will update the JSON.
-
-### `/preview`
-Preview clip in Remotion studio:
-```bash
-cd remotion && bun remotion studio
-```
-
-## File Paths Reference
+## Key Paths
 
 | Path | Purpose |
 |------|---------|
-| `pipeline/types.ts` | ClipData TypeScript schema |
-| `pipeline/index.ts` | CLI entrypoint — accepts filename |
-| `pipeline/transcribe.ts` | Whisper integration (ffmpeg + openai-whisper) |
-| `pipeline/analyze.ts` | Gemini API — translates, clips, extracts vocab |
-| `remotion/src/ClipComposition.tsx` | Main Remotion composition (reads clip.json) |
-| `remotion/src/components/HookTitle.tsx` | Persistent title bar |
-| `remotion/src/components/BilingualCaption.tsx` | Synced subtitle rendering |
-| `remotion/src/components/HighlightedText.tsx` | Words colored yellow per highlights array |
-| `remotion/src/components/VocabCard.tsx` | Pop-up vocabulary cards |
-| `output/[name]/clip.json` | **The editable artifact** — Claude modifies this |
-| `input/` | Drop raw MP4 files here |
+| `src/pipeline/types.ts` | Schema source of truth |
+| `src/pipeline/index.ts` | CLI: `bun src/pipeline/index.ts <video> [--force] [--lang]` |
+| `src/pipeline/analyze.ts` | Gemini 2.5 Flash — structured JSON, 3x retry |
+| `src/remotion/ClipComposition.tsx` | Main render composition |
+| `src/remotion/components/` | HookTitle, BilingualCaption, HighlightedText, VocabCard |
+| `src/remotion/editor/App.tsx` | Editor UI — auto-save, Cmd+S |
+| `src/studio/server.ts` | Bun HTTP server, WebSocket PTY, Remotion proxy |
+| `src/main/main.cjs` | Electron main process |
+| `style.json` | All visual config |
+| `output/[name]/clip.json` | Editable artifact |
 
-## Gemini Prompt Notes
+## Commands
 
-**Note (Feb 2026):** Updated to `gemini-2.5-flash` as `gemini-2.0-flash` is deprecated. The Gemini 2.5 Flash call in `analyze.ts` is a **single request** that:
-1. Receives the full Whisper transcript (word-level timestamps)
-2. Selects best 30-60s segment
-3. Cleans and translates the subtitles (handles mixed EN/JP)
-4. Extracts 3-5 vocabulary cards for business phrases
-5. Writes a catchy hook title in both languages
-6. Returns JSON matching the ClipData schema
-
-**Critical:** The prompt includes the exact schema definition and uses Gemini's JSON mode to enforce valid output.
-
-## Editing Workflow
-
-When user runs `/edit-clip` and makes a natural language request (e.g. "make the first vocab card appear 2 seconds later"):
-
-1. Claude reads `output/[name]/clip.json`
-2. Parses the JSON into the ClipData structure
-3. Updates the requested field(s)
-4. Re-validates the JSON
-5. Writes the updated JSON back
-6. User can then run `/render` to see changes
-
-## Visual Components (Remotion)
-
-- **HookTitle**: Large bold white text, black stroke, centered at top, all 30-60s
-- **BilingualCaption**: Lower third area, English above, Japanese below, synced to timestamps
-- **HighlightedText**: Japanese text with yellow/orange color on words in `highlights` array
-- **VocabCard**: Animated pop-up card with:
-  - Category badge (top left)
-  - Phrase (large bold)
-  - Literal translation (smaller)
-  - Nuance/context (italic, Japanese)
+```bash
+/process-video <file>    # Full pipeline
+/edit-clip <name>        # Natural language editing
+/preview <name>          # Remotion Studio
+/render <name>           # Render MP4
+/studio                  # Launch Studio UI
+/docs                    # View documentation
+/agent-status            # List 42 agents
+```
 
 ## Dependencies
 
-### Root workspace
-- `@google/generative-ai` — Gemini API
-- `bun-types` — TypeScript for Bun
+Remotion 4.0.434, React 18, Electron 33, @google/generative-ai, @xterm/xterm, Bun runtime, ffmpeg, whisper (local)
 
-### Pipeline scripts (system tools)
-- `ffmpeg` — Audio extraction (must be installed locally)
-- `whisper` — Local transcription (from openai-whisper package)
+## Project Organization
 
-### Remotion workspace
-- `remotion` — Video rendering
-- Standard React ecosystem
-
-## Setup Checklist
-
-- [ ] Create pipeline/ directory and TypeScript files
-- [ ] Create remotion/ workspace
-- [ ] Install dependencies: `bun install`
-- [ ] Add Gemini API key to `.env`
-- [ ] Create `input/` and `output/` directories
-- [ ] Test full pipeline with sample video
-- [ ] Verify Remotion renders successfully
-- [ ] Verify Claude `/edit-clip` command works
-
-## Notes
-
-- Clip timestamps are in **seconds** (float) not frames
-- Gemini model: `gemini-2.0-flash` (fast, cheap, large context)
-- Whisper runs **locally** — no API calls needed
-- All video output must be MP4 for compatibility
+- **42 agents** in `.claude/agents/` (Pipeline 8, Remotion 7, Editor 7, Studio 4, Electron 2, Cross-Cutting 14)
+- **14 skills** in `.claude/skills/`
+- **14 per-folder CLAUDE.md files** for hyperlocal context
+- **6 docs** in `docs/` (discovery, plan, PRD, problems, progress, research)
